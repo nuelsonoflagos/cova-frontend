@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cova — Claim submission</title>
+<script src="api-client.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --g:#0A5C45;--gm:#137A5C;--gl:#1D9E75;--gp:#E6F5F0;--gpp:#d0ede4;
+  --cream:#F7F4EE;--crd:#E8E4DB;--crd2:#D8D3C8;
+  --ink:#0F1A14;--inkm:#2D3E35;--inkl:#5A6E63;--inkf:#9AADA3;
+  --w:#fff;--r:#C0392B;--am:#D4860A;--amp:#FEF3E2;
+  --fd:'Syne',sans-serif;--fb:'DM Sans',sans-serif;
+  --rad:18px;--radsm:10px;--radxs:8px;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--fb);background:linear-gradient(180deg, var(--cream) 0%, #ECF8F3 100%);color:var(--ink);min-height:100vh}
+a{text-decoration:none;color:inherit}
+nav{display:flex;align-items:center;justify-content:space-between;padding:26px 5vw;max-width:1200px;margin:0 auto}
+.logo{font-family:var(--fd);font-size:22px;font-weight:800;color:var(--g)}
+.logo span{color:var(--gl)}
+.nav-cta{font-family:var(--fd);font-size:14px;font-weight:700;color:var(--w);background:var(--g);padding:12px 20px;border-radius:999px;transition:all .2s}
+.nav-cta:hover{background:var(--gm)}
+.main-wrap{max-width:1160px;margin:0 auto;padding:24px 5vw 60px}
+.page-head{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:28px}
+.page-title{font-family:var(--fd);font-size:clamp(32px,4vw,44px);font-weight:800;line-height:1.05;max-width:760px}
+.page-copy{font-size:15px;color:var(--inkl);max-width:520px;line-height:1.75}
+.claim-card{background:var(--w);border:1px solid var(--crd);border-radius:28px;padding:30px;box-shadow:0 24px 70px rgba(10,92,69,.08);margin-bottom:24px}
+.section-title{font-family:var(--fd);font-size:20px;font-weight:800;color:var(--ink);margin-bottom:18px}
+.form-group{display:flex;flex-direction:column;gap:10px;margin-bottom:18px}
+.form-group label{font-size:14px;font-weight:700;color:var(--inkm)}
+.form-group input,
+.form-group textarea,
+.form-group select{width:100%;padding:14px 16px;border:1.5px solid var(--crd);border-radius:16px;background:var(--gp);color:var(--ink);outline:none;transition:border-color .2s}
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus{border-color:var(--gl);background:#fff}
+.form-group textarea{min-height:140px;resize:vertical}
+.hint-text{font-size:13px;color:var(--inkf)}
+.btn-primary{display:inline-flex;align-items:center;justify-content:center;padding:18px 22px;border-radius:20px;background:var(--g);color:var(--w);font-family:var(--fd);font-size:17px;font-weight:700;border:none;cursor:pointer;transition:all .2s}
+.btn-primary:hover{background:var(--gm);transform:translateY(-1px)}
+.btn-secondary{display:inline-flex;align-items:center;justify-content:center;padding:14px 18px;border-radius:16px;border:2px solid var(--g);background:transparent;color:var(--g);font-weight:700;cursor:pointer;transition:all .2s}
+.btn-secondary:hover{background:var(--gp)}
+
+/* Progress bar */
+.progress-bar-container {
+  background: var(--crd);
+  border-radius: 20px;
+  padding: 6px;
+  margin-bottom: 28px;
+}
+.progress-bar {
+  display: flex;
+  gap: 4px;
+}
+.progress-step {
+  flex: 1;
+  text-align: center;
+  position: relative;
+}
+.progress-number {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--crd);
+  display: grid;
+  place-items: center;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--inkf);
+  margin: 0 auto 8px;
+  transition: all 0.3s ease;
+}
+.progress-step.active .progress-number,
+.progress-step.completed .progress-number {
+  background: var(--g);
+  color: var(--w);
+}
+.progress-step.completed .progress-number::after {
+  content: '✓';
+}
+.progress-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--inkf);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.progress-step.active .progress-label {
+  color: var(--g);
+}
+.progress-step.completed .progress-label {
+  color: var(--inkl);
+}
+
+/* Photo slots */
+.photo-slots {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+.photo-slot {
+  border: 2px dashed var(--crd);
+  border-radius: 16px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: var(--gp);
+}
+.photo-slot:hover {
+  border-color: var(--gl);
+}
+.photo-slot.has-file {
+  border-style: solid;
+  border-color: var(--g);
+  background: var(--gpp);
+}
+.photo-icon {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+.photo-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--inkf);
+}
+.photo-filename {
+  font-size: 12px;
+  color: var(--inkl);
+  margin-top: 4px;
+  word-break: break-word;
+}
+
+/* Step visibility */
+.step-content {
+  display: none;
+}
+.step-content.active {
+  display: block;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Summary box */
+.summary-box {
+  background: var(--gp);
+  border-radius: 18px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--crd);
+}
+.summary-row:last-child {
+  border-bottom: none;
+}
+.summary-label {
+  font-size: 14px;
+  color: var(--inkf);
+}
+.summary-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+  text-align: right;
+}
+
+/* Success details */
+.success-details {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.detail-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: var(--gp);
+  border-radius: 16px;
+}
+.detail-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--g);
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+}
+.detail-content h4 {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+.detail-content p {
+  font-size: 13px;
+  color: var(--inkl);
+}
+
+/* Navigation buttons */
+.step-nav {
+  display: flex;
+  gap: 14px;
+  margin-top: 24px;
+  flex-wrap: wrap;
+}
+.step-nav .btn-primary {
+  flex: 1;
+  min-width: 200px;
+}
+.step-nav .btn-secondary {
+  flex: 1;
+  min-width: 200px;
+}
+
+/* Conditional sections */
+.conditional-section {
+  display: none;
+  padding: 16px;
+  background: var(--gp);
+  border-radius: 16px;
+  margin-bottom: 18px;
+  border-left: 4px solid var(--gl);
+}
+.conditional-section.show {
+  display: block;
+}
+
+@media(max-width:640px){
+  .photo-slots{grid-template-columns:1fr}
+  .progress-step{display:none}
+  .progress-step.active{display:block}
+  .progress-bar-container{display:flex;align-items:center;justify-content:space-between;padding:16px}
+  .progress-label{display:none}
+  .progress-step.active .progress-label{display:block}
+}
+</style>
+</head>
+<body>
+<nav>
+  <a href="cova-dashboard.html" class="logo">Cov<span>a</span></a>
+  <a href="cova-dashboard.html" class="nav-cta">← Back to dashboard</a>
+</nav>
+<main class="main-wrap">
+  <section class="page-head">
+    <h1 class="page-title">File a claim</h1>
+    <p class="page-copy" id="pageCopy">Select your policy and follow the steps to submit your claim.</p>
+  </section>
+
+  <!-- Progress Bar -->
+  <div class="progress-bar-container">
+    <div class="progress-bar">
+      <div class="progress-step active" data-step="1">
+        <div class="progress-number">1</div>
+        <div class="progress-label">Select policy</div>
+      </div>
+      <div class="progress-step" data-step="2">
+        <div class="progress-number">2</div>
+        <div class="progress-label">Incident</div>
+      </div>
+      <div class="progress-step" data-step="3">
+        <div class="progress-number">3</div>
+        <div class="progress-label">Evidence</div>
+      </div>
+      <div class="progress-step" data-step="4">
+        <div class="progress-number">4</div>
+        <div class="progress-label">Submit</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 1: Policy Selection -->
+  <article class="claim-card step-content active" id="step1">
+    <div class="section-title">Select your policy</div>
+    <div class="form-group">
+      <label for="policySelect">Choose from your active policies</label>
+      <select id="policySelect" required onchange="selectPolicy()">
+        <option value="">Select a policy</option>
+        <option value="device|COVA-EP-9357|iPhone 17 Pro Max|10,000">📱 Electronic Equipment - iPhone 17 Pro Max (COVA-EP-9357)</option>
+        <option value="motor|COVA-MT-1248|Toyota Camry 2020|26,667">🚗 Motor Insurance - Toyota Camry 2020 (COVA-MT-1248)</option>
+        <option value="life|COVA-LF-3842|Term Life|15,000">❤️ Life Insurance - Term Life (COVA-LF-3842)</option>
+        <option value="health|COVA-HT-7291|Gold Plan|7,917">🏥 Health Insurance - Gold Plan (COVA-HT-7291)</option>
+        <option value="travel|COVA-TR-2847|Dubai Trip|15,000">✈️ Travel Insurance - Dubai Trip (COVA-TR-2847)</option>
+        <option value="property|COVA-PR-8472|Victoria Island|12,500">🏠 Property Insurance - Victoria Island (COVA-PR-8472)</option>
+        <option value="investment|COVA-IN-5928|Education Fund|8,333">📈 Investment Plan - Education Fund (COVA-IN-5928)</option>
+        <option value="group|COVA-GR-3847|Bright Supermarkets|683,333">👥 Group Insurance - Bright Supermarkets (COVA-GR-3847)</option>
+        <option value="fire|COVA-FR-9284|Warehouse|350,000">🔥 Fire Insurance - Warehouse (COVA-FR-9284)</option>
+      </select>
+    </div>
+    <p class="page-copy" style="margin-top: 16px;">Selected policy will determine available incident types and required documents.</p>
+  </article>
+
+  <!-- Step 2: Incident Details -->
+  <article class="claim-card step-content" id="step2">
+    <div class="section-title">Tell us what happened</div>
+    <form id="incidentForm">
+      <div class="form-group">
+        <label for="incidentType">Incident type</label>
+        <select id="incidentType" required onchange="updateIncidentType()">
+          <option value="">Choose type</option>
+          <!-- Options populated dynamically -->
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="incidentDate">Date of incident</label>
+        <input id="incidentDate" type="date" required>
+      </div>
+      <div class="form-group">
+        <label for="incidentTime">Time of incident</label>
+        <input id="incidentTime" type="time" required>
+      </div>
+      <div class="form-group">
+        <label for="incidentDescription">Detailed description</label>
+        <textarea id="incidentDescription" placeholder="Describe what happened in as much detail as possible" required></textarea>
+      </div>
+
+      <!-- Police Report Section (for theft, burglary, robbery, motor accidents) -->
+      <div class="conditional-section" id="policeReportSection">
+        <div class="form-group">
+          <label for="policeReportNumber">Police report number</label>
+          <input id="policeReportNumber" type="text" placeholder="CR/123/2026">
+        </div>
+        <div class="form-group">
+          <label for="policeReportDate">Date reported to police</label>
+          <input id="policeReportDate" type="date">
+        </div>
+        <div class="form-group">
+          <label>Police report document</label>
+          <input id="policeReport" type="file" accept="application/pdf,image/*">
+          <span class="hint-text">PDF, JPG or PNG required.</span>
+        </div>
+      </div>
+
+      <!-- Death Certificate Section (for life claims) -->
+      <div class="conditional-section" id="deathCertSection">
+        <div class="form-group">
+          <label>Death certificate</label>
+          <input id="deathCertificate" type="file" accept="application/pdf,image/*">
+          <span class="hint-text">PDF, JPG or PNG required.</span>
+        </div>
+      </div>
+
+      <!-- Hospital Receipts Section (for health claims) -->
+      <div class="conditional-section" id="hospitalReceiptSection">
+        <div class="form-group">
+          <label>Hospital receipts and bills</label>
+          <input id="hospitalReceipts" type="file" accept="application/pdf,image/*" multiple>
+          <span class="hint-text">Upload all hospital documentation.</span>
+        </div>
+      </div>
+
+      <!-- Airline Documentation Section (for travel delays) -->
+      <div class="conditional-section" id="airlineDocSection">
+        <div class="form-group">
+          <label>Airline documentation</label>
+          <input id="airlineDocs" type="file" accept="application/pdf,image/*">
+          <span class="hint-text">Required for flight delay and cancellation claims.</span>
+        </div>
+      </div>
+
+      <div class="step-nav">
+        <button type="button" class="btn-secondary" onclick="prevStep(1)">← Back</button>
+        <button type="button" class="btn-primary" onclick="goToStep(3)">Continue →</button>
+      </div>
+    </form>
+  </article>
+
+  <!-- Step 3: Evidence -->
+  <article class="claim-card step-content" id="step3">
+    <div class="section-title">Upload evidence</div>
+    <p class="page-copy">Add photos and supporting documents to help us process your claim faster.</p>
+    
+    <div class="photo-slots" id="photoSlots">
+      <div class="photo-slot" onclick="document.getElementById('photo1').click()">
+        <div class="photo-icon">📷</div>
+        <div class="photo-label">Photo 1</div>
+        <div class="photo-filename" id="photo1Name"></div>
+        <input type="file" id="photo1" accept="image/*" style="display:none;" onchange="handlePhotoUpload(this, 'photo1Name')">
+      </div>
+      <div class="photo-slot" onclick="document.getElementById('photo2').click()">
+        <div class="photo-icon">📷</div>
+        <div class="photo-label">Photo 2</div>
+        <div class="photo-filename" id="photo2Name"></div>
+        <input type="file" id="photo2" accept="image/*" style="display:none;" onchange="handlePhotoUpload(this, 'photo2Name')">
+      </div>
+      <div class="photo-slot" onclick="document.getElementById('photo3').click()">
+        <div class="photo-icon">📷</div>
+        <div class="photo-label">Photo 3</div>
+        <div class="photo-filename" id="photo3Name"></div>
+        <input type="file" id="photo3" accept="image/*" style="display:none;" onchange="handlePhotoUpload(this, 'photo3Name')">
+      </div>
+      <div class="photo-slot" onclick="document.getElementById('photo4').click()">
+        <div class="photo-icon">📷</div>
+        <div class="photo-label">Photo 4</div>
+        <div class="photo-filename" id="photo4Name"></div>
+        <input type="file" id="photo4" accept="image/*" style="display:none;" onchange="handlePhotoUpload(this, 'photo4Name')">
+      </div>
+    </div>
+    
+    <span class="hint-text" style="margin-top: 16px; display: block;">Upload up to 4 photos. Clear images help speed up review.</span>
+
+    <div class="step-nav">
+      <button type="button" class="btn-secondary" onclick="prevStep(2)">← Back</button>
+      <button type="button" class="btn-primary" onclick="goToStep(4)">Continue →</button>
+    </div>
+  </article>
+
+  <!-- Step 4: Declaration & Submit -->
+  <article class="claim-card step-content" id="step4">
+    <div class="section-title">Review and submit</div>
+    
+    <div class="summary-box">
+      <h3 style="margin-bottom: 16px;">Claim summary</h3>
+      <div class="summary-row">
+        <span class="summary-label">Policy</span>
+        <span class="summary-value" id="summaryPolicy">-</span>
+      </div>
+      <div class="summary-row">
+        <span class="summary-label">Incident type</span>
+        <span class="summary-value" id="summaryIncidentType">-</span>
+      </div>
+      <div class="summary-row">
+        <span class="summary-label">Date</span>
+        <span class="summary-value" id="summaryDate">-</span>
+      </div>
+      <div class="summary-row">
+        <span class="summary-label">Description</span>
+        <span class="summary-value" id="summaryDescription">-</span>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label style="display: flex; align-items: start; gap: 12px; cursor: pointer;">
+        <input type="checkbox" id="accuracyCheck" style="margin-top: 4px;" required>
+        <span style="font-size: 14px; color: var(--inkm);">
+          I confirm that all information provided is accurate and complete to the best of my knowledge.
+        </span>
+      </label>
+    </div>
+    
+    <div class="form-group" id="excessCheckGroup" style="display:none;">
+      <label style="display: flex; align-items: start; gap: 12px; cursor: pointer;">
+        <input type="checkbox" id="excessCheck" style="margin-top: 4px;">
+        <span style="font-size: 14px; color: var(--inkm);">
+          I understand that an excess fee of <strong>₦<span id="excessAmount">0</span></strong> applies to this claim.
+        </span>
+      </label>
+    </div>
+
+    <div class="step-nav">
+      <button type="button" class="btn-secondary" onclick="prevStep(3)">← Back</button>
+      <button type="button" class="btn-primary" onclick="submitClaim()">Submit claim</button>
+    </div>
+  </article>
+
+  <!-- Success State -->
+  <article class="claim-card step-content" id="successState" style="display:none;">
+    <div style="text-align: center; padding: 20px;">
+      <div style="font-size: 64px; margin-bottom: 20px;">✓</div>
+      <h2 style="font-size: 28px; font-weight: 800; color: var(--ink); margin-bottom: 12px;">Claim submitted successfully</h2>
+      <p class="page-copy">Your claim has been received and is being processed.</p>
+    </div>
+
+    <div class="success-details">
+      <div class="detail-item">
+        <div class="detail-icon">📋</div>
+        <div class="detail-content">
+          <h4>Claim reference</h4>
+          <p id="claimReference">COV-CLM-2026-0000</p>
+        </div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-icon">👤</div>
+        <div class="detail-content">
+          <h4>Your handler</h4>
+          <p id="handlerName">Jane Nwosu</p>
+          <p style="font-size: 13px; color: var(--inkf);">Available 9am–5pm weekdays</p>
+        </div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-icon">⏱️</div>
+        <div class="detail-content">
+          <h4>Estimated resolution</h4>
+          <p id="estimatedTime">72 hours</p>
+          <p style="font-size: 13px; color: var(--inkf);">Based on your product type</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="step-nav">
+      <a href="https://wa.me/2348012345678" class="btn-primary" style="text-decoration: none;">
+        📱 Contact handler on WhatsApp
+      </a>
+    </div>
+
+    <div style="margin-top: 20px; text-align: center;">
+      <a href="cova-claim-tracker.html" style="color: var(--g); font-weight: 700; font-size: 15px;">
+        Track claim progress →
+      </a>
+    </div>
+  </article>
+</main>
+
+<script>
+// Product configurations with incident types
+const PRODUCT_CONFIG = {
+  device: {
+    icon: '📱',
+    name: 'Electronic Equipment',
+    incidentTypes: [
+      { value: 'accidental', label: 'Accidental damage' },
+      { value: 'theft', label: 'Theft' },
+      { value: 'liquid', label: 'Liquid damage' },
+      { value: 'hardware', label: 'Hardware failure' },
+      { value: 'total', label: 'Total loss' }
+    ],
+    resolutionTime: '72 hours',
+    excess: 10000,
+    requiresPoliceReport: ['theft'],
+    requiresDeathCert: [],
+    requiresHospitalReceipts: []
+  },
+  motor: {
+    icon: '🚗',
+    name: 'Motor Insurance',
+    incidentTypes: [
+      { value: 'accident', label: 'Accident' },
+      { value: 'theft', label: 'Theft' },
+      { value: 'fire', label: 'Fire' },
+      { value: 'flood', label: 'Flood' },
+      { value: 'vandalism', label: 'Vandalism' },
+      { value: 'windscreen', label: 'Windscreen damage' }
+    ],
+    resolutionTime: '5 days',
+    excess: 50000,
+    requiresPoliceReport: ['accident', 'theft'],
+    requiresDeathCert: [],
+    requiresHospitalReceipts: []
+  },
+  life: {
+    icon: '❤️',
+    name: 'Life Insurance',
+    incidentTypes: [
+      { value: 'death', label: 'Death claim' },
+      { value: 'critical', label: 'Critical illness' }
+    ],
+    resolutionTime: '14 days',
+    excess: 0,
+    requiresPoliceReport: [],
+    requiresDeathCert: ['death'],
+    requiresHospitalReceipts: []
+  },
+  health: {
+    icon: '🏥',
+    name: 'Health Insurance',
+    incidentTypes: [
+      { value: 'hospitalisation', label: 'Hospitalisation' },
+      { value: 'outpatient', label: 'Outpatient' },
+      { value: 'maternity', label: 'Maternity' },
+      { value: 'dental', label: 'Dental' },
+      { value: 'optical', label: 'Optical' }
+    ],
+    resolutionTime: '48 hours',
+    excess: 5000,
+    requiresPoliceReport: [],
+    requiresDeathCert: [],
+    requiresHospitalReceipts: ['hospitalisation', 'outpatient']
+  },
+  travel: {
+    icon: '✈️',
+    name: 'Travel Insurance',
+    incidentTypes: [
+      { value: 'medical', label: 'Medical emergency' },
+      { value: 'cancellation', label: 'Trip cancellation' },
+      { value: 'baggage', label: 'Baggage loss' },
+      { value: 'delay', label: 'Flight delay' },
+      { value: 'liability', label: 'Personal liability' }
+    ],
+    resolutionTime: '72 hours',
+    excess: 15000,
+    requiresPoliceReport: [],
+    requiresDeathCert: [],
+    requiresHospitalReceipts: ['medical'],
+    requiresAirlineDocs: ['delay', 'cancellation']
+  },
+  property: {
+    icon: '🏠',
+    name: 'Property Insurance',
+    incidentTypes: [
+      { value: 'fire', label: 'Fire' },
+      { value: 'flood', label: 'Flood' },
+      { value: 'burglary', label: 'Burglary' },
+      { value: 'damage', label: 'Accidental damage' },
+      { value: 'explosion', label: 'Explosion' }
+    ],
+    resolutionTime: '7 days',
+    excess: 100000,
+    requiresPoliceReport: ['burglary'],
+    requiresDeathCert: [],
+    requiresHospitalReceipts: []
+  },
+  investment: {
+    icon: '📈',
+    name: 'Investment Plan',
+    incidentTypes: [
+      { value: 'withdrawal', label: 'Early withdrawal' },
+      { value: 'loan', label: 'Policy loan' }
+    ],
+    resolutionTime: '5 days',
+    excess: 0,
+    requiresPoliceReport: [],
+    requiresDeathCert: [],
+    requiresHospitalReceipts: []
+  },
+  group: {
+    icon: '👥',
+    name: 'Group Insurance',
+    incidentTypes: [
+      { value: 'death', label: 'Death' },
+      { value: 'permanent', label: 'Permanent disability' },
+      { value: 'temporary', label: 'Temporary disability' },
+      { value: 'medical', label: 'Medical' }
+    ],
+    resolutionTime: '14 days',
+    excess: 25000,
+    requiresPoliceReport: [],
+    requiresDeathCert: ['death'],
+    requiresHospitalReceipts: ['medical']
+  },
+  fire: {
+    icon: '🔥',
+    name: 'Fire Insurance',
+    incidentTypes: [
+      { value: 'fire', label: 'Fire' },
+      { value: 'explosion', label: 'Explosion' },
+      { value: 'flood', label: 'Flood' },
+      { value: 'riot', label: 'Riot' },
+      { value: 'impact', label: 'Impact' }
+    ],
+    resolutionTime: '7 days',
+    excess: 200000,
+    requiresPoliceReport: [],
+    requiresDeathCert: [],
+    requiresHospitalReceipts: []
+  },
+  burglary: {
+    icon: '🔒',
+    name: 'Burglary & Theft',
+    incidentTypes: [
+      { value: 'theft', label: 'Forced entry theft' },
+      { value: 'robbery', label: 'Robbery' }
+    ],
+    resolutionTime: '5 days',
+    excess: 150000,
+    requiresPoliceReport: ['theft', 'robbery'],
+    requiresDeathCert: [],
+    requiresHospitalReceipts: []
+  },
+  workmen: {
+    icon: '👷',
+    name: "Workmen's Compensation",
+    incidentTypes: [
+      { value: 'injury', label: 'Workplace injury' },
+      { value: 'death', label: 'Death' },
+      { value: 'disease', label: 'Occupational disease' }
+    ],
+    resolutionTime: '14 days',
+    excess: 30000,
+    requiresPoliceReport: [],
+    requiresDeathCert: ['death'],
+    requiresHospitalReceipts: ['injury']
+  },
+  gpa: {
+    icon: '🤝',
+    name: 'Group Personal Accident',
+    incidentTypes: [
+      { value: 'death', label: 'Death' },
+      { value: 'permanent', label: 'Permanent disability' },
+      { value: 'temporary', label: 'Temporary disability' },
+      { value: 'medical', label: 'Medical' }
+    ],
+    resolutionTime: '7 days',
+    excess: 20000,
+    requiresPoliceReport: [],
+    requiresDeathCert: ['death'],
+    requiresHospitalReceipts: ['medical']
+  },
+  money: {
+    icon: '💸',
+    name: 'Money Insurance',
+    incidentTypes: [
+      { value: 'transit', label: 'Cash in transit loss' },
+      { value: 'premises', label: 'Cash on premises loss' }
+    ],
+    resolutionTime: '5 days',
+    excess: 50000,
+    requiresPoliceReport: ['transit', 'premises'],
+    requiresDeathCert: [],
+    requiresHospitalReceipts: []
+  },
+  fidelity: {
+    icon: '🤝',
+    name: 'Fidelity Guarantee',
+    incidentTypes: [
+      { value: 'fraud', label: 'Staff fraud' },
+      { value: 'embezzlement', label: 'Embezzlement' }
+    ],
+    resolutionTime: '14 days',
+    excess: 100000,
+    requiresPoliceReport: ['fraud', 'embezzlement'],
+    requiresDeathCert: [],
+    requiresHospitalReceipts: []
+  },
+  liability: {
+    icon: '⚖️',
+    name: 'Public Liability',
+    incidentTypes: [
+      { value: 'injury', label: 'Third party injury' },
+      { value: 'damage', label: 'Property damage' }
+    ],
+    resolutionTime: '7 days',
+    excess: 100000,
+    requiresPoliceReport: [],
+    requiresDeathCert: [],
+    requiresHospitalReceipts: []
+  }
+};
+
+let currentStep = 1;
+let selectedProduct = null;
+
+function selectPolicy() {
+  const policySelect = document.getElementById('policySelect');
+  const selected = policySelect.value;
+  if (!selected) return;
+  
+  const [productType] = selected.split('|');
+  selectedProduct = productType;
+  
+  // Populate incident types
+  const incidentTypeSelect = document.getElementById('incidentType');
+  incidentTypeSelect.innerHTML = '<option value="">Choose type</option>';
+  
+  if (PRODUCT_CONFIG[productType]) {
+    PRODUCT_CONFIG[productType].incidentTypes.forEach(type => {
+      const option = document.createElement('option');
+      option.value = type.value;
+      option.textContent = type.label;
+      incidentTypeSelect.appendChild(option);
+    });
+  }
+  
+  // Update copy
+  document.getElementById('pageCopy').textContent = `Selected: ${PRODUCT_CONFIG[productType].name}. Continue to submit your claim.`;
+}
+
+function updateIncidentType() {
+  const incidentType = document.getElementById('incidentType').value;
+  const productConfig = selectedProduct ? PRODUCT_CONFIG[selectedProduct] : null;
+  
+  if (!productConfig) return;
+  
+  // Show/hide police report section
+  const policeSection = document.getElementById('policeReportSection');
+  const requiresPolice = productConfig.requiresPoliceReport && productConfig.requiresPoliceReport.includes(incidentType);
+  policeSection.classList.toggle('show', requiresPolice);
+  
+  // Show/hide death certificate section
+  const deathSection = document.getElementById('deathCertSection');
+  const requiresDeath = productConfig.requiresDeathCert && productConfig.requiresDeathCert.includes(incidentType);
+  deathSection.classList.toggle('show', requiresDeath);
+  
+  // Show/hide hospital receipts section
+  const hospitalSection = document.getElementById('hospitalReceiptSection');
+  const requiresHospital = productConfig.requiresHospitalReceipts && productConfig.requiresHospitalReceipts.includes(incidentType);
+  hospitalSection.classList.toggle('show', requiresHospital);
+  
+  // Show/hide airline docs section
+  const airlineSection = document.getElementById('airlineDocSection');
+  const requiresAirline = productConfig.requiresAirlineDocs && productConfig.requiresAirlineDocs.includes(incidentType);
+  airlineSection.classList.toggle('show', requiresAirline);
+  
+  // Update excess amount
+  if (productConfig.excess > 0) {
+    document.getElementById('excessCheckGroup').style.display = 'block';
+    document.getElementById('excessAmount').textContent = productConfig.excess.toLocaleString();
+  } else {
+    document.getElementById('excessCheckGroup').style.display = 'none';
+  }
+}
+
+function goToStep(step) {
+  if (step === 2 && !selectedProduct) {
+    alert('Please select a policy first');
+    return;
+  }
+  
+  if (step === 4) {
+    // Update summary
+    const policySelect = document.getElementById('policySelect');
+    const selectedText = policySelect.options[policySelect.selectedIndex].text;
+    document.getElementById('summaryPolicy').textContent = selectedText.split('(')[0].trim();
+    
+    const incidentType = document.getElementById('incidentType');
+    document.getElementById('summaryIncidentType').textContent = incidentType.options[incidentType.selectedIndex].text;
+    
+    const date = document.getElementById('incidentDate').value;
+    document.getElementById('summaryDate').textContent = date || '-';
+    
+    const description = document.getElementById('incidentDescription').value;
+    document.getElementById('summaryDescription').textContent = description.substring(0, 100) + (description.length > 100 ? '...' : '');
+  }
+  
+  // Update progress bar
+  document.querySelectorAll('.progress-step').forEach(el => {
+    const step = parseInt(el.dataset.step);
+    el.classList.remove('active', 'completed');
+    if (step < step) el.classList.add('completed');
+    if (step === step) el.classList.add('active');
+  });
+  
+  // Show/hide step content
+  document.querySelectorAll('.step-content').forEach(el => el.classList.remove('active'));
+  document.getElementById('step' + step).classList.add('active');
+  
+  currentStep = step;
+  window.scrollTo(0, 0);
+}
+
+function prevStep(step) {
+  goToStep(step);
+}
+
+function handlePhotoUpload(input, nameElementId) {
+  const file = input.files[0];
+  if (file) {
+    document.getElementById(nameElementId).textContent = file.name;
+    input.closest('.photo-slot').classList.add('has-file');
+  }
+}
+
+function submitClaim() {
+  // Get policy_id from URL
+  const params = new URLSearchParams(window.location.search);
+  const policyId = params.get('policy_id');
+  
+  const accuracyCheck = document.getElementById('accuracyCheck').checked;
+  if (!accuracyCheck) {
+    alert('Please confirm that information is accurate');
+    return;
+  }
+  
+  const incidentType = document.getElementById('incidentType').value;
+  const incidentDate = document.getElementById('incidentDate').value;
+  const description = document.getElementById('incidentDescription').value.trim();
+  
+  if (!incidentType || !incidentDate || !description) {
+    alert('Please fill in all required fields');
+    return;
+  }
+  
+  const claimData = {
+    policy_id: policyId,
+    incident_type: incidentType,
+    incident_date: new Date(incidentDate).toISOString(),
+    description: description,
+  };
+  
+  const result = await fileClaim(claimData);
+  
+  if (result.ok) {
+    alert('Claim filed! Reference: ' + result.data.claim.claim_ref);
+    window.location.href = `cova-claim-tracker.html?claim_id=${result.data.claim.id}`;
+  } else {
+    alert('Error filing claim: ' + result.data.error.message);
+  }
+  
+  // Update estimated resolution time
+  if (selectedProduct && PRODUCT_CONFIG[selectedProduct]) {
+    document.getElementById('estimatedTime').textContent = PRODUCT_CONFIG[selectedProduct].resolutionTime;
+  }
+  
+  // Show success state
+  document.querySelectorAll('.step-content').forEach(el => el.classList.remove('active'));
+  document.getElementById('successState').style.display = 'block';
+  document.getElementById('successState').classList.add('active');
+  
+  // Update progress bar to show completion
+  document.querySelectorAll('.progress-step').forEach(el => el.classList.add('completed'));
+  
+  window.scrollTo(0, 0);
+}
+</script>
+</body>
+</html>

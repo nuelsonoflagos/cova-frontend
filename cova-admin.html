@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cova — Admin Dashboard</title>
+<script src="api-client.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --g:#0A5C45;--gm:#137A5C;--gl:#1D9E75;--gp:#E6F5F0;--gpp:#d0ede4;
+  --cream:#F7F4EE;--crd:#E8E4DB;--crd2:#D8D3C8;
+  --ink:#0F1A14;--inkm:#2D3E35;--inkl:#5A6E63;--inkf:#9AADA3;
+  --w:#fff;--r:#C0392B;--am:#D4860A;--amp:#FEF3E2;
+  --fd:'Syne',sans-serif;--fb:'DM Sans',sans-serif;
+  --rad:18px;--radsm:10px;
+  --dark:#1a1f1c;--dark2:#232a26;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--fb);background:var(--cream);color:var(--ink);min-height:100vh}
+a{text-decoration:none;color:inherit}
+.wrapper{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
+.sidebar{background:var(--dark);border-right:1px solid rgba(255,255,255,.08);padding:24px;display:flex;flex-direction:column;gap:28px;position:fixed;left:0;top:0;width:260px;height:100vh;overflow-y:auto;z-index:1000}
+.sidebar-logo{font-family:var(--fd);font-size:20px;font-weight:800;color:var(--w)}
+.sidebar-logo span{color:var(--gl)}
+.sidebar-nav{display:flex;flex-direction:column;gap:8px}
+.sidebar-link{padding:14px 16px;border-radius:14px;color:rgba(255,255,255,.6);font-size:14px;font-weight:500;transition:all .2s;cursor:pointer}
+.sidebar-link:hover{background:rgba(255,255,255,.08);color:var(--w)}
+.sidebar-link.active{background:var(--g);color:var(--w);font-weight:700}
+.sidebar-footer{margin-top:auto;border-top:1px solid rgba(255,255,255,.08);padding-top:18px}
+.sidebar-user{font-size:12px;color:rgba(255,255,255,.5);margin-bottom:12px}
+.sidebar-logout{padding:12px 14px;border-radius:12px;background:rgba(255,255,255,.06);color:rgba(255,255,255,.7);font-size:13px;font-weight:600;text-align:center;cursor:pointer;transition:all .2s}
+.sidebar-logout:hover{background:rgba(255,255,255,.12);color:var(--w)}
+.main-content{grid-column:2;padding:28px 5vw;overflow-x:hidden}
+.top-header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:28px;flex-wrap:wrap}
+.page-title{font-family:var(--fd);font-size:28px;font-weight:800;color:var(--ink)}
+.menu-toggle{display:none;background:none;border:none;cursor:pointer;font-size:24px;color:var(--ink);padding:8px}
+.metrics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-bottom:28px}
+.metric-card{background:var(--w);border:1px solid var(--crd);border-radius:24px;padding:22px;box-shadow:0 8px 24px rgba(10,92,69,.06)}
+.metric-label{font-size:12px;font-weight:700;color:var(--inkl);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:8px}
+.metric-value{font-family:var(--fd);font-size:32px;font-weight:800;color:var(--g);margin-bottom:6px}
+.metric-sub{font-size:13px;color:var(--inkf)}
+.card{background:var(--w);border:1px solid var(--crd);border-radius:28px;padding:28px;box-shadow:0 8px 24px rgba(10,92,69,.06);margin-bottom:24px}
+.card h2{font-family:var(--fd);font-size:20px;font-weight:800;color:var(--ink);margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.card-controls{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.filter-badge{display:inline-flex;align-items:center;gap:6px;background:var(--gp);color:var(--g);padding:8px 12px;border-radius:12px;font-size:12px;font-weight:700}
+.table-wrap{overflow-x:auto}
+.table{width:100%;border-collapse:collapse}
+.table th{padding:14px;text-align:left;font-size:11px;font-weight:700;color:var(--inkm);text-transform:uppercase;letter-spacing:0.1em;border-bottom:2px solid var(--crd);background:var(--gp)}
+.table td{padding:16px 14px;border-bottom:1px solid var(--crd);font-size:14px;color:var(--ink)}
+.claim-id{font-weight:700;color:var(--g);font-family:monospace}
+.customer-name{font-weight:700;color:var(--ink)}
+.product-badge{display:inline-flex;align-items:center;gap:4px;background:var(--amp);color:var(--am);padding:6px 10px;border-radius:999px;font-size:12px;font-weight:700}
+.status-badge{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:999px;font-size:12px;font-weight:700}
+.status-badge.pending{background:var(--amp);color:var(--am)}
+.status-badge.approved{background:var(--gpp);color:var(--g)}
+.status-badge.rejected{background:rgba(192,57,43,.12);color:var(--r)}
+.status-badge.escalated{background:rgba(212,134,10,.12);color:var(--am)}
+.actions-cell{display:flex;gap:8px;flex-wrap:wrap}
+.action-btn{padding:8px 12px;border-radius:10px;border:none;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s}
+.action-approve{background:var(--gpp);color:var(--g)}
+.action-approve:hover{background:var(--gl);color:var(--w)}
+.action-reject{background:rgba(192,57,43,.12);color:var(--r)}
+.action-reject:hover{background:var(--r);color:var(--w)}
+.action-escalate{background:var(--amp);color:var(--am)}
+.action-escalate:hover{background:var(--am);color:var(--w)}
+.pagination{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:18px;padding-top:18px;border-top:1px solid var(--crd)}
+.pagination button{padding:6px 10px;border:1px solid var(--crd);border-radius:8px;background:var(--w);color:var(--ink);cursor:pointer;font-size:12px;transition:all .2s}
+.pagination button:hover{background:var(--gp);border-color:var(--gl)}
+.pagination button.active{background:var(--g);color:var(--w);border-color:var(--g)}
+.chart-placeholder{width:100%;height:300px;background:var(--gp);border-radius:18px;display:flex;align-items:center;justify-content:center;color:var(--inkl);font-size:14px;margin-top:18px}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.3);display:none;z-index:999}
+.overlay.open{display:block}
+.horizontal-chart{margin-top:18px}
+.chart-row{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.chart-label{width:140px;font-size:13px;font-weight:600;color:var(--ink);text-align:right}
+.chart-bar-wrap{flex:1;display:flex;align-items:center;gap:8px}
+.chart-bar{height:28px;background:var(--g);border-radius:8px;display:flex;align-items:center;padding:0 10px;color:var(--w);font-size:12px;font-weight:700;transition:width .3s}
+.chart-count{min-width:50px;text-align:right;font-size:13px;font-weight:700;color:var(--ink)}
+.filter-bar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.filter-select{padding:10px 14px;border:1.5px solid var(--crd);border-radius:12px;background:var(--w);color:var(--ink);font-size:13px;cursor:pointer;transition:border-color .2s;min-width:150px}
+.filter-select:focus{border-color:var(--gl);outline:none}
+.sla-badge{display:inline-flex;align-items:center;gap:4px;padding:6px 10px;border-radius:999px;font-size:11px;font-weight:700}
+.sla-badge.green{background:var(--gpp);color:var(--g)}
+.sla-badge.amber{background:var(--amp);color:var(--am)}
+.sla-badge.red{background:rgba(192,57,43,.12);color:var(--r)}
+.account-badge{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:700}
+.account-badge.personal{background:var(--gpp);color:var(--g)}
+.account-badge.business{background:rgba(10,92,69,.12);color:var(--g)}
+.handler-select{padding:6px 10px;border:1px solid var(--crd);border-radius:8px;background:var(--w);color:var(--ink);font-size:12px;cursor:pointer;min-width:140px}
+.status-select{padding:6px 10px;border:1px solid var(--crd);border-radius:8px;background:var(--w);color:var(--ink);font-size:12px;cursor:pointer;min-width:120px}
+.days-open{font-weight:700;color:var(--inkm)}
+.availability-toggle{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:12px;background:var(--gp);cursor:pointer;transition:all .2s}
+.availability-toggle.available{background:var(--gpp);color:var(--g)}
+.availability-toggle.unavailable{background:var(--amp);color:var(--am)}
+.toggle-switch{width:32px;height:18px;background:var(--crd);border-radius:999px;position:relative;transition:background .3s}
+.toggle-switch.active{background:var(--g)}
+.toggle-switch::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;background:var(--w);border-radius:50%;transition:transform .3s}
+.toggle-switch.active::after{transform:translateX(14px)}
+.insurer-card{background:var(--w);border:1px solid var(--crd);border-radius:20px;padding:20px;margin-bottom:16px}
+.insurer-name{font-family:var(--fd);font-size:18px;font-weight:800;color:var(--ink);margin-bottom:12px}
+.insurer-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.insurer-metric{text-align:center}
+.insurer-metric-value{font-size:20px;font-weight:800;color:var(--g)}
+.insurer-metric-label{font-size:11px;color:var(--inkf);text-transform:uppercase;letter-spacing:0.1em;margin-top:4px}
+.revenue-breakdown{margin-top:18px}
+.breakdown-row{display:flex;align-items:center;justify-content:space-between;padding:14px;border-bottom:1px solid var(--crd)}
+.breakdown-row:last-child{border-bottom:none}
+.breakdown-product{font-size:14px;font-weight:600;color:var(--ink)}
+.breakdown-insurer{font-size:13px;color:var(--inkf)}
+.breakdown-amount{font-size:15px;font-weight:800;color:var(--g)}
+@media(max-width:1200px){.metrics-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:1024px){
+  .wrapper{grid-template-columns:1fr}
+  .sidebar{position:fixed;left:-260px;top:0;transition:left .3s}
+  .sidebar.open{left:0}
+  .main-content{grid-column:1;padding-top:80px}
+  .menu-toggle{display:block;position:fixed;top:20px;left:20px;z-index:1001}
+  .overlay{display:none}
+  .overlay.open{display:block}
+}
+@media(max-width:768px){
+  .metrics-grid{grid-template-columns:repeat(2,1fr);gap:12px}
+  .metric-card{padding:16px}
+  .metric-value{font-size:24px}
+  .card{padding:20px}
+  .table{font-size:12px}
+  .table th,.table td{padding:10px 8px}
+  .page-title{font-size:24px}
+  .card h2{flex-direction:column;align-items:flex-start}
+  .card-controls{width:100%}
+}
+@media(max-width:540px){
+  .metrics-grid{grid-template-columns:1fr}
+  .actions-cell{flex-direction:column}
+  .action-btn{width:100%;text-align:center}
+  .main-content{padding:16px 5vw}
+}
+</style>
+</head>
+<body>
+<button class="menu-toggle" id="menuToggle" onclick="toggleSidebar()">☰</button>
+<div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+<div class="wrapper">
+  <aside class="sidebar" id="sidebar">
+    <a href="cova.html" class="sidebar-logo">Cov<span>a</span></a>
+    <nav class="sidebar-nav">
+      <div class="sidebar-link active" onclick="switchView('overview')">📊 Overview</div>
+      <div class="sidebar-link" onclick="switchView('claims')">📋 Claims</div>
+      <div class="sidebar-link" onclick="switchView('customers')">👥 Customers</div>
+      <div class="sidebar-link" onclick="switchView('policies')">📄 Policies</div>
+      <div class="sidebar-link" onclick="switchView('handlers')">🧑‍💼 Handlers</div>
+      <div class="sidebar-link" onclick="switchView('insurers')">🏢 Insurers</div>
+      <div class="sidebar-link" onclick="switchView('revenue')">💰 Revenue</div>
+      <div class="sidebar-link" onclick="switchView('settings')">⚙️ Settings</div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">Logged in as: Admin</div>
+      <div class="sidebar-logout" onclick="logout()">Log out</div>
+    </div>
+  </aside>
+  <main class="main-content">
+    <div class="top-header">
+      <h1 class="page-title">Admin Dashboard</h1>
+    </div>
+
+    <!-- Overview Section -->
+    <section id="overviewSection">
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-label">Monthly recurring revenue</div>
+          <div class="metric-value">₦142.8M</div>
+          <div class="metric-sub">↑ 8% from last month</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Open claims</div>
+          <div class="metric-value">47</div>
+          <div class="metric-sub">12 pending approval</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Avg resolution time</div>
+          <div class="metric-value">4.2 days</div>
+          <div class="metric-sub">↓ 1.1 days vs target (5.3)</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">New signups this week</div>
+          <div class="metric-value">28</div>
+          <div class="metric-sub">+ 15% vs last week</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Policies by product type</h2>
+        <div class="horizontal-chart" id="policiesChart">
+          <!-- Populated by JavaScript -->
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Avg resolution time by product</h2>
+        <div class="horizontal-chart" id="resolutionChart">
+          <!-- Populated by JavaScript -->
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Claims Section -->
+    <section id="claimsSection" style="display:none">
+      <div class="card">
+        <h2>Claims queue <span class="filter-badge">47 claims</span></h2>
+        <div class="filter-bar">
+          <select class="filter-select" onchange="filterClaims('product')">
+            <option value="">All products</option>
+            <option value="life">Life Insurance</option>
+            <option value="health">Health</option>
+            <option value="motor">Motor</option>
+            <option value="electronic">Electronic</option>
+            <option value="travel">Travel</option>
+            <option value="property">Property</option>
+            <option value="fire">Fire</option>
+            <option value="burglary">Burglary</option>
+            <option value="money">Money</option>
+            <option value="fidelity">Fidelity</option>
+            <option value="liability">Public Liability</option>
+            <option value="gpa">GPA</option>
+            <option value="workmen">Workmen's</option>
+            <option value="marine">Marine</option>
+            <option value="aviation">Aviation</option>
+            <option value="oil-gas">Oil & Gas</option>
+            <option value="engineering">Engineering</option>
+            <option value="agric">Agriculture</option>
+          </select>
+          <select class="filter-select" onchange="filterClaims('insurer')">
+            <option value="">All insurers</option>
+            <option value="leadway">Leadway Assurance</option>
+            <option value="aiico">AIICO Insurance</option>
+            <option value="axa">AXA Mansard</option>
+            <option value="custodian">Custodian & Allied</option>
+            <option value="nem">NEM Insurance</option>
+            <option value="cornerstone">Cornerstone Insurance</option>
+          </select>
+          <select class="filter-select" onchange="filterClaims('handler')">
+            <option value="">All handlers</option>
+            <option value="jane">Jane Nwosu</option>
+            <option value="amara">Amara Okafor</option>
+            <option value="chidi">Chidi Nnamdi</option>
+            <option value="tunde">Tunde Bakare</option>
+            <option value="nneka">Nneka Okafor</option>
+          </select>
+          <select class="filter-select" onchange="filterClaims('status')">
+            <option value="">All statuses</option>
+            <option value="pending">Under Review</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+            <option value="escalated">Escalated</option>
+            <option value="settled">Settled</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Claim ref</th>
+                <th>Customer</th>
+                <th>Product type</th>
+                <th>Incident</th>
+                <th>Date filed</th>
+                <th>Days open</th>
+                <th>SLA status</th>
+                <th>Handler</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="claimsTableBody">
+              <!-- Populated by JavaScript -->
+            </tbody>
+          </table>
+        </div>
+        <div class="pagination">
+          <button class="active">1</button>
+          <button>2</button>
+          <button>3</button>
+          <span style="margin:0 8px;color:var(--inkf)">···</span>
+          <button>Next</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Customers Section -->
+    <section id="customersSection" style="display:none">
+      <div class="card">
+        <h2>Customer database <span class="filter-badge">892 active customers</span></h2>
+        <div class="filter-bar">
+          <input type="text" class="filter-select" placeholder="Search customers..." style="min-width:250px" onkeyup="searchCustomers()">
+          <select class="filter-select" onchange="filterCustomers('type')">
+            <option value="">All account types</option>
+            <option value="personal">Personal</option>
+            <option value="business">Business</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Account type</th>
+                <th>Phone</th>
+                <th>Policies</th>
+                <th>Total monthly premium</th>
+                <th>Date joined</th>
+                <th>Last active</th>
+              </tr>
+            </thead>
+            <tbody id="customersTableBody">
+              <!-- Populated by JavaScript -->
+            </tbody>
+          </table>
+        </div>
+        <div class="pagination">
+          <button class="active">1</button>
+          <button>2</button>
+          <button>3</button>
+          <span style="margin:0 8px;color:var(--inkf)">···</span>
+          <button>Next</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Policies Section -->
+    <section id="policiesSection" style="display:none">
+      <div class="card">
+        <h2>Policy registry <span class="filter-badge">2,847 policies</span></h2>
+        <div class="filter-bar">
+          <select class="filter-select" onchange="filterPolicies('product')">
+            <option value="">All product types</option>
+            <option value="life">Life Insurance</option>
+            <option value="health">Health</option>
+            <option value="motor">Motor</option>
+            <option value="electronic">Electronic</option>
+            <option value="travel">Travel</option>
+            <option value="property">Property</option>
+            <option value="fire">Fire</option>
+            <option value="burglary">Burglary</option>
+            <option value="money">Money</option>
+            <option value="fidelity">Fidelity</option>
+            <option value="liability">Public Liability</option>
+            <option value="gpa">GPA</option>
+            <option value="workmen">Workmen's</option>
+            <option value="marine">Marine</option>
+            <option value="aviation">Aviation</option>
+            <option value="oil-gas">Oil & Gas</option>
+            <option value="engineering">Engineering</option>
+            <option value="agric">Agriculture</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Policy number</th>
+                <th>Customer</th>
+                <th>Product type</th>
+                <th>Insurer</th>
+                <th>Sum insured</th>
+                <th>Premium</th>
+                <th>Start date</th>
+                <th>End date</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="policiesTableBody">
+              <!-- Populated by JavaScript -->
+            </tbody>
+          </table>
+        </div>
+        <div class="pagination">
+          <button class="active">1</button>
+          <button>2</button>
+          <button>3</button>
+          <span style="margin:0 8px;color:var(--inkf)">···</span>
+          <button>Next</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Handlers Section -->
+    <section id="handlersSection" style="display:none">
+      <div class="card">
+        <h2>Claims handlers <span class="filter-badge">12 active handlers</span></h2>
+        <div class="table-wrap">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Handler name</th>
+                <th>Assigned claims</th>
+                <th>Resolved this week</th>
+                <th>Avg resolution time</th>
+                <th>Availability</th>
+              </tr>
+            </thead>
+            <tbody id="handlersTableBody">
+              <!-- Populated by JavaScript -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Insurers Section -->
+    <section id="insurersSection" style="display:none">
+      <div class="card">
+        <h2>Insurer performance <span class="filter-badge">6 partner insurers</span></h2>
+        <div id="insurersContainer">
+          <!-- Populated by JavaScript -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Revenue Section -->
+    <section id="revenueSection" style="display:none">
+      <div class="card">
+        <h2>Monthly commission breakdown <span class="filter-badge">April 2026</span></h2>
+        <div class="filter-bar">
+          <select class="filter-select" onchange="filterRevenue('period')">
+            <option value="current">Current month</option>
+            <option value="last">Last month</option>
+            <option value="quarter">This quarter</option>
+            <option value="year">This year</option>
+          </select>
+        </div>
+        <div class="revenue-breakdown" id="revenueBreakdown">
+          <!-- Populated by JavaScript -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Settings Section -->
+    <section id="settingsSection" style="display:none">
+      <div class="card">
+        <h2>Admin settings</h2>
+        <p style="color:var(--inkl);margin-top:12px">System configuration and permissions will display here.</p>
+      </div>
+    </section>
+
+    <!-- Claims Section (hidden by default) -->
+    <section id="claimsSection" style="display:none">
+      <div class="card">
+        <h2>All claims <span class="filter-badge">Showing 47 claims</span></h2>
+        <p style="color:var(--inkl);margin-top:12px">Access to detailed claims management will display here.</p>
+      </div>
+    </section>
+
+    <!-- Customers Section (hidden by default) -->
+    <section id="customersSection" style="display:none">
+      <div class="card">
+        <h2>Customer database <span class="filter-badge">892 active customers</span></h2>
+        <p style="color:var(--inkl);margin-top:12px">Detailed customer management interface will display here.</p>
+      </div>
+    </section>
+
+    <!-- Policies Section (hidden by default) -->
+    <section id="policiesSection" style="display:none">
+      <div class="card">
+        <h2>Policy registry <span class="filter-badge">2,847 policies</span></h2>
+        <p style="color:var(--inkl);margin-top:12px">Policy management interface will display here.</p>
+      </div>
+    </section>
+
+    <!-- Handlers Section (hidden by default) -->
+    <section id="handlersSection" style="display:none">
+      <div class="card">
+        <h2>Claims handlers <span class="filter-badge">12 active handlers</span></h2>
+        <p style="color:var(--inkl);margin-top:12px">Handler performance and assignment interface will display here.</p>
+      </div>
+    </section>
+
+    <!-- Settings Section (hidden by default) -->
+    <section id="settingsSection" style="display:none">
+      <div class="card">
+        <h2>Admin settings</h2>
+        <p style="color:var(--inkl);margin-top:12px">System configuration and permissions will display here.</p>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+// Product type configurations with colors
+const PRODUCT_TYPES = [
+  { id: 'life', name: 'Life Insurance', icon: '❤️', color: '#FF6B6B' },
+  { id: 'health', name: 'Health', icon: '🏥', color: '#4ECDC4' },
+  { id: 'motor', name: 'Motor', icon: '🚗', color: '#45B7D1' },
+  { id: 'electronic', name: 'Electronic', icon: '📱', color: '#96CEB4' },
+  { id: 'travel', name: 'Travel', icon: '✈️', color: '#FFEAA7' },
+  { id: 'property', name: 'Property', icon: '🏠', color: '#DDA0DD' },
+  { id: 'fire', name: 'Fire', icon: '🔥', color: '#FF6347' },
+  { id: 'burglary', name: 'Burglary', icon: '🔒', color: '#20B2AA' },
+  { id: 'money', name: 'Money', icon: '💸', color: '#F0E68C' },
+  { id: 'fidelity', name: 'Fidelity', icon: '🤝', color: '#9370DB' },
+  { id: 'liability', name: 'Public Liability', icon: '⚖️', color: '#87CEEB' },
+  { id: 'gpa', name: 'GPA', icon: '🤕', color: '#FFB6C1' },
+  { id: 'workmen', name: "Workmen's", icon: '👷', color: '#B8860B' },
+  { id: 'marine', name: 'Marine', icon: '🚢', color: '#5F9EA0' },
+  { id: 'aviation', name: 'Aviation', icon: '✈️', color: '#778899' },
+  { id: 'oil-gas', name: 'Oil & Gas', icon: '🛢️', color: '#8B4513' },
+  { id: 'engineering', name: 'Engineering', icon: '⚙️', color: '#708090' },
+  { id: 'agric', name: 'Agriculture', icon: '🌾', color: '#6B8E23' }
+];
+
+// Mock data
+let claims = [
+  { id: 'CL-7812', customer: 'Chioma Adeyemi', product: 'electronic', incident: 'Screen damage', date: '1 May 2026', daysOpen: 2, sla: 'green', handler: 'Jane Nwosu', status: 'approved' },
+  { id: 'CL-7811', customer: 'David Okonkwo', product: 'electronic', incident: 'Device theft', date: '30 Apr 2026', daysOpen: 3, sla: 'green', handler: 'Amara Okafor', status: 'pending' },
+  { id: 'CL-7810', customer: 'Grace Mensah', product: 'motor', incident: 'Third-party collision', date: '28 Apr 2026', daysOpen: 5, sla: 'amber', handler: 'Chidi Nnamdi', status: 'escalated' },
+  { id: 'CL-7809', customer: 'Kwame Boateng', product: 'electronic', incident: 'Water damage', date: '27 Apr 2026', daysOpen: 6, sla: 'amber', handler: 'Jane Nwosu', status: 'pending' },
+  { id: 'CL-7808', customer: 'Blessing Eze', product: 'electronic', incident: 'Accidental damage', date: '26 Apr 2026', daysOpen: 7, sla: 'green', handler: 'Amara Okafor', status: 'approved' },
+  { id: 'CL-7807', customer: 'Tunde Okafor', product: 'motor', incident: 'Comprehensive claim', date: '25 Apr 2026', daysOpen: 8, sla: 'amber', handler: 'Chidi Nnamdi', status: 'pending' },
+  { id: 'CL-7806', customer: 'Nneka Eze', product: 'electronic', incident: 'Loss claim', date: '24 Apr 2026', daysOpen: 9, sla: 'red', handler: 'Jane Nwosu', status: 'rejected' },
+  { id: 'CL-7805', customer: 'Emeka Adeyemi', product: 'motor', incident: 'TPFT claim', date: '23 Apr 2026', daysOpen: 10, sla: 'red', handler: 'Amara Okafor', status: 'pending' },
+  { id: 'CL-7804', customer: 'TechFlow Ltd', product: 'fire', incident: 'Fire outbreak', date: '22 Apr 2026', daysOpen: 11, sla: 'red', handler: 'Tunde Bakare', status: 'escalated' },
+  { id: 'CL-7803', customer: 'Amina Yusuf', product: 'health', incident: 'Hospitalization', date: '21 Apr 2026', daysOpen: 12, sla: 'red', handler: 'Nneka Okafor', status: 'pending' }
+];
+
+let customers = [
+  { name: 'Chioma Adeyemi', type: 'personal', phone: '+234 801 234 5678', policies: 1, premium: 1740000, joined: '1 Mar 2026', active: '2 May 2026' },
+  { name: 'TechFlow Ltd', type: 'business', phone: '+234 703 987 6543', policies: 5, premium: 8700000, joined: '15 Jan 2026', active: '2 May 2026' },
+  { name: 'David Okonkwo', type: 'personal', phone: '+234 812 345 6789', policies: 2, premium: 3480000, joined: '8 Feb 2026', active: '1 May 2026' },
+  { name: 'Grace Mensah', type: 'personal', phone: '+234 902 345 6789', policies: 3, premium: 5220000, joined: '20 Jan 2026', active: '3 May 2026' },
+  { name: 'Nexus Global', type: 'business', phone: '+234 810 987 6543', policies: 12, premium: 20880000, joined: '5 Dec 2025', active: '2 May 2026' },
+  { name: 'Kwame Boateng', type: 'personal', phone: '+234 703 456 7890', policies: 1, premium: 1740000, joined: '28 Feb 2026', active: '2 May 2026' }
+];
+
+let policies = [
+  { number: 'POL-2024-001', customer: 'Chioma Adeyemi', product: 'electronic', insurer: 'AIICO Insurance', sumInsured: 1200000, premium: 145000, start: '1 Mar 2026', end: '28 Feb 2027', status: 'Active' },
+  { number: 'POL-2024-002', customer: 'TechFlow Ltd', product: 'fire', insurer: 'Leadway Assurance', sumInsured: 150000000, premium: 350000, start: '15 Jan 2026', end: '14 Jan 2027', status: 'Active' },
+  { number: 'POL-2024-003', customer: 'David Okonkwo', product: 'motor', insurer: 'AXA Mansard', sumInsured: 15000000, premium: 145000, start: '8 Feb 2026', end: '7 Feb 2027', status: 'Active' },
+  { number: 'POL-2024-004', customer: 'TechFlow Ltd', product: 'gpa', insurer: 'NEM Insurance', sumInsured: 48000000, premium: 120000, start: '15 Jan 2026', end: '14 Jan 2027', status: 'Active' },
+  { number: 'POL-2024-005', customer: 'Grace Mensah', product: 'health', insurer: 'Leadway Assurance', sumInsured: 5000000, premium: 48000, start: '20 Jan 2026', end: '19 Jan 2027', status: 'Active' },
+  { number: 'POL-2024-006', customer: 'Nexus Global', product: 'marine', insurer: 'Custodian & Allied', sumInsured: 500000000, premium: 500000, start: '5 Dec 2025', end: '4 Dec 2026', status: 'Active' }
+];
+
+let handlers = [
+  { name: 'Jane Nwosu', assigned: 12, resolved: 8, avgTime: 3.5, available: true },
+  { name: 'Amara Okafor', assigned: 10, resolved: 7, avgTime: 4.2, available: true },
+  { name: 'Chidi Nnamdi', assigned: 15, resolved: 9, avgTime: 5.1, available: true },
+  { name: 'Tunde Bakare', assigned: 8, resolved: 6, avgTime: 3.8, available: false },
+  { name: 'Nneka Okafor', assigned: 11, resolved: 8, avgTime: 4.5, available: true },
+  { name: 'Emeka Adeyemi', assigned: 9, resolved: 7, avgTime: 4.0, available: true }
+];
+
+let insurers = [
+  { name: 'Leadway Assurance', policies: 487, premiums: '₦45.2M', claims: 12, settlementRate: 94.5 },
+  { name: 'AIICO Insurance', policies: 523, premiums: '₦38.7M', claims: 15, settlementRate: 91.2 },
+  { name: 'AXA Mansard', policies: 445, premiums: '₦42.3M', claims: 10, settlementRate: 96.8 },
+  { name: 'Custodian & Allied', policies: 398, premiums: '₦35.1M', claims: 8, settlementRate: 98.2 },
+  { name: 'NEM Insurance', policies: 412, premiums: '₦28.9M', claims: 9, settlementRate: 93.7 },
+  { name: 'Cornerstone Insurance', policies: 356, premiums: '₦22.4M', claims: 7, settlementRate: 95.1 }
+];
+
+let revenue = [
+  { product: 'motor', insurer: 'AXA Mansard', amount: 12.4 },
+  { product: 'health', insurer: 'Leadway Assurance', amount: 8.9 },
+  { product: 'electronic', insurer: 'AIICO Insurance', amount: 7.2 },
+  { product: 'fire', insurer: 'Leadway Assurance', amount: 6.8 },
+  { product: 'life', insurer: 'Cornerstone Insurance', amount: 5.5 },
+  { product: 'marine', insurer: 'Custodian & Allied', amount: 4.3 },
+  { product: 'gpa', insurer: 'NEM Insurance', amount: 3.8 },
+  { product: 'workmen', insurer: 'AXA Mansard', amount: 2.9 },
+  { product: 'fidelity', insurer: 'AIICO Insurance', amount: 2.1 },
+  { product: 'liability', insurer: 'NEM Insurance', amount: 1.8 }
+];
+
+let policiesByProduct = [
+  { product: 'Motor', count: 487 },
+  { product: 'Health', count: 345 },
+  { product: 'Electronic', count: 423 },
+  { product: 'Life', count: 298 },
+  { product: 'Fire', count: 156 },
+  { product: 'Travel', count: 89 },
+  { product: 'Property', count: 112 },
+  { product: 'Burglary', count: 78 },
+  { product: 'Money', count: 45 },
+  { product: 'Fidelity', count: 67 },
+  { product: 'Liability', count: 134 },
+  { product: 'GPA', count: 98 },
+  { product: 'Workmen\'s', count: 145 },
+  { product: 'Marine', count: 56 },
+  { product: 'Aviation', count: 34 },
+  { product: 'Oil & Gas', count: 28 },
+  { product: 'Engineering', count: 89 },
+  { product: 'Agriculture', count: 23 }
+];
+
+let resolutionTimes = [
+  { product: 'Electronic', avgTime: 3.2 },
+  { product: 'Health', avgTime: 4.5 },
+  { product: 'Motor', avgTime: 5.8 },
+  { product: 'Fire', avgTime: 6.2 },
+  { product: 'Life', avgTime: 3.8 },
+  { product: 'Travel', avgTime: 2.5 },
+  { product: 'Property', avgTime: 7.1 },
+  { product: 'Burglary', avgTime: 5.5 },
+  { product: 'Money', avgTime: 4.8 },
+  { product: 'Fidelity', avgTime: 6.0 },
+  { product: 'Liability', avgTime: 5.2 },
+  { product: 'GPA', avgTime: 3.5 },
+  { product: 'Workmen\'s', avgTime: 4.2 },
+  { product: 'Marine', avgTime: 7.8 },
+  { product: 'Aviation', avgTime: 8.5 },
+  { product: 'Oil & Gas', avgTime: 6.8 },
+  { product: 'Engineering', avgTime: 7.2 },
+  { product: 'Agriculture', avgTime: 6.5 }
+];
+
+// Sidebar functions
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('overlay');
+  sidebar.classList.toggle('open');
+  overlay.classList.toggle('open');
+}
+
+function switchView(view) {
+  document.querySelectorAll('section').forEach(s => s.style.display = 'none');
+  document.getElementById(view + 'Section').style.display = 'block';
+  document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+  event.target.classList.add('active');
+  
+  // Initialize charts when overview is shown
+  if (view === 'overview') {
+    renderPoliciesChart();
+    renderResolutionChart();
+  }
+  
+  if (window.innerWidth <= 1024) toggleSidebar();
+}
+
+// Render functions
+function renderPoliciesChart() {
+  const chart = document.getElementById('policiesChart');
+  const maxCount = Math.max(...policiesByProduct.map(p => p.count));
+  
+  chart.innerHTML = policiesByProduct.map(p => `
+    <div class="chart-row">
+      <div class="chart-label">${p.product}</div>
+      <div class="chart-bar-wrap">
+        <div class="chart-bar" style="width: ${(p.count / maxCount) * 100}%">${p.count}</div>
+      </div>
+      <div class="chart-count">${p.count}</div>
+    </div>
+  `).join('');
+}
+
+function renderResolutionChart() {
+  const chart = document.getElementById('resolutionChart');
+  const maxTime = Math.max(...resolutionTimes.map(r => r.avgTime));
+  
+  chart.innerHTML = resolutionTimes.map(r => `
+    <div class="chart-row">
+      <div class="chart-label">${r.product}</div>
+      <div class="chart-bar-wrap">
+        <div class="chart-bar" style="width: ${(r.avgTime / maxTime) * 100}%">${r.avgTime.toFixed(1)}d</div>
+      </div>
+      <div class="chart-count">${r.avgTime.toFixed(1)}d</div>
+    </div>
+  `).join('');
+}
+
+function renderClaimsTable() {
+  const tbody = document.getElementById('claimsTableBody');
+  
+  tbody.innerHTML = claims.map(c => {
+    const product = PRODUCT_TYPES.find(p => p.id === c.product);
+    return `
+      <tr>
+        <td><span class="claim-id">${c.id}</span></td>
+        <td><span class="customer-name">${c.customer}</span></td>
+        <td><span class="product-badge" style="background:${product.color}20;color:${product.color}">${product.icon} ${product.name}</span></td>
+        <td>${c.incident}</td>
+        <td>${c.date}</td>
+        <td><span class="days-open">${c.daysOpen}d</span></td>
+        <td><span class="sla-badge ${c.sla}">${c.sla === 'green' ? '✓ On track' : c.sla === 'amber' ? '⚠️ At risk' : '⚠️ Overdue'}</span></td>
+        <td>
+          <select class="handler-select" onchange="updateHandler('${c.id}', this.value)">
+            <option value="jane" ${c.handler.includes('Jane') ? 'selected' : ''}>Jane Nwosu</option>
+            <option value="amara" ${c.handler.includes('Amara') ? 'selected' : ''}>Amara Okafor</option>
+            <option value="chidi" ${c.handler.includes('Chidi') ? 'selected' : ''}>Chidi Nnamdi</option>
+            <option value="tunde" ${c.handler.includes('Tunde') ? 'selected' : ''}>Tunde Bakare</option>
+            <option value="nneka" ${c.handler.includes('Nneka') ? 'selected' : ''}>Nneka Okafor</option>
+          </select>
+        </td>
+        <td>
+          <select class="status-select" onchange="updateStatus('${c.id}', this.value)">
+            <option value="pending" ${c.status === 'pending' ? 'selected' : ''}>Under Review</option>
+            <option value="approved" ${c.status === 'approved' ? 'selected' : ''}>Approved</option>
+            <option value="rejected" ${c.status === 'rejected' ? 'selected' : ''}>Rejected</option>
+            <option value="escalated" ${c.status === 'escalated' ? 'selected' : ''}>Escalated</option>
+            <option value="settled" ${c.status === 'settled' ? 'selected' : ''}>Settled</option>
+          </select>
+        </td>
+        <td><div class="actions-cell">
+          <button class="action-btn action-approve" onclick="actionClaim('${c.id}', 'approve')">✓</button>
+          <button class="action-btn action-reject" onclick="actionClaim('${c.id}', 'reject')">✗</button>
+          <button class="action-btn action-escalate" onclick="actionClaim('${c.id}', 'escalate')">⬆️</button>
+        </div></td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function renderCustomersTable() {
+  const tbody = document.getElementById('customersTableBody');
+  
+  tbody.innerHTML = customers.map(c => `
+    <tr style="cursor:pointer" onclick="viewCustomer('${c.name.replace(/'/g, "\\'")}')">
+      <td><span class="customer-name">${c.name}</span></td>
+      <td><span class="account-badge ${c.type}">${c.type.charAt(0).toUpperCase() + c.type.slice(1)}</span></td>
+      <td>${c.phone}</td>
+      <td>${c.policies}</td>
+      <td>₦${c.premium.toLocaleString('en-NG')}</td>
+      <td>${c.joined}</td>
+      <td>${c.active}</td>
+    </tr>
+  `).join('');
+}
+
+function renderPoliciesTable() {
+  const tbody = document.getElementById('policiesTableBody');
+  
+  tbody.innerHTML = policies.map(p => {
+    const product = PRODUCT_TYPES.find(pr => pr.id === p.product);
+    const statusClass = p.status.toLowerCase();
+    return `
+      <tr>
+        <td><span class="claim-id">${p.number}</span></td>
+        <td><span class="customer-name">${p.customer}</span></td>
+        <td><span class="product-badge" style="background:${product.color}20;color:${product.color}">${product.icon} ${product.name}</span></td>
+        <td>${p.insurer}</td>
+        <td>₦${p.sumInsured.toLocaleString('en-NG')}</td>
+        <td>₦${p.premium.toLocaleString('en-NG')}</td>
+        <td>${p.start}</td>
+        <td>${p.end}</td>
+        <td><span class="status-badge ${statusClass}">${p.status}</span></td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function renderHandlersTable() {
+  const tbody = document.getElementById('handlersTableBody');
+  
+  tbody.innerHTML = handlers.map(h => `
+    <tr>
+      <td><span class="customer-name">${h.name}</span></td>
+      <td>${h.assigned}</td>
+      <td>${h.resolved}</td>
+      <td>${h.avgTime.toFixed(1)} days</td>
+      <td>
+        <div class="availability-toggle ${h.available ? 'available' : 'unavailable'}" onclick="toggleAvailability('${h.name}')">
+          <div class="toggle-switch ${h.available ? 'active' : ''}"></div>
+          ${h.available ? 'Available' : 'Unavailable'}
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function renderInsurers() {
+  const container = document.getElementById('insurersContainer');
+  
+  container.innerHTML = insurers.map(i => `
+    <div class="insurer-card">
+      <div class="insurer-name">${i.name}</div>
+      <div class="insurer-metrics">
+        <div class="insurer-metric">
+          <div class="insurer-metric-value">${i.policies}</div>
+          <div class="insurer-metric-label">Policies</div>
+        </div>
+        <div class="insurer-metric">
+          <div class="insurer-metric-value">${i.premiums}</div>
+          <div class="insurer-metric-label">Total Premiums</div>
+        </div>
+        <div class="insurer-metric">
+          <div class="insurer-metric-value">${i.claims}</div>
+          <div class="insurer-metric-label">Open Claims</div>
+        </div>
+        <div class="insurer-metric">
+          <div class="insurer-metric-value">${i.settlementRate}%</div>
+          <div class="insurer-metric-label">Settlement Rate</div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderRevenue() {
+  const container = document.getElementById('revenueBreakdown');
+  
+  container.innerHTML = revenue.map(r => {
+    const product = PRODUCT_TYPES.find(p => p.id === r.product);
+    return `
+      <div class="breakdown-row">
+        <div>
+          <div class="breakdown-product">${product.icon} ${product.name}</div>
+          <div class="breakdown-insurer">${r.insurer}</div>
+        </div>
+        <div class="breakdown-amount">₦${r.amount.toFixed(1)}M</div>
+      </div>
+    `;
+  }).join('');
+}
+
+// Action functions
+function filterClaims(type) {
+  console.log(`Filtering claims by ${type}`);
+}
+
+function searchCustomers() {
+  const searchInput = document.querySelector('.filter-bar input');
+  const searchTerm = searchInput.value.toLowerCase();
+  const filtered = customers.filter(c => 
+    c.name.toLowerCase().includes(searchTerm) || 
+    c.phone.includes(searchTerm)
+  );
+  
+  const tbody = document.getElementById('customersTableBody');
+  tbody.innerHTML = filtered.map(c => `
+    <tr style="cursor:pointer" onclick="viewCustomer('${c.name.replace(/'/g, "\\'")}')">
+      <td><span class="customer-name">${c.name}</span></td>
+      <td><span class="account-badge ${c.type}">${c.type.charAt(0).toUpperCase() + c.type.slice(1)}</span></td>
+      <td>${c.phone}</td>
+      <td>${c.policies}</td>
+      <td>₦${c.premium.toLocaleString('en-NG')}</td>
+      <td>${c.joined}</td>
+      <td>${c.active}</td>
+    </tr>
+  `).join('');
+}
+
+function filterCustomers(type) {
+  console.log(`Filtering customers by type: ${type}`);
+}
+
+function filterPolicies(type) {
+  console.log(`Filtering policies by product: ${type}`);
+}
+
+function filterRevenue(period) {
+  console.log(`Filtering revenue by period: ${period}`);
+}
+
+function updateHandler(claimId, handler) {
+  console.log(`Updating handler for ${claimId} to ${handler}`);
+}
+
+function updateStatus(claimId, status) {
+  console.log(`Updating status for ${claimId} to ${status}`);
+}
+
+function actionClaim(claimId, action) {
+  const actions = {
+    'approve': 'Approve',
+    'reject': 'Reject',
+    'escalate': 'Escalate'
+  };
+  alert(`Claim ${claimId}: ${actions[action]}`);
+}
+
+function toggleAvailability(handlerName) {
+  const handler = handlers.find(h => h.name === handlerName);
+  if (handler) {
+    handler.available = !handler.available;
+    renderHandlersTable();
+  }
+}
+
+function viewCustomer(customerName) {
+  alert(`Viewing profile for: ${customerName}`);
+}
+
+function logout() {
+  window.location.href = 'cova-login.html';
+}
+
+// Initialize on load
+document.addEventListener('DOMContentLoaded', function() {
+  renderPoliciesChart();
+  renderResolutionChart();
+  renderClaimsTable();
+  renderCustomersTable();
+  renderPoliciesTable();
+  renderHandlersTable();
+  renderInsurers();
+  renderRevenue();
+});
+</script>
+</body>
+</html>

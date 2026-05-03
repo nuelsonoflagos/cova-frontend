@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cova — SME Dashboard</title>
+<script src="api-client.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --g:#0A5C45;--gm:#137A5C;--gl:#1D9E75;--gp:#E6F5F0;--gpp:#d0ede4;
+  --cream:#F7F4EE;--crd:#E8E4DB;--crd2:#D8D3C8;
+  --ink:#0F1A14;--inkm:#2D3E35;--inkl:#5A6E63;--inkf:#9AADA3;
+  --w:#fff;--r:#C0392B;--am:#D4860A;--amp:#FEF3E2;
+  --fd:'Syne',sans-serif;--fb:'DM Sans',sans-serif;
+  --rad:18px;--radsm:10px;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--fb);background:linear-gradient(180deg, var(--cream) 0%, #ECF8F3 100%);color:var(--ink);min-height:100vh}
+a{text-decoration:none;color:inherit}
+.wrapper{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
+.sidebar{background:var(--w);border-right:1px solid var(--crd);padding:24px;display:flex;flex-direction:column;gap:24px;position:fixed;left:0;top:0;width:280px;height:100vh;overflow-y:auto;transition:transform .3s ease;z-index:100}
+.sidebar.collapsed{transform:translateX(-280px)}
+.sidebar-logo{font-family:var(--fd);font-size:22px;font-weight:800;color:var(--g);margin-bottom:20px}
+.sidebar-logo span{color:var(--gl)}
+.sidebar-nav{display:flex;flex-direction:column;gap:6px}
+.sidebar-link{padding:12px 14px;border-radius:14px;color:var(--inkl);font-size:14px;font-weight:500;transition:all .2s;display:flex;align-items:center;gap:10px}
+.sidebar-link:hover{background:var(--gp);color:var(--g)}
+.sidebar-link.active{background:var(--gp);color:var(--g);font-weight:700}
+.sidebar-section-label{font-size:11px;font-weight:700;color:var(--inkf);text-transform:uppercase;letter-spacing:0.1em;margin:16px 0 12px 0}
+.main-content{grid-column:2;margin-left:0;padding:28px 5vw 60px}
+.top-bar{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:28px}
+.company-info{display:flex;flex-direction:column;gap:8px}
+.company-name{font-family:var(--fd);font-size:28px;font-weight:800;color:var(--ink)}
+.account-mgr{font-size:14px;color:var(--inkl);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.whatsapp-link{display:inline-flex;align-items:center;gap:6px;color:var(--g);font-weight:700;cursor:pointer}
+.whatsapp-link:hover{text-decoration:underline}
+.account-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:700;margin-left:12px}
+.account-badge-sme{background:var(--gl);color:var(--w)}
+.account-badge-personal{background:#9B59B6;color:var(--w)}
+.toggle-sidebar{display:none;position:fixed;top:20px;left:20px;z-index:1001;background:var(--g);color:var(--w);border:none;padding:10px 14px;border-radius:12px;cursor:pointer;box-shadow:0 4px 12px rgba(10,92,69,.2);transition:all .2s}
+.toggle-sidebar:hover{background:var(--gm);transform:translateX(2px)}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-bottom:28px}
+.stat-card{background:var(--w);border:1px solid var(--crd);border-radius:24px;padding:20px;box-shadow:0 20px 50px rgba(10,92,69,.08)}
+.stat-label{font-size:12px;font-weight:700;color:var(--inkl);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px}
+.stat-value{font-family:var(--fd);font-size:28px;font-weight:800;color:var(--ink)}
+.stat-sub{font-size:13px;color:var(--inkf);margin-top:4px}
+.stat-card.featured{background:var(--g);border-color:var(--g)}
+.stat-card.featured .stat-label{color:rgba(255,255,255,.6)}
+.stat-card.featured .stat-value{color:var(--w)}
+.stat-card.featured .stat-sub{color:rgba(255,255,255,.7)}
+.tab-list{display:flex;gap:8px;border-bottom:2px solid var(--crd);margin-bottom:24px;padding-bottom:16px}
+.tab-btn{padding:12px 18px;border:none;background:none;cursor:pointer;font-size:14px;font-weight:600;color:var(--inkl);border-bottom:3px solid transparent;transition:all .2s}
+.tab-btn:hover{color:var(--g)}
+.tab-btn.active{color:var(--g);border-bottom-color:var(--gl);font-weight:700}
+.tab-indicator{display:inline-block;width:8px;height:8px;background:var(--g);border-radius:50%;margin-left:8px}
+.tab-badge{display:inline-flex;align-items:center;gap:6px;background:var(--amp);color:var(--am);padding:4px 10px;border-radius:999px;font-size:11px;font-weight:700;margin-left:8px}
+.card{background:var(--w);border:1px solid var(--crd);border-radius:28px;padding:28px;box-shadow:0 24px 70px rgba(10,92,69,.08);margin-bottom:24px}
+.card h2{font-family:var(--fd);font-size:20px;font-weight:800;color:var(--ink);margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.table-wrap{overflow-x:auto}
+.table{width:100%;border-collapse:collapse}
+.table th,.table td{padding:14px 12px;text-align:left;border-bottom:1px solid var(--crd);font-size:14px}
+.table th{font-size:12px;font-weight:700;color:var(--inkm);text-transform:uppercase;letter-spacing:0.08em;background:var(--gp)}
+.table td{color:var(--ink)}
+.device-name{font-weight:700;color:var(--g)}
+.imei-masked{font-family:monospace;color:var(--inkf);letter-spacing:1px}
+.status-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600}
+.status-chip.active{background:var(--gpp);color:var(--g)}
+.status-chip.inactive{background:var(--crd2);color:var(--inkf)}
+.action-link{font-size:13px;font-weight:700;color:var(--g);cursor:pointer;transition:color .2s}
+.action-link:hover{text-decoration:underline}
+.actions-cell{display:flex;gap:12px}
+.summary-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.summary-card{background:var(--gp);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:14px}
+.summary-card h3{font-size:15px;font-weight:700;color:var(--ink);margin-bottom:8px}
+.summary-row{display:flex;justify-content:space-between;font-size:14px;margin-bottom:6px}
+.summary-label{color:var(--inkf)}
+.summary-value{font-weight:700;color:var(--ink)}
+.commercial-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px}
+.commercial-card{background:var(--w);border:1px solid var(--crd);border-radius:24px;padding:24px;display:flex;flex-direction:column;gap:14px}
+.commercial-icon{font-size:36px;margin-bottom:12px}
+.commercial-product{font-size:17px;font-weight:700;color:var(--ink);margin-bottom:4px}
+.commercial-value{font-size:24px;font-weight:800;color:var(--g);margin-bottom:4px}
+.commercial-detail{font-size:13px;color:var(--inkf);margin-bottom:8px}
+.commercial-actions{display:flex;flex-direction:column;gap:10px;margin-top:auto}
+.commercial-badge{display:inline-flex;align-items:center;gap:6px;background:var(--am);color:var(--am);padding:6px 10px;border-radius:999px;font-size:11px;font-weight:700;margin-bottom:12px}
+.btn-primary{display:inline-flex;align-items:center;justify-content:center;padding:14px 20px;border-radius:16px;background:var(--g);color:var(--w);font-family:var(--fd);font-size:15px;font-weight:700;border:none;cursor:pointer;transition:all .2s}
+.btn-primary:hover{background:var(--gm);transform:translateY(-1px)}
+.btn-secondary{display:inline-flex;align-items:center;justify-content:center;padding:12px 18px;border-radius:14px;border:2px solid var(--g);background:transparent;color:var(--g);font-weight:700;cursor:pointer;transition:all .2s;font-size:14px}
+.btn-secondary:hover{background:var(--gp)}
+.button-group{display:flex;gap:12px;margin-top:20px;flex-wrap:wrap}
+.tab-content{display:none}
+.tab-content.active{display:block}
+.empty-state{text-align:center;padding:60px 40px;color:var(--inkf)}
+.empty-icon{font-size:64px;margin-bottom:20px}
+.empty-title{font-family:var(--fd);font-size:20px;font-weight:700;color:var(--ink);margin-bottom:12px}
+.empty-copy{font-size:14px;line-height:1.7}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.3);display:none;z-index:999}
+.overlay.open{display:block}
+@media(max-width:1280px){
+  .wrapper{grid-template-columns:1fr}
+  .sidebar{position:fixed;left:-280px;z-index:100}
+  .sidebar.open{left:0}
+  .toggle-sidebar{display:block}
+  .main-content{grid-column:1;margin-left:0;padding-left:280px}
+}
+@media(max-width:900px){
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .summary-cards{grid-template-columns:1fr}
+  .commercial-grid{grid-template-columns:1fr}
+}
+@media(max-width:680px){
+  .company-name{font-size:22px}
+  .stat-value{font-size:22px}
+  .card{padding:20px}
+  .table{font-size:13px}
+  .table th,.table td{padding:10px 8px}
+  .commercial-card{padding:18px}
+}
+</style>
+</head>
+<body>
+<button class="toggle-sidebar" onclick="toggleSidebar()">☰</button>
+<div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+<div class="wrapper">
+  <aside class="sidebar" id="sidebar">
+    <a href="cova.html" class="sidebar-logo">Cov<span>a</span></a>
+    
+    <nav class="sidebar-nav">
+      <a href="#" class="sidebar-link active" onclick="switchTab('dashboard',this)">
+        <span>📊</span>Dashboard
+      </a>
+      <a href="cova-policy.html" class="sidebar-link" onclick="switchTab('policies',this)">
+        <span>📋</span>My policies
+      </a>
+      <a href="cova-claim.html" class="sidebar-link" onclick="switchTab('claims',this)">
+        <span>📄</span>File a claim
+      </a>
+      <a href="cova-renewal.html" class="sidebar-link" onclick="switchTab('renewals',this)">
+        <span>🔄</span>Renewals
+      </a>
+      
+      <div class="sidebar-section-label">Manage</div>
+      <a href="#" class="sidebar-link" onclick="switchTab('devices',this)">
+        <span>📱</span>Devices
+      </a>
+      <a href="#" class="sidebar-link" onclick="switchTab('fleet',this)">
+        <span>🚗</span>Motor Fleet
+      </a>
+      <a href="#" class="sidebar-link" onclick="switchTab('group',this)">
+        <span>👥</span>Group Cover
+      </a>
+      <a href="#" class="sidebar-link" onclick="switchTab('commercial',this)">
+        <span>🏢</span>Commercial
+      </a>
+      <a href="#" class="sidebar-link" onclick="switchTab('invoices',this)">
+        <span>📥</span>Invoices
+      </a>
+      <a href="cova-login.html" class="sidebar-link" onclick="switchTab('logout',this)">
+        <span>🚪</span>Log out
+      </a>
+    </nav>
+  </aside>
+
+  <main class="main-content">
+    <div class="top-bar">
+      <div class="company-info">
+        <h1 class="company-name">TechFlow Ltd</h1>
+        <div class="account-mgr">
+          Account Manager: <strong>Amara Okafor</strong> · 
+          <a href="https://wa.me/2348012345678" class="whatsapp-link">+234 801 234 5678</a>
+        </div>
+        <span class="account-badge account-badge-sme">Business Account</span>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Total policies</div>
+        <div class="stat-value">12</div>
+        <div class="stat-sub">Across all product types</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Monthly spend</div>
+        <div class="stat-value">₦2.4M</div>
+        <div class="stat-sub">Total premium</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Active claims</div>
+        <div class="stat-value">2</div>
+        <div class="stat-sub">In progress</div>
+      </div>
+      <div class="stat-card featured">
+        <div class="stat-label">Next renewal</div>
+        <div class="stat-value">28 days</div>
+        <div class="stat-sub">Motor fleet · 8 May</div>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="tab-list">
+      <button class="tab-btn active" onclick="switchTab('devices',this)">
+        Devices <span class="tab-indicator"></span>
+      </button>
+      <button class="tab-btn" onclick="switchTab('fleet',this)">
+        Motor Fleet
+      </button>
+      <button class="tab-btn" onclick="switchTab('group',this)">
+        Group Cover
+      </button>
+      <button class="tab-btn" onclick="switchTab('commercial',this)">
+        Commercial
+        <span class="tab-badge">🎁 Bundle active</span>
+      </button>
+      <button class="tab-btn" onclick="switchTab('claims',this)">
+        Claims
+      </button>
+      <button class="tab-btn" onclick="switchTab('invoices',this)">
+        Invoices
+      </button>
+    </div>
+
+    <!-- Devices Tab -->
+    <article class="card tab-content active" id="devices-tab">
+      <h2>
+        Device policies
+        <span class="tab-badge">5 devices</span>
+      </h2>
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Staff member</th>
+              <th>Device model</th>
+              <th>IMEI</th>
+              <th>Cover type</th>
+              <th>Insurer</th>
+              <th>Monthly cost</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="device-name">Chioma Adeyemi</span></td>
+              <td>iPhone 17 Pro Max</td>
+              <td><span class="imei-masked">3591052....5891</span></td>
+              <td>Electronic all-risk</td>
+              <td>AXA Mansard</td>
+              <td>₦145,000</td>
+              <td><span class="status-chip active">Active</span></td>
+              <td class="actions-cell">
+                <span class="action-link" onclick="viewPolicy()">View</span>
+                <span class="action-link" onclick="fileClaim()">File claim</span>
+              </td>
+            </tr>
+            <tr>
+              <td><span class="device-name">David Okonkwo</span></td>
+              <td>Samsung S24 Ultra</td>
+              <td><span class="imei-masked">3542611....0923</span></td>
+              <td>Electronic all-risk</td>
+              <td>AXA Mansard</td>
+              <td>₦145,000</td>
+              <td><span class="status-chip active">Active</span></td>
+              <td class="actions-cell">
+                <span class="action-link" onclick="viewPolicy()">View</span>
+                <span class="action-link" onclick="fileClaim()">File claim</span>
+              </td>
+            </tr>
+            <tr>
+              <td><span class="device-name">Grace Mensah</span></td>
+              <td>MacBook Pro 14"</td>
+              <td><span class="imei-masked">000346....7834</span></td>
+              <td>Electronic all-risk</td>
+              <td>AXA Mansard</td>
+              <td>₦190,000</td>
+              <td><span class="status-chip active">Active</span></td>
+              <td class="actions-cell">
+                <span class="action-link" onclick="viewPolicy()">View</span>
+                <span class="action-link" onclick="fileClaim()">File claim</span>
+              </td>
+            </tr>
+            <tr>
+              <td><span class="device-name">Kwame Boateng</span></td>
+              <td>iPad Air M2</td>
+              <td><span class="imei-masked">3534122....2847</span></td>
+              <td>Electronic all-risk</td>
+              <td>AXA Mansard</td>
+              <td>₦135,000</td>
+              <td><span class="status-chip active">Active</span></td>
+              <td class="actions-cell">
+                <span class="action-link" onclick="viewPolicy()">View</span>
+                <span class="action-link" onclick="fileClaim()">File claim</span>
+              </td>
+            </tr>
+            <tr>
+              <td><span class="device-name">Blessing Eze</span></td>
+              <td>Sony Alpha 7 IV</td>
+              <td><span class="imei-masked">000358....1923</span></td>
+              <td>Electronic all-risk</td>
+              <td>AXA Mansard</td>
+              <td>₦110,000</td>
+              <td><span class="status-chip inactive">Inactive</span></td>
+              <td class="actions-cell">
+                <span class="action-link" onclick="viewPolicy()">View</span>
+                <span class="action-link" onclick="fileClaim()">File claim</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="button-group">
+        <a href="cova-onboarding.html" class="btn-primary">+ Add device to fleet</a>
+      </div>
+    </article>
+
+    <!-- Motor Fleet Tab -->
+    <article class="card tab-content" id="fleet-tab">
+      <h2>
+        Motor fleet
+        <span class="tab-badge">0 vehicles</span>
+      </h2>
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Driver name</th>
+              <th>Plate number</th>
+              <th>Vehicle</th>
+              <th>Cover type</th>
+              <th>Insurer</th>
+              <th>Premium</th>
+              <th>Renewal date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td colspan="8" style="text-align:center;padding:40px;color:var(--inkf);">
+                <div class="empty-state" style="padding:20px;">
+                  <div class="empty-icon">🚗</div>
+                  <div class="empty-title">No vehicles in fleet</div>
+                  <div class="empty-copy">Add vehicles to your business fleet to get comprehensive coverage.</div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="button-group">
+        <a href="cova-motor-onboarding.html" class="btn-primary">+ Add vehicle to fleet</a>
+      </div>
+    </article>
+
+    <!-- Group Cover Tab -->
+    <article class="card tab-content" id="group-tab">
+      <h2>Group cover summary</h2>
+      <div class="summary-cards">
+        <div class="summary-card">
+          <h3>👥 Group Life</h3>
+          <div class="summary-row">
+            <span class="summary-label">Enrolled staff</span>
+            <span class="summary-value">48</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">Sum assured</span>
+            <span class="summary-value">₦48,000,000</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">Monthly cost</span>
+            <span class="summary-value">₦400,000</span>
+          </div>
+          <a href="#" class="btn-secondary" style="align-self:flex-start;">Manage policy →</a>
+        </div>
+        <div class="summary-card">
+          <h3>🏥 Group Health</h3>
+          <div class="summary-row">
+            <span class="summary-label">Enrolled staff</span>
+            <span class="summary-value">48</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">HMO plan</span>
+            <span class="summary-value">Gold tier</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">Monthly cost</span>
+            <span class="summary-value">₦240,000</span>
+          </div>
+          <a href="cova-health-onboarding.html" class="btn-secondary" style="align-self:flex-start;">Add/remove staff →</a>
+        </div>
+        <div class="summary-card">
+          <h3>👷 Workmen's Compensation</h3>
+          <div class="summary-row">
+            <span class="summary-label">Staff count</span>
+            <span class="summary-value">48</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">Annual payroll</span>
+            <span class="summary-value">₦96,000,000</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">Annual premium</span>
+            <span class="summary-value">₦4,800,000</span>
+          </div>
+          <a href="#" class="btn-secondary" style="align-self:flex-start;">Manage policy →</a>
+        </div>
+        <div class="summary-card">
+          <h3>🤝 GPA</h3>
+          <div class="summary-row">
+            <span class="summary-label">Covered staff</span>
+            <span class="summary-value">48</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">Cover type</span>
+            <span class="summary-value">24hr worldwide</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">Annual premium</span>
+            <span class="summary-value">₦1,440,000</span>
+          </div>
+          <a href="#" class="btn-secondary" style="align-self:flex-start;">Manage policy →</a>
+        </div>
+      </div>
+    </article>
+
+    <!-- Commercial Tab -->
+    <article class="card tab-content" id="commercial-tab">
+      <h2>
+        Commercial policies
+        <span class="tab-badge">🎁 6 products</span>
+      </h2>
+      <div class="commercial-grid">
+        <div class="commercial-card">
+          <div class="commercial-icon">🔥</div>
+          <div class="commercial-product">Fire Insurance</div>
+          <div class="commercial-value">₦150M</div>
+          <div class="commercial-detail">Insurer: Leadway Assurance</div>
+          <div class="commercial-detail">Renewal: 15 Feb 2027</div>
+          <div class="commercial-detail">Annual premium: ₦4,200,000</div>
+        </div>
+        <div class="commercial-card">
+          <div class="commercial-icon">🔒</div>
+          <div class="commercial-product">Burglary & Theft</div>
+          <div class="commercial-value">₦80M</div>
+          <div class="commercial-detail">Insurer: AIICO Insurance</div>
+          <div class="commercial-detail">Renewal: 10 Mar 2027</div>
+          <div class="commercial-detail">Annual premium: ₦2,400,000</div>
+        </div>
+        <div class="commercial-card">
+          <div class="commercial-icon">📉</div>
+          <div class="commercial-product">Consequential Loss</div>
+          <div class="commercial-value">₦50M</div>
+          <div class="commercial-detail">Insurer: AXA Mansard</div>
+          <div class="commercial-detail">Renewal: 20 Apr 2027</div>
+          <div class="commercial-detail">Annual premium: ₦1,500,000</div>
+        </div>
+        <div class="commercial-card">
+          <div class="commercial-icon">💸</div>
+          <div class="commercial-product">Money Insurance</div>
+          <div class="commercial-value">₦30M</div>
+          <div class="commercial-detail">Insurer: Consolidated Hallmark</div>
+          <div class="commercial-detail">Renewal: 25 May 2027</div>
+          <div class="commercial-detail">Annual premium: ₦900,000</div>
+        </div>
+        <div class="commercial-card">
+          <div class="commercial-icon">🤝</div>
+          <div class="commercial-product">Fidelity Guarantee</div>
+          <div class="commercial-value">₦100M</div>
+          <div class="commercial-detail">Insurer: Custodian & Allied</div>
+          <div class="commercial-detail">Renewal: 15 Jun 2027</div>
+          <div class="commercial-detail">Annual premium: ₦3,000,000</div>
+        </div>
+        <div class="commercial-card">
+          <div class="commercial-icon">⚖️</div>
+          <div class="commercial-product">Public Liability</div>
+          <div class="commercial-value">₦50M</div>
+          <div class="commercial-detail">Insurer: NEM Insurance</div>
+          <div class="commercial-detail">Renewal: 10 Jul 2027</div>
+          <div class="commercial-detail">Annual premium: ₦1,500,000</div>
+        </div>
+      </div>
+      <div class="button-group" style="margin-top:24px;">
+        <a href="cova-fire-onboarding.html" class="btn-primary">+ Add commercial product</a>
+      </div>
+    </article>
+
+    <!-- Claims Tab -->
+    <article class="card tab-content" id="claims-tab">
+      <h2>
+        Open claims
+        <span class="tab-badge">2 active</span>
+      </h2>
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Claim #</th>
+              <th>Product type</th>
+              <th>Policy</th>
+              <th>Date</th>
+              <th>Status</th>
+              <th>Handler</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>COV-CL-7812</strong></td>
+              <td>🚗 Motor</td>
+              <td>COVA-MT-1248</td>
+              <td>1 May 2026</td>
+              <td><span class="status-chip active">In review</span></td>
+              <td>Amara Okafor</td>
+              <td><a href="cova-claim-tracker.html?type=motor" class="action-link">Track</a></td>
+            </tr>
+            <tr>
+              <td><strong>COV-CL-7813</strong></td>
+              <td>🔥 Fire</td>
+              <td>COVA-FR-9284</td>
+              <td>28 Apr 2026</td>
+              <td><span class="status-chip active">In assessment</span></td>
+              <td>Amara Okafor</td>
+              <td><a href="cova-claim-tracker.html?type=fire" class="action-link">Track</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </article>
+
+    <!-- Invoices Tab -->
+    <article class="card tab-content" id="invoices-tab">
+      <h2>
+        Monthly invoices
+        <span class="tab-badge">2026</span>
+      </h2>
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Invoice #</th>
+              <th>Date</th>
+              <th>Premium</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>INV-2026-04</strong></td>
+              <td>28 Apr 2026</td>
+              <td>₦2,400,000</td>
+              <td><span class="status-chip active">Paid</span></td>
+              <td><a href="#" class="action-link">Download PDF</a></td>
+            </tr>
+            <tr>
+              <td><strong>INV-2026-03</strong></td>
+              <td>28 Mar 2026</td>
+              <td>₦2,400,000</td>
+              <td><span class="status-chip active">Paid</span></td>
+              <td><a href="#" class="action-link">Download PDF</a></td>
+            </tr>
+            <tr>
+              <td><strong>INV-2026-02</strong></td>
+              <td>28 Feb 2026</td>
+              <td>₦2,400,000</td>
+              <td><span class="status-chip active">Paid</span></td>
+              <td><a href="#" class="action-link">Download PDF</a></td>
+            </tr>
+            <tr>
+              <td><strong>INV-2026-01</strong></td>
+              <td>28 Jan 2026</td>
+              <td>₦2,400,000</td>
+              <td><span class="status-chip active">Paid</span></td>
+              <td><a href="#" class="action-link">Download PDF</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </article>
+  </main>
+</div>
+
+<script>
+// Fetch company policies on page load
+window.addEventListener('DOMContentLoaded', async () => {
+  const token = localStorage.getItem('accessToken');
+  
+  if (!token) {
+    window.location.href = 'cova-auth.html';
+    return;
+  }
+  
+  const result = await getUserPolicies();
+  
+  if (result.ok) {
+    const policies = result.data.policies || [];
+    displaySmePolicies(policies);
+  } else {
+    console.error('Failed to fetch policies:', result.data.error);
+  }
+});
+
+function displaySmePolicies(policies) {
+  // Display policies in devices tab
+  const devicesContainer = document.getElementById('devices-table-body');
+  if (devicesContainer) {
+    displayDevicesPolicies(policies.filter(p => p.product_type === 'device'), devicesContainer);
+  }
+  
+  // Display policies in fleet tab
+  const fleetContainer = document.getElementById('fleet-table-body');
+  if (fleetContainer) {
+    displayFleetPolicies(policies.filter(p => p.product_type === 'motor'), fleetContainer);
+  }
+  
+  // Display policies in group tab
+  const groupContainer = document.getElementById('group-table-body');
+  if (groupContainer) {
+    displayGroupPolicies(policies.filter(p => p.product_type === 'group'), groupContainer);
+  }
+  
+  // Display policies in commercial tab
+  const commercialContainer = document.getElementById('commercial-grid');
+  if (commercialContainer) {
+    displayCommercialPolicies(policies.filter(p => ['fire', 'property', 'business'].includes(p.product_type)), commercialContainer);
+  }
+  
+  // Display policies in claims tab
+  const claimsContainer = document.getElementById('claims-table-body');
+  if (claimsContainer) {
+    // Would need getClaims API for this
+    displayClaimsPolicies([], claimsContainer);
+  }
+}
+
+function displayDevicesPolicies(policies, container) {
+  if (policies.length === 0) {
+    container.innerHTML = '<tr><td colspan="5" class="text-center">No device policies found</td></tr>';
+    return;
+  }
+  
+  container.innerHTML = policies.map(policy => `
+    <tr>
+      <td><div class="device-name">${policy.metadata?.device_name || 'Unknown Device'}</div></td>
+      <td><div class="imei-masked">${policy.metadata?.imei || 'N/A'}</div></td>
+      <td>₦${policy.sum_insured?.toLocaleString() || '0'}</td>
+      <td>
+        <span class="status-chip ${policy.status === 'active' ? 'active' : 'inactive'}">${policy.status || 'Unknown'}</span>
+      </td>
+      <td>
+        <div class="actions-cell">
+          <span class="action-link" onclick="viewPolicy('${policy.id}')">View</span>
+          <span class="action-link" onclick="fileClaim('${policy.id}')">Claim</span>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function displayFleetPolicies(policies, container) {
+  if (policies.length === 0) {
+    container.innerHTML = '<tr><td colspan="5" class="text-center">No fleet policies found</td></tr>';
+    return;
+  }
+  
+  container.innerHTML = policies.map(policy => `
+    <tr>
+      <td><div class="device-name">${policy.metadata?.vehicle_name || 'Unknown Vehicle'}</div></td>
+      <td><div class="imei-masked">${policy.metadata?.registration_number || 'N/A'}</div></td>
+      <td>₦${policy.sum_insured?.toLocaleString() || '0'}</td>
+      <td>
+        <span class="status-chip ${policy.status === 'active' ? 'active' : 'inactive'}">${policy.status || 'Unknown'}</span>
+      </td>
+      <td>
+        <div class="actions-cell">
+          <span class="action-link" onclick="viewPolicy('${policy.id}')">View</span>
+          <span class="action-link" onclick="fileClaim('${policy.id}')">Claim</span>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function displayGroupPolicies(policies, container) {
+  if (policies.length === 0) {
+    container.innerHTML = '<tr><td colspan="5" class="text-center">No group policies found</td></tr>';
+    return;
+  }
+  
+  container.innerHTML = policies.map(policy => `
+    <tr>
+      <td><div class="device-name">${policy.metadata?.group_name || 'Unknown Group'}</div></td>
+      <td><div class="imei-masked">${policy.metadata?.member_count || '0'} members</div></td>
+      <td>₦${policy.sum_insured?.toLocaleString() || '0'}</td>
+      <td>
+        <span class="status-chip ${policy.status === 'active' ? 'active' : 'inactive'}">${policy.status || 'Unknown'}</span>
+      </td>
+      <td>
+        <div class="actions-cell">
+          <span class="action-link" onclick="viewPolicy('${policy.id}')">View</span>
+          <span class="action-link" onclick="fileClaim('${policy.id}')">Claim</span>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function displayCommercialPolicies(policies, container) {
+  if (policies.length === 0) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-icon">🏢</div><h3 class="empty-title">No Commercial Policies</h3><p class="empty-copy">Add fire, property or business insurance to protect your company assets</p></div>';
+    return;
+  }
+  
+  container.innerHTML = policies.map(policy => `
+    <div class="commercial-card">
+      <div class="commercial-icon">${getCommercialIcon(policy.product_type)}</div>
+      <div class="commercial-badge">${policy.status || 'Active'}</div>
+      <div class="commercial-product">${getCommercialProductName(policy.product_type)}</div>
+      <div class="commercial-value">₦${policy.sum_insured?.toLocaleString() || '0'}</div>
+      <div class="commercial-detail">Premium: ₦${policy.premium_amount?.toLocaleString() || '0'}/${policy.premium_frequency || 'monthly'}</div>
+      <div class="commercial-actions">
+        <button class="btn-primary" onclick="viewPolicy('${policy.id}')">View Policy</button>
+        <button class="btn-secondary" onclick="fileClaim('${policy.id}')">File Claim</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function displayClaimsPolicies(policies, container) {
+  if (policies.length === 0) {
+    container.innerHTML = '<tr><td colspan="6" class="text-center">No claims found</td></tr>';
+    return;
+  }
+  
+  container.innerHTML = policies.map(claim => `
+    <tr>
+      <td><div class="device-name">${claim.claim_ref || 'N/A'}</div></td>
+      <td><div class="imei-masked">${claim.incident_type || 'N/A'}</div></td>
+      <td>${new Date(claim.incident_date).toLocaleDateString()}</td>
+      <td>₦${claim.claim_amount?.toLocaleString() || '0'}</td>
+      <td>
+        <span class="status-chip ${claim.status === 'approved' ? 'active' : 'inactive'}">${claim.status || 'Pending'}</span>
+      </td>
+      <td>
+        <div class="actions-cell">
+          <span class="action-link" onclick="viewClaim('${claim.id}')">View</span>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function getCommercialIcon(productType) {
+  const icons = {
+    'fire': '🔥',
+    'property': '🏠',
+    'business': '💼'
+  };
+  return icons[productType] || '🏢';
+}
+
+function getCommercialProductName(productType) {
+  const names = {
+    'fire': 'Fire Insurance',
+    'property': 'Property Insurance',
+    'business': 'Business Insurance'
+  };
+  return names[productType] || 'Commercial Insurance';
+}
+
+function viewPolicy(policyId) {
+  window.location.href = `cova-policy.html?id=${policyId}`;
+}
+
+function fileClaim(policyId) {
+  window.location.href = `cova-claim.html?policy_id=${policyId}`;
+}
+
+function viewClaim(claimId) {
+  window.location.href = `cova-claim-tracker.html?claim_id=${claimId}`;
+}
+
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('overlay');
+  sidebar.classList.toggle('collapsed');
+  overlay.classList.toggle('open');
+}
+
+function switchTab(tabName, element) {
+  // Update tab buttons
+  const btns = document.querySelectorAll('.tab-btn');
+  btns.forEach(btn => btn.classList.remove('active'));
+  if (element) element.classList.add('active');
+  
+  // Update sidebar links
+  const sidebarLinks = document.querySelectorAll('.sidebar-link');
+  sidebarLinks.forEach(link => link.classList.remove('active'));
+  
+  // Show corresponding tab content
+  document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+  
+  const tabMap = {
+    'dashboard': null,
+    'devices': 'devices-tab',
+    'fleet': 'fleet-tab',
+    'group': 'group-tab',
+    'commercial': 'commercial-tab',
+    'claims': 'claims-tab',
+    'invoices': 'invoices-tab'
+  };
+  
+  const tabId = tabMap[tabName];
+  if (tabId) {
+    document.getElementById(tabId).classList.add('active');
+  }
+}
+
+function viewPolicy() {
+  window.location.href = 'cova-policy.html';
+}
+
+function fileClaim() {
+  window.location.href = 'cova-claim.html';
+}
+
+// Auto-collapse sidebar on smaller screens
+function handleResize() {
+  const sidebar = document.getElementById('sidebar');
+  const toggleBtn = document.querySelector('.toggle-sidebar');
+  
+  if (window.innerWidth <= 1280) {
+    sidebar.classList.add('collapsed');
+    toggleBtn.style.display = 'block';
+  } else {
+    sidebar.classList.remove('collapsed');
+    toggleBtn.style.display = 'none';
+  }
+}
+
+window.addEventListener('resize', handleResize);
+handleResize();
+</script>
+</body>
+</html>

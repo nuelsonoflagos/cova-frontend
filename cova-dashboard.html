@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cova — My Dashboard</title>
+<script src="api-client.js"></script>
+<script>
+// Load policies when page loads
+window.addEventListener('DOMContentLoaded', async () => {
+  const token = localStorage.getItem('accessToken');
+  
+  // If no token, redirect to login
+  if (!token) {
+    window.location.href = 'cova-auth.html';
+    return;
+  }
+  
+  // Fetch user's policies
+  const result = await getUserPolicies();
+  
+  if (result.ok) {
+    const policies = result.data.policies || [];
+    displayPolicies(policies);
+  } else {
+    console.error('Failed to fetch policies:', result.data.error);
+    alert('Error loading policies');
+  }
+});
+
+function displayPolicies(policies) {
+  const policiesContainer = document.getElementById('policies-container');
+  
+  if (!policiesContainer) {
+    console.error('policies-container not found');
+    return;
+  }
+  
+  if (policies.length === 0) {
+    policiesContainer.innerHTML = '<p>No active policies. Get one now!</p>';
+    return;
+  }
+  
+  // Clear container
+  policiesContainer.innerHTML = '';
+  
+  // Display each policy
+  policies.forEach(policy => {
+    const policyCard = document.createElement('div');
+    policyCard.className = 'policy-card';
+    policyCard.innerHTML = `
+      <h3>${policy.product_type}</h3>
+      <p><strong>Status:</strong> ${policy.status}</p>
+      <p><strong>Premium:</strong> ₦${policy.premium_amount}</p>
+      <p><strong>Coverage:</strong> ₦${policy.sum_insured}</p>
+      <button onclick="viewPolicy('${policy.id}')">View Details</button>
+      <button onclick="fileClaim('${policy.id}')">File Claim</button>
+    `;
+    policiesContainer.appendChild(policyCard);
+  });
+}
+
+function viewPolicy(policyId) {
+  window.location.href = `cova-policy.html?id=${policyId}`;
+}
+
+function fileClaim(policyId) {
+  window.location.href = `cova-claim.html?policy_id=${policyId}`;
+}
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --g:#0A5C45;--gm:#137A5C;--gl:#1D9E75;--gp:#E6F5F0;--gpp:#d0ede4;
+  --cream:#F7F4EE;--crd:#E8E4DB;--crd2:#D8D3C8;
+  --ink:#0F1A14;--inkm:#2D3E35;--inkl:#5A6E63;--inkf:#9AADA3;
+  --w:#fff;--r:#C0392B;--rp:#FDECEA;--am:#D4860A;--amp:#FEF3E2;
+  --fd:'Syne',sans-serif;--fb:'DM Sans',sans-serif;
+  --rad:16px;--radsm:8px;
+  --sidebar:240px;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--fb);background:var(--cream);color:var(--ink);line-height:1.6;overflow-x:hidden;min-height:100vh}
+
+/* ── SIDEBAR ── */
+.sidebar{position:fixed;top:0;left:0;bottom:0;width:var(--sidebar);background:var(--ink);display:flex;flex-direction:column;z-index:100;overflow-y:auto}
+.sidebar-logo{padding:22px 20px 18px;border-bottom:1px solid rgba(255,255,255,0.07)}
+.logo{font-family:var(--fd);font-size:20px;font-weight:800;color:var(--w);text-decoration:none;display:block}
+.logo span{color:var(--gl)}
+.sidebar-user{padding:14px 20px;border-bottom:1px solid rgba(255,255,255,0.07);display:flex;align-items:center;gap:10px}
+.avatar{width:34px;height:34px;border-radius:50%;background:var(--g);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:13px;font-weight:700;color:var(--w);flex-shrink:0}
+.user-info{flex:1;min-width:0}
+.user-name{font-size:13px;font-weight:600;color:var(--w);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.user-biz{font-size:11px;color:rgba(255,255,255,0.35);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sidebar-nav{padding:10px 10px;flex:1}
+.nav-section-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:rgba(255,255,255,0.25);padding:8px 10px 5px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--radsm);cursor:pointer;text-decoration:none;transition:all .18s;margin-bottom:2px}
+.nav-item:hover{background:rgba(255,255,255,0.06)}
+.nav-item.active{background:var(--g)}
+.nav-icon{width:18px;text-align:center;font-size:15px;flex-shrink:0}
+.nav-label{font-size:13px;font-weight:500;color:rgba(255,255,255,0.5)}
+.nav-item.active .nav-label,.nav-item:hover .nav-label{color:var(--w)}
+.nav-badge{margin-left:auto;font-size:10px;font-weight:700;background:var(--r);color:var(--w);padding:1px 6px;border-radius:10px}
+.sidebar-bottom{padding:12px 10px;border-top:1px solid rgba(255,255,255,0.07)}
+
+/* ── TOPBAR (mobile) ── */
+.topbar{display:none;position:fixed;top:0;left:0;right:0;height:56px;background:var(--ink);align-items:center;justify-content:space-between;padding:0 16px;z-index:200}
+.topbar-logo{font-family:var(--fd);font-size:19px;font-weight:800;color:var(--w)}
+.topbar-logo span{color:var(--gl)}
+.mob-menu-btn{background:none;border:none;cursor:pointer;color:rgba(255,255,255,0.7);padding:6px}
+.mob-overlay{display:none;position:fixed;inset:0;background:rgba(15,26,20,0.6);z-index:300}
+.mob-overlay.open{display:block}
+.mob-sidebar{position:fixed;top:0;left:-260px;bottom:0;width:260px;background:var(--ink);z-index:400;transition:left .28s ease;overflow-y:auto}
+.mob-sidebar.open{left:0}
+
+/* ── MAIN ── */
+.main{margin-left:var(--sidebar);min-height:100vh;padding:32px 28px 60px}
+
+/* ── PAGE HEADER ── */
+.page-header{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:20px;margin-bottom:32px}
+.page-header h1{margin:0;font-size:32px;font-weight:700;color:#1A1A1A}
+.page-header .page-title{margin:0;font-size:32px;font-weight:700;color:#1A1A1A}
+.page-header .page-sub{margin-top:4px;color:#666;font-size:16px}
+.notification-bell{position:relative;background:rgba(10,92,69,0.1);border:none;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.notification-bell:hover{background:rgba(10,92,69,0.15)}
+.notification-dot{position:absolute;top:6px;right:6px;width:10px;height:10px;background:#E74C3C;border-radius:50%;border:2px solid white}
+.account-badge-business{background:#3498DB;color:white;padding:2px 10px;border-radius:20px;font-size:12px;font-weight:500}
+.account-badge-personal{background:#9B59B6;color:white;padding:2px 10px;border-radius:20px;font-size:12px;font-weight:500}
+.sidebar-user{padding:14px 20px;border-bottom:1px solid rgba(255,255,255,0.07);display:flex;align-items:center;gap:10px}
+.avatar{width:34px;height:34px;border-radius:50%;background:var(--g);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:13px;font-weight:700;color:var(--w);flex-shrink:0}
+.user-info{flex:1;min-width:0}
+.user-name{font-size:13px;font-weight:600;color:var(--w);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.user-biz{font-size:11px;color:rgba(255,255,255,0.35);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sidebar-nav{padding:10px 10px;flex:1}
+.nav-section-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:rgba(255,255,255,0.25);padding:8px 10px 5px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--radsm);cursor:pointer;text-decoration:none;transition:all .18s;margin-bottom:2px}
+.nav-item:hover{background:rgba(255,255,255,0.06)}
+.nav-item.active{background:var(--g)}
+.nav-icon{width:18px;text-align:center;font-size:15px;flex-shrink:0}
+.nav-label{font-size:13px;font-weight:500;color:rgba(255,255,255,0.5)}
+.nav-item.active .nav-label,.nav-item:hover .nav-label{color:var(--w)}
+.nav-badge{margin-left:auto;font-size:10px;font-weight:700;background:var(--r);color:var(--w);padding:1px 6px;border-radius:10px}
+.sidebar-bottom{padding:12px 10px;border-top:1px solid rgba(255,255,255,0.07)}
+
+/* ── BUTTONS ── */
+.btn-primary{background:var(--g);color:var(--w);padding:10px 18px;border-radius:var(--radsm);font-family:var(--fd);font-size:13px;font-weight:700;border:none;cursor:pointer;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:7px}
+.btn-primary:hover{background:var(--gm);transform:translateY(-1px)}
+.btn-outline{background:transparent;color:var(--g);padding:9px 16px;border-radius:var(--radsm);font-family:var(--fd);font-size:13px;font-weight:600;border:1.5px solid rgba(10,92,69,0.25);cursor:pointer;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:7px}
+.btn-outline:hover{border-color:var(--g);background:var(--gp)}
+.btn-white-sm{background:var(--w);color:var(--g);padding:8px 16px;border-radius:6px;font-family:var(--fd);font-size:12px;font-weight:700;border:none;cursor:pointer;transition:all .2s;display:inline-block;text-decoration:none}
+.btn-white-sm:hover{background:var(--gp)}
+
+/* ── STAT CARDS ── */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+.stat-card{background:var(--w);border:1px solid var(--crd);border-radius:var(--rad);padding:20px;transition:all .2s}
+.stat-card:hover{box-shadow:0 4px 20px rgba(10,92,69,0.07)}
+.stat-card.featured{background:var(--g);border-color:var(--g)}
+.stat-icon{font-size:20px;margin-bottom:12px}
+.stat-value{font-family:var(--fd);font-size:26px;font-weight:800;color:var(--ink);letter-spacing:-1px;line-height:1;margin-bottom:4px}
+.stat-card.featured .stat-value{color:var(--w)}
+.stat-label{font-size:12px;color:var(--inkl)}
+.stat-card.featured .stat-label{color:rgba(255,255,255,0.55)}
+.stat-chip{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:600;margin-top:6px;padding:2px 7px;border-radius:10px}
+.chip-green{background:var(--gp);color:var(--g)}
+.chip-amber{background:var(--amp);color:var(--am)}
+.chip-blue{background:#EEF3FF;color:#3B5BDB}
+.chip-red{background:var(--rp);color:var(--r)}
+
+/* ── ALERT BANNER ── */
+.alert-banner{background:var(--amp);border:1px solid rgba(212,134,10,0.25);border-radius:var(--radsm);padding:12px 16px;display:flex;align-items:center;gap:12px;margin-bottom:22px;font-size:13px;color:var(--inkm);flex-wrap:wrap}
+.alert-text strong{font-weight:600;color:var(--am)}
+.alert-action{margin-left:auto;font-size:12px;font-weight:700;color:var(--am);white-space:nowrap;cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+
+/* ── CONTENT GRID ── */
+.content-grid{display:grid;grid-template-columns:1fr 320px;gap:20px;align-items:start}
+
+/* ── SECTION CARD ── */
+.section-card{background:var(--w);border:1px solid var(--crd);border-radius:var(--rad);overflow:hidden;margin-bottom:20px}
+.section-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--crd)}
+.section-head-title{font-family:var(--fd);font-size:14px;font-weight:700;color:var(--ink)}
+.section-head-link{font-size:12px;font-weight:600;color:var(--gl);text-decoration:none;cursor:pointer;border:none;background:none;font-family:var(--fb)}
+.section-head-link:hover{color:var(--g)}
+
+/* ── POLICY ITEMS ── */
+.policy-item{padding:16px 20px;border-bottom:1px solid var(--crd);display:flex;align-items:center;gap:14px;transition:background .15s;cursor:pointer}
+.policy-item:last-child{border-bottom:none}
+.policy-item:hover{background:var(--cream)}
+.policy-icon{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.icon-device{background:#E6F5F0}
+.icon-motor{background:#EEF3FF}
+.policy-body{flex:1;min-width:0}
+.policy-name{font-size:14px;font-weight:600;color:var(--ink);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.policy-meta{font-size:12px;color:var(--inkl)}
+.policy-right{text-align:right;flex-shrink:0}
+.policy-amount{font-family:var(--fd);font-size:14px;font-weight:700;color:var(--ink);margin-bottom:3px}
+.policy-status{font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px;display:inline-block}
+.status-active{background:var(--gp);color:var(--g)}
+.status-renew{background:var(--amp);color:var(--am)}
+.status-expired{background:var(--rp);color:var(--r)}
+.status-processing{background:#EEF3FF;color:#3B5BDB}
+
+/* ── RENEWALS ── */
+.renewal-item{padding:16px 20px;border-bottom:1px solid var(--crd);display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.renewal-item:last-child{border-bottom:none}
+.renewal-body{flex:1;min-width:160px}
+.renewal-name{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:2px}
+.renewal-date{font-size:12px;color:var(--inkl)}
+.renewal-right{display:flex;align-items:center;gap:8px;flex-shrink:0;flex-wrap:wrap}
+.days-badge{font-size:12px;font-weight:700;padding:3px 9px;border-radius:10px}
+.days-urgent{background:var(--rp);color:var(--r)}
+.days-warn{background:var(--amp);color:var(--am)}
+.days-ok{background:var(--gp);color:var(--g)}
+
+/* ── CLAIM TRACKER ── */
+.claim-item{padding:16px 20px;border-bottom:1px solid var(--crd)}
+.claim-item:last-child{border-bottom:none}
+.claim-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:6px;flex-wrap:wrap}
+.claim-name{font-size:13px;font-weight:600;color:var(--ink)}
+.claim-ref{font-size:11px;color:var(--inkf);margin-top:1px}
+.claim-desc{font-size:12px;color:var(--inkl);margin-bottom:12px;line-height:1.55}
+.claim-progress{display:flex;align-items:center}
+.cp-step{display:flex;flex-direction:column;align-items:center;flex:1;position:relative}
+.cp-step:not(:last-child)::after{content:'';position:absolute;top:7px;left:50%;width:100%;height:2px;background:var(--crd);z-index:0}
+.cp-step.done:not(:last-child)::after{background:var(--gl)}
+.cp-step.active:not(:last-child)::after{background:linear-gradient(to right,var(--gl),var(--crd))}
+.cp-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--crd);background:var(--w);z-index:1;position:relative;transition:all .2s}
+.cp-step.done .cp-dot{background:var(--gl);border-color:var(--gl)}
+.cp-step.active .cp-dot{background:var(--g);border-color:var(--g)}
+.cp-label{font-size:10px;color:var(--inkf);margin-top:4px;text-align:center;white-space:nowrap}
+.cp-step.active .cp-label{color:var(--g);font-weight:600}
+.cp-step.done .cp-label{color:var(--gl)}
+
+/* ── HANDLER CARD ── */
+.handler-wrap{padding:18px 20px;display:flex;align-items:center;gap:14px}
+.handler-av{width:44px;height:44px;border-radius:50%;background:var(--gpp);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:15px;font-weight:700;color:var(--g);flex-shrink:0}
+.handler-name{font-size:14px;font-weight:600;color:var(--ink);margin-bottom:2px}
+.handler-status{font-size:12px;color:var(--inkl);margin-bottom:8px;display:flex;align-items:center;gap:5px}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--gl);display:inline-block;animation:blink 2s infinite;flex-shrink:0}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
+.handler-btns{display:flex;gap:8px}
+.hbtn{font-size:12px;font-weight:600;padding:6px 12px;border-radius:6px;border:none;cursor:pointer;transition:all .18s;display:inline-flex;align-items:center;gap:5px;font-family:var(--fb)}
+.hbtn-wa{background:#25D366;color:var(--w)}
+.hbtn-wa:hover{background:#1ebe5a}
+.hbtn-call{background:var(--gp);color:var(--g)}
+.hbtn-call:hover{background:var(--gpp)}
+
+/* ── QUICK ACTIONS ── */
+.quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:16px 20px}
+.quick-item{border:1.5px solid var(--crd);border-radius:var(--radsm);padding:14px;cursor:pointer;transition:all .18s;text-decoration:none;display:block;background:var(--w)}
+.quick-item:hover{border-color:var(--gl);background:var(--gp);transform:translateY(-2px)}
+.quick-icon{font-size:20px;margin-bottom:7px}
+.quick-label{font-size:12px;font-weight:600;color:var(--inkm);line-height:1.3}
+.quick-item:hover .quick-label{color:var(--g)}
+
+/* ── RENEWAL HIGHLIGHT CARD ── */
+.renew-highlight{background:var(--g);border-radius:var(--rad);padding:20px;margin-bottom:20px;position:relative;overflow:hidden}
+.renew-highlight::before{content:'';position:absolute;top:-30px;right:-30px;width:110px;height:110px;border-radius:50%;background:rgba(255,255,255,0.05)}
+.rh-tag{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.45);margin-bottom:7px}
+.rh-title{font-family:var(--fd);font-size:15px;font-weight:700;color:var(--w);margin-bottom:3px}
+.rh-sub{font-size:12px;color:rgba(255,255,255,.5);margin-bottom:14px}
+
+/* ── ACTIVITY ── */
+.activity-item{padding:12px 20px;border-bottom:1px solid var(--crd);display:flex;gap:11px;align-items:flex-start}
+.activity-item:last-child{border-bottom:none}
+.act-dot{width:8px;height:8px;border-radius:50%;background:var(--crd2);flex-shrink:0;margin-top:5px}
+.act-dot.green{background:var(--gl)}
+.act-dot.amber{background:var(--am)}
+.act-dot.blue{background:#3B5BDB}
+.act-text{font-size:13px;color:var(--inkm);line-height:1.45}
+.act-time{font-size:11px;color:var(--inkf);margin-top:2px}
+
+/* ── TABS ── */
+.tab-bar{display:flex;gap:4px;padding:12px 20px;border-bottom:1px solid var(--crd);background:var(--cream)}
+.tab{font-size:13px;font-weight:500;color:var(--inkl);padding:6px 14px;border-radius:6px;cursor:pointer;transition:all .18s;border:none;background:none;font-family:var(--fb)}
+.tab:hover{color:var(--ink);background:var(--crd)}
+.tab.active{background:var(--gp);color:var(--g);font-weight:600}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
+/* ── POLICY DETAIL ── */
+.detail-grid{padding:18px 20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;border-bottom:1px solid var(--crd)}
+.detail-row{display:flex;flex-direction:column;gap:2px}
+.detail-label{font-size:11px;color:var(--inkf)}
+.detail-value{font-size:13px;font-weight:600;color:var(--ink)}
+
+/* ── COVERAGE BARS ── */
+.cov-row{padding:14px 20px;border-bottom:1px solid var(--crd)}
+.cov-row:last-child{border-bottom:none}
+.cov-top{display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px}
+.cov-name{color:var(--inkl)}
+.cov-val{font-weight:600;color:var(--ink)}
+.cov-bar{height:5px;background:var(--crd);border-radius:3px;overflow:hidden}
+.cov-fill{height:100%;border-radius:3px;background:linear-gradient(to right,var(--g),var(--gl))}
+
+/* ── DOCS ── */
+.doc-item{padding:12px 20px;border-bottom:1px solid var(--crd);display:flex;align-items:center;gap:12px;cursor:pointer;transition:background .15s}
+.doc-item:last-child{border-bottom:none}
+.doc-item:hover{background:var(--cream)}
+.doc-icon{font-size:20px;flex-shrink:0}
+.doc-name{font-size:13px;font-weight:500;color:var(--ink)}
+.doc-meta{font-size:11px;color:var(--inkf)}
+.doc-dl{font-size:20px;color:var(--inkf);margin-left:auto;transition:color .15s}
+.doc-item:hover .doc-dl{color:var(--gl)}
+
+/* ── EMPTY STATE ── */
+.empty{padding:40px 20px;text-align:center}
+.empty-icon{font-size:36px;margin-bottom:12px}
+.empty-title{font-family:var(--fd);font-size:16px;font-weight:700;color:var(--ink);margin-bottom:5px}
+.empty-sub{font-size:13px;color:var(--inkl);margin-bottom:18px;line-height:1.6}
+
+/* ── MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(15,26,20,0.6);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.open{display:flex}
+.modal{background:var(--w);border-radius:20px;padding:28px;max-width:440px;width:100%;position:relative;animation:fadeUp .28s ease both}
+.modal-close{position:absolute;top:14px;right:16px;background:none;border:none;cursor:pointer;font-size:20px;color:var(--inkf);line-height:1}
+.modal-title{font-family:var(--fd);font-size:20px;font-weight:800;color:var(--ink);margin-bottom:4px}
+.modal-sub{font-size:14px;color:var(--inkl);margin-bottom:20px;line-height:1.55}
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:13px;font-weight:500;color:var(--inkm);margin-bottom:6px}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:12px 14px;border:1.5px solid var(--crd);border-radius:var(--radsm);font-family:var(--fb);font-size:14px;color:var(--ink);background:var(--w);outline:none;transition:border-color .2s;-webkit-appearance:none}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--gl);box-shadow:0 0 0 3px rgba(29,158,117,0.1)}
+.form-group textarea{resize:vertical;min-height:80px}
+.success-state{display:none;text-align:center;padding:16px 0}
+.success-icon{font-size:44px;margin-bottom:12px}
+.success-title{font-family:var(--fd);font-size:18px;font-weight:800;color:var(--ink);margin-bottom:6px}
+.success-sub{font-size:14px;color:var(--inkl);line-height:1.55}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── TOAST ── */
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:var(--w);padding:10px 20px;border-radius:8px;font-size:13px;font-weight:500;z-index:900;transition:transform .28s ease;pointer-events:none;white-space:nowrap}
+
+/* ── RESPONSIVE ── */
+@media(max-width:1100px){
+  .stats-row{grid-template-columns:repeat(2,1fr)}
+  .content-grid{grid-template-columns:1fr}
+}
+@media(max-width:768px){
+  .sidebar{display:none}
+  .topbar{display:flex}
+  .main{margin-left:0;padding:72px 16px 60px}
+  .stats-row{grid-template-columns:1fr 1fr;gap:10px}
+}
+@media(max-width:420px){
+  .stats-row{grid-template-columns:1fr}
+  .quick-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo"><a href="cova.html" class="logo">Cov<span>a</span></a></div>
+  <div class="sidebar-user">
+    <div class="avatar">AB</div>
+    <div class="user-info">
+      <div class="user-name">Adaeze Bright</div>
+      <div class="user-biz">Bright Supermarkets Ltd</div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Dashboard</div>
+    <a href="#" class="nav-item active" onclick="setPage('overview',this);return false">
+      <span class="nav-icon">🏠</span><span class="nav-label">Overview</span>
+    </a>
+    <a href="#" class="nav-item" onclick="setPage('policies',this);return false">
+      <span class="nav-icon">🛡️</span><span class="nav-label">My Policies</span>
+    </a>
+    <a href="#" class="nav-item" onclick="setPage('claims',this);return false">
+      <span class="nav-icon">📋</span><span class="nav-label">Claims</span>
+      <span class="nav-badge">1</span>
+    </a>
+    <a href="#" class="nav-item" onclick="setPage('documents',this);return false">
+      <span class="nav-icon">📁</span><span class="nav-label">Documents</span>
+    </a>
+    <div class="nav-section-label" style="margin-top:10px">Add more cover</div>
+    <a href="cova-onboarding.html" class="nav-item">
+      <span class="nav-icon">📱</span><span class="nav-label">Electronic Equipment</span>
+    </a>
+    <a href="cova-motor-onboarding.html" class="nav-item">
+      <span class="nav-icon">🚗</span><span class="nav-label">Motor Insurance</span>
+    </a>
+    <a href="cova-group-onboarding.html" class="nav-item">
+      <span class="nav-icon">👥</span><span class="nav-label">Group Insurance</span>
+    </a>
+    <a href="cova-fire-onboarding.html" class="nav-item">
+      <span class="nav-icon">🔥</span><span class="nav-label">Fire Insurance</span>
+    </a>
+  </nav>
+  <div class="sidebar-bottom">
+    <a href="#" class="nav-item" onclick="setPage('account',this);return false">
+      <span class="nav-icon">⚙️</span><span class="nav-label">Account</span>
+    </a>
+    <a href="cova.html" class="nav-item">
+      <span class="nav-icon">↩</span><span class="nav-label">Back to site</span>
+    </a>
+  </div>
+</aside>
+
+<!-- MOBILE TOPBAR -->
+<header class="topbar">
+  <div class="topbar-logo">Cov<span>a</span></div>
+  <button class="mob-menu-btn" onclick="toggleMobNav()">
+    <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 5h16M3 11h16M3 17h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </button>
+</header>
+<div class="mob-overlay" id="mob-overlay" onclick="toggleMobNav()"></div>
+<aside class="mob-sidebar" id="mob-sidebar">
+  <div class="sidebar-logo" style="display:flex;align-items:center;justify-content:space-between;padding-right:14px">
+    <a href="cova.html" class="logo">Cov<span>a</span></a>
+    <button onclick="toggleMobNav()" style="background:none;border:none;cursor:pointer;color:rgba(255,255,255,0.5);font-size:20px;line-height:1">✕</button>
+  </div>
+  <div class="sidebar-user">
+    <div class="avatar">AB</div>
+    <div class="user-info"><div class="user-name">Adaeze Bright</div><div class="user-biz">Bright Supermarkets Ltd</div></div>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="#" class="nav-item active" onclick="setPage('overview',this);toggleMobNav();return false"><span class="nav-icon">🏠</span><span class="nav-label">Overview</span></a>
+    <a href="#" class="nav-item" onclick="setPage('policies',this);toggleMobNav();return false"><span class="nav-icon">🛡️</span><span class="nav-label">My Policies</span></a>
+    <a href="#" class="nav-item" onclick="setPage('claims',this);toggleMobNav();return false"><span class="nav-icon">📋</span><span class="nav-label">Claims</span><span class="nav-badge">1</span></a>
+    <a href="#" class="nav-item" onclick="setPage('documents',this);toggleMobNav();return false"><span class="nav-icon">📁</span><span class="nav-label">Documents</span></a>
+    <div class="nav-section-label" style="margin-top:10px">Add more cover</div>
+    <a href="cova-onboarding.html" class="nav-item"><span class="nav-icon">📱</span><span class="nav-label">Electronic Equipment</span></a>
+    <a href="cova-motor-onboarding.html" class="nav-item"><span class="nav-icon">🚗</span><span class="nav-label">Motor Insurance</span></a>
+    <a href="cova-group-onboarding.html" class="nav-item"><span class="nav-icon">👥</span><span class="nav-label">Group Insurance</span></a>
+    <a href="cova-fire-onboarding.html" class="nav-item"><span class="nav-icon">🔥</span><span class="nav-label">Fire Insurance</span></a>
+  </nav>
+  <div class="sidebar-bottom">
+    <a href="#" class="nav-item" onclick="setPage('account',this);toggleMobNav();return false"><span class="nav-icon">⚙️</span><span class="nav-label">Account</span></a>
+    <a href="cova.html" class="nav-item"><span class="nav-icon">↩</span><span class="nav-label">Back to site</span></a>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- ══════════ OVERVIEW ══════════ -->
+  <div id="page-overview">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Good morning, Adaeze 👋</div>
+        <div class="page-sub" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">Wednesday, 30 April 2026 · <span class="account-badge-business">Business account</span></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:16px">
+        <button class="notification-bell" onclick="showToast('No new notifications')">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z" fill="currentColor"/></svg>
+          <span class="notification-dot">3</span>
+        </button>
+        <button class="btn-primary" onclick="openClaimModal()">+ File a claim</button>
+      </div>
+    </div>
+
+    <div class="alert-banner">
+      <span style="font-size:18px;flex-shrink:0">⚠️</span>
+      <div class="alert-text">Your <strong>Motor Insurance</strong> (Toyota Corolla · ABC 123 LA) renews in <strong>18 days</strong> — 8 May 2026.</div>
+      <span class="alert-action" onclick="openRenewModal()">Renew now →</span>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card featured">
+        <div class="stat-icon">🛡️</div>
+        <div class="stat-value">8</div>
+        <div class="stat-label">Active policies</div>
+        <div class="stat-chip chip-green" style="margin-top:8px">All current</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">💰</div>
+        <div class="stat-value">₦68,417</div>
+        <div class="stat-label">Monthly premium</div>
+        <div class="stat-chip chip-green" style="margin-top:8px">8 policies</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📋</div>
+        <div class="stat-value">2</div>
+        <div class="stat-label">Open claims</div>
+        <div class="stat-chip chip-blue" style="margin-top:8px">In review</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📅</div>
+        <div class="stat-value">18d</div>
+        <div class="stat-label">Next renewal</div>
+        <div class="stat-chip chip-amber" style="margin-top:8px">Motor · 8 May</div>
+      </div>
+    </div>
+
+    <div class="content-grid">
+      <!-- LEFT -->
+      <div>
+        <!-- Active policies -->
+        <div class="section-card">
+          <div class="section-head">
+            <div class="section-head-title">Active policies</div>
+            <button class="section-head-link" onclick="setPage('policies',null)">See all →</button>
+          </div>
+          <div class="policy-item" onclick="setPage('policies',null)">
+            <div class="policy-icon">📱</div>
+            <div class="policy-body">
+              <div class="policy-name">iPhone 14 Pro Max <span class="product-badge-device">Device</span></div>
+              <div class="policy-meta">AXA Mansard · Expires 14 Jan 2027 · #IPN-02141</div>
+            </div>
+            <div class="policy-right">
+              <div class="policy-amount">₦10,000/mo</div>
+              <span class="policy-status policy-status-active">Active</span>
+            </div>
+          </div>
+          <div class="policy-item" onclick="setPage('policies',null)">
+            <div class="policy-icon">🚗</div>
+            <div class="policy-body">
+              <div class="policy-name">Toyota Camry 2020 <span class="product-badge-motor">Motor</span></div>
+              <div class="policy-meta">Leadway · Expires 8 May 2026 · #CMT-00104</div>
+            </div>
+            <div class="policy-right">
+              <div class="policy-amount">₦26,667/mo</div>
+              <span class="policy-status policy-status-expiring">Expiring soon</span>
+            </div>
+          </div>
+          <div class="policy-item" onclick="setPage('policies',null)">
+            <div class="policy-icon">❤️</div>
+            <div class="policy-body">
+              <div class="policy-name">AIICO Health Plan <span class="product-badge-health">Health</span></div>
+              <div class="policy-meta">AIICO · Expires 30 Dec 2026 · #HLT-00785</div>
+            </div>
+            <div class="policy-right">
+              <div class="policy-amount">₦7,917/mo</div>
+              <span class="policy-status policy-status-active">Active</span>
+            </div>
+          </div>
+          <div class="policy-item" onclick="setPage('policies',null)">
+            <div class="policy-icon">✈️</div>
+            <div class="policy-body">
+              <div class="policy-name">Travel Insurance <span class="product-badge-travel">Travel</span></div>
+              <div class="policy-meta">Zenith · Expires 15 Jun 2026 · #TRV-00321</div>
+            </div>
+            <div class="policy-right">
+              <div class="policy-amount">₦15,000 (one-off)</div>
+              <span class="policy-status policy-status-active">Active</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent claims -->
+        <div class="section-card">
+          <div class="section-head">
+            <div class="section-head-title">Recent claims</div>
+            <button class="section-head-link" onclick="setPage('claims',null)">All claims →</button>
+          </div>
+          <div class="claim-item">
+            <div class="claim-top">
+              <div>
+                <div class="claim-name">Motor — Rear bumper damage <span class="product-badge-motor">Motor</span></div>
+                <div class="claim-ref">Claim #CLM-0047 · 24 Apr 2026</div>
+              </div>
+              <span class="claim-status claim-status-pending">In review</span>
+            </div>
+            <div class="claim-desc">Handler: Chinedu Okoro (Leadway)</div>
+          </div>
+          <div class="claim-item">
+            <div class="claim-top">
+              <div>
+                <div class="claim-name">Device — Screen replacement <span class="product-badge-device">Device</span></div>
+                <div class="claim-ref">Claim #CLM-0052 · 18 Apr 2026</div>
+              </div>
+              <span class="claim-status claim-status-approved">Approved</span>
+            </div>
+            <div class="claim-desc">Handler: Fatima Bello (AXA Mansard)</div>
+          </div>
+        </div>
+
+        <!-- Get more cover -->
+        <div class="section-card">
+          <div class="section-head"><div class="section-head-title">Get more cover</div></div>
+          <div class="product-grid">
+            <!-- Personal Products -->
+            <div class="product-category">
+              <div class="category-label">Personal</div>
+              <div class="product-tiles">
+                <a href="cova-onboarding.html" class="product-tile">
+                  <div class="product-icon">📱</div>
+                  <div class="product-name">Electronic Equipment</div>
+                </a>
+                <a href="cova-motor-onboarding.html" class="product-tile">
+                  <div class="product-icon">🚗</div>
+                  <div class="product-name">Motor Insurance</div>
+                </a>
+                <a href="#" class="product-tile">
+                  <div class="product-icon">❤️</div>
+                  <div class="product-name">Life Insurance</div>
+                </a>
+                <a href="#" class="product-tile">
+                  <div class="product-icon">🏥</div>
+                  <div class="product-name">Health Insurance</div>
+                </a>
+                <a href="#" class="product-tile">
+                  <div class="product-icon">✈️</div>
+                  <div class="product-name">Travel Insurance</div>
+                </a>
+                <a href="#" class="product-tile">
+                  <div class="product-icon">🏠</div>
+                  <div class="product-name">Property Insurance</div>
+                </a>
+              </div>
+            </div>
+            
+            <!-- Business Products -->
+            <div class="product-category">
+              <div class="category-label">Business</div>
+              <div class="product-tiles">
+                <a href="cova-group-onboarding.html" class="product-tile">
+                  <div class="product-icon">👥</div>
+                  <div class="product-name">Group Insurance</div>
+                </a>
+                <a href="cova-fire-onboarding.html" class="product-tile">
+                  <div class="product-icon">🔥</div>
+                  <div class="product-name">Fire Insurance</div>
+                </a>
+                <a href="#" class="product-tile">
+                  <div class="product-icon">📈</div>
+                  <div class="product-name">Investment Plans</div>
+                </a>
+                <a href="#" class="product-tile">
+                  <div class="product-icon">👷</div>
+                  <div class="product-name">Workmen's Comp</div>
+                </a>
+                <a href="#" class="product-tile">
+                  <div class="product-icon">🔒</div>
+                  <div class="product-name">Burglary & Theft</div>
+                </a>
+                <a href="#" class="product-tile">
+                  <div class="product-icon">💸</div>
+                  <div class="product-name">Money Insurance</div>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT -->
+      <div>
+        <!-- Renewal highlight -->
+        <div class="renew-highlight">
+          <div class="rh-tag">Upcoming renewal</div>
+          <div class="rh-title">Motor Insurance expires<br>in 18 days</div>
+          <div class="rh-sub">Toyota Corolla 2019 · ABC 123 LA · Comprehensive · Leadway</div>
+          <button class="btn-white-sm" onclick="openRenewModal()">Renew for ₦32,000 →</button>
+        </div>
+
+        <!-- Claims handler -->
+        <div class="section-card" style="margin-bottom:20px">
+          <div class="section-head"><div class="section-head-title">Your claims handler</div></div>
+          <div class="handler-wrap">
+            <div class="handler-av">TA</div>
+            <div>
+              <div class="handler-name">Tolu Adegoke</div>
+              <div class="handler-status"><span class="live-dot"></span>Available · responds in ~1hr</div>
+              <div class="handler-btns">
+                <button class="hbtn hbtn-wa" onclick="openWhatsApp()">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                  WhatsApp
+                </button>
+                <button class="hbtn hbtn-call">📞 Call</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick actions -->
+        <div class="section-card">
+          <div class="section-head"><div class="section-head-title">Quick actions</div></div>
+          <div class="quick-grid">
+            <a href="cova-onboarding.html" class="quick-item"><div class="quick-icon">📱</div><div class="quick-label">Insure a device</div></a>
+            <a href="cova-motor-onboarding.html" class="quick-item"><div class="quick-icon">🚗</div><div class="quick-label">Add a vehicle</div></a>
+            <a href="#" class="quick-item" onclick="openClaimModal();return false"><div class="quick-icon">📋</div><div class="quick-label">File a claim</div></a>
+            <a href="#" class="quick-item" onclick="setPage('documents',null);return false"><div class="quick-icon">📄</div><div class="quick-label">Download policy</div></a>
+            <a href="#" class="quick-item" onclick="openWhatsApp();return false"><div class="quick-icon">💬</div><div class="quick-label">Chat on WhatsApp</div></a>
+            <a href="cova.html#waitlist" class="quick-item"><div class="quick-icon">➕</div><div class="quick-label">Add more cover</div></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /overview -->
+
+  <!-- ══════════ MY POLICIES ══════════ -->
+  <div id="page-policies" style="display:none">
+    <div class="page-header">
+      <div>
+        <div class="page-title">My Policies</div>
+        <div class="page-sub">2 active · 0 expired</div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <a href="cova-onboarding.html" class="btn-outline">+ Device cover</a>
+        <a href="cova-motor-onboarding.html" class="btn-primary">+ Motor cover</a>
+      </div>
+    </div>
+
+    <div id="policies-container">
+      <!-- Policies will appear here -->
+    </div>
+
+    <!-- Device policy card -->
+    <div class="section-card" style="margin-bottom:16px">
+      <div style="padding:20px;border-bottom:1px solid var(--crd);display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap">
+        <div class="policy-icon icon-device" style="width:48px;height:48px;font-size:22px">📱</div>
+        <div style="flex:1;min-width:180px">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:3px">
+            <div style="font-family:var(--fd);font-size:16px;font-weight:800;color:var(--ink)">Electronic Equipment Insurance</div>
+            <span class="policy-status status-active">Active</span>
+          </div>
+          <div style="font-size:13px;color:var(--inkl);margin-bottom:2px">Policy #CEE-00291 · AXA Mansard · Full Cover</div>
+          <div style="font-size:12px;color:var(--inkf)">Started 14 Jan 2026 · Expires 14 Jan 2027</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-family:var(--fd);font-size:20px;font-weight:800;color:var(--ink)">₦7,400<span style="font-size:13px;font-weight:400;color:var(--inkl)">/mo</span></div>
+          <div style="font-size:12px;color:var(--inkl)">₦4.8M total insured</div>
+        </div>
+      </div>
+      <div class="tab-bar">
+        <button class="tab active" onclick="switchTab(this,'ep-devices')">Devices (4)</button>
+        <button class="tab" onclick="switchTab(this,'ep-coverage')">Coverage</button>
+        <button class="tab" onclick="switchTab(this,'ep-claims')">Claims</button>
+      </div>
+      <div id="ep-devices" class="tab-panel active">
+        <div class="policy-item"><div class="policy-icon icon-device">💻</div><div class="policy-body"><div class="policy-name">MacBook Pro 14" M3</div><div class="policy-meta">Serial: C02X3···K9 · Insured: ₦2,100,000</div></div><span class="policy-status status-active">Covered</span></div>
+        <div class="policy-item"><div class="policy-icon icon-device">📱</div><div class="policy-body"><div class="policy-name">iPhone 15 Pro Max</div><div class="policy-meta">IMEI: 3591···4427 · Insured: ₦1,200,000</div></div><span class="policy-status status-active">Covered</span></div>
+        <div class="policy-item"><div class="policy-icon icon-device">🖨️</div><div class="policy-body"><div class="policy-name">Moniepoint POS Terminal ×3</div><div class="policy-meta">Batch serial · Insured: ₦900,000</div></div><span class="policy-status status-active">Covered</span></div>
+        <div class="policy-item"><div class="policy-icon icon-device">📸</div><div class="policy-body"><div class="policy-name">Sony A7IV Camera</div><div class="policy-meta">Serial: 5039···2211 · Insured: ₦600,000</div></div><span class="policy-status status-active">Covered</span></div>
+      </div>
+      <div id="ep-coverage" class="tab-panel">
+        <div class="cov-row"><div class="cov-top"><span class="cov-name">Accidental damage</span><span class="cov-val">Included</span></div><div class="cov-bar"><div class="cov-fill" style="width:100%"></div></div></div>
+        <div class="cov-row"><div class="cov-top"><span class="cov-name">Theft (30-day wait passed ✓)</span><span class="cov-val">Included</span></div><div class="cov-bar"><div class="cov-fill" style="width:100%"></div></div></div>
+        <div class="cov-row"><div class="cov-top"><span class="cov-name">Total loss replacement</span><span class="cov-val">Included</span></div><div class="cov-bar"><div class="cov-fill" style="width:100%"></div></div></div>
+        <div class="cov-row"><div class="cov-top"><span class="cov-name">Excess per claim</span><span class="cov-val">₦0</span></div><div class="cov-bar"><div class="cov-fill" style="width:0%"></div></div></div>
+      </div>
+      <div id="ep-claims" class="tab-panel">
+        <div class="empty"><div class="empty-icon">✅</div><div class="empty-title">No claims on this policy</div><div class="empty-sub">Your devices are claim-free. If something happens, file in seconds.</div><button class="btn-primary" onclick="openClaimModal()">File a claim</button></div>
+      </div>
+    </div>
+
+    <!-- Motor policy card -->
+    <div class="section-card">
+      <div style="padding:20px;border-bottom:1px solid var(--crd);display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap">
+        <div class="policy-icon icon-motor" style="width:48px;height:48px;font-size:22px">🚗</div>
+        <div style="flex:1;min-width:180px">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:3px">
+            <div style="font-family:var(--fd);font-size:16px;font-weight:800;color:var(--ink)">Motor Insurance — Comprehensive</div>
+            <span class="policy-status status-renew">Renew in 18d</span>
+          </div>
+          <div style="font-size:13px;color:var(--inkl);margin-bottom:2px">Policy #CMT-00104 · Leadway Assurance</div>
+          <div style="font-size:12px;color:var(--inkf)">Started 8 May 2025 · Expires 8 May 2026</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-family:var(--fd);font-size:20px;font-weight:800;color:var(--ink)">₦32,000<span style="font-size:13px;font-weight:400;color:var(--inkl)">/yr</span></div>
+          <div style="font-size:12px;color:var(--inkl)">₦3.6M sum insured</div>
+        </div>
+      </div>
+      <div class="detail-grid">
+        <div class="detail-row"><span class="detail-label">Vehicle</span><span class="detail-value">Toyota Corolla 2019</span></div>
+        <div class="detail-row"><span class="detail-label">Plate number</span><span class="detail-value">ABC 123 LA</span></div>
+        <div class="detail-row"><span class="detail-label">Cover type</span><span class="detail-value">Comprehensive</span></div>
+        <div class="detail-row"><span class="detail-label">Chassis no.</span><span class="detail-value">JTDBR32E···7401</span></div>
+      </div>
+      <div style="padding:16px 20px;display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn-primary" onclick="openRenewModal()">Renew for ₦32,000</button>
+        <button class="btn-outline" onclick="openClaimModal()">File a claim</button>
+      </div>
+    </div>
+  </div><!-- /policies -->
+
+  <!-- ══════════ CLAIMS ══════════ -->
+  <div id="page-claims" style="display:none">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Claims</div>
+        <div class="page-sub">1 open · 0 resolved this year</div>
+      </div>
+      <button class="btn-primary" onclick="openClaimModal()">+ New claim</button>
+    </div>
+
+    <div class="section-card">
+      <div class="section-head"><div class="section-head-title">Open claims</div></div>
+      <div class="claim-item">
+        <div class="claim-top">
+          <div>
+            <div class="claim-name">Motor — Rear bumper damage</div>
+            <div class="claim-ref">Claim #CLM-0047 · Filed 24 Apr 2026 · Leadway Assurance</div>
+          </div>
+          <span class="policy-status status-processing">In review</span>
+        </div>
+        <div class="claim-desc">Reported collision damage at Lekki-Epe Expressway near Chevron roundabout. Vehicle inspected at VI Garage by Cova-approved assessor on 26 Apr. Repair estimate: ₦185,000. Awaiting insurer approval.</div>
+        <div class="claim-progress" style="margin-bottom:14px">
+          <div class="cp-step done"><div class="cp-dot"></div><div class="cp-label">Filed</div></div>
+          <div class="cp-step done"><div class="cp-dot"></div><div class="cp-label">Assessed</div></div>
+          <div class="cp-step active"><div class="cp-dot"></div><div class="cp-label">In review</div></div>
+          <div class="cp-step"><div class="cp-dot"></div><div class="cp-label">Approved</div></div>
+          <div class="cp-step"><div class="cp-dot"></div><div class="cp-label">Resolved</div></div>
+        </div>
+        <div style="background:var(--gp);border-radius:6px;padding:10px 14px;font-size:12px;color:var(--g);font-weight:500">
+          <strong>Tolu Adegoke</strong> is handling this claim · Last update: Today 9:14 AM ·
+          <span style="cursor:pointer;text-decoration:underline;text-underline-offset:2px" onclick="openWhatsApp()">Message on WhatsApp →</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-card" style="margin-top:16px">
+      <div class="section-head"><div class="section-head-title">How to file a claim</div></div>
+      <div style="padding:20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px">
+        <div style="display:flex;gap:12px;align-items:flex-start">
+          <div style="width:26px;height:26px;border-radius:50%;background:var(--gp);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--g);flex-shrink:0;margin-top:2px">1</div>
+          <div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:3px">Click '+ New claim'</div><div style="font-size:12px;color:var(--inkl);line-height:1.5">Select the policy and describe what happened in a few lines.</div></div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:flex-start">
+          <div style="width:26px;height:26px;border-radius:50%;background:var(--gp);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--g);flex-shrink:0;margin-top:2px">2</div>
+          <div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:3px">Send photos</div><div style="font-size:12px;color:var(--inkl);line-height:1.5">Upload here or send to your handler on WhatsApp — your choice.</div></div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:flex-start">
+          <div style="width:26px;height:26px;border-radius:50%;background:var(--gp);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--g);flex-shrink:0;margin-top:2px">3</div>
+          <div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:3px">We handle the rest</div><div style="font-size:12px;color:var(--inkl);line-height:1.5">Cova files with the insurer and resolves within 72 hours. No excess.</div></div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /claims -->
+
+  <!-- ══════════ DOCUMENTS ══════════ -->
+  <div id="page-documents" style="display:none">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Documents</div>
+        <div class="page-sub">Policy schedules, certificates and claim reports</div>
+      </div>
+    </div>
+    <div class="section-card">
+      <div class="section-head"><div class="section-head-title">Policy documents</div></div>
+      <div class="doc-item" onclick="fakeDownload('CEE-00291-schedule.pdf')"><div class="doc-icon">📄</div><div><div class="doc-name">Electronic Equipment Policy Schedule</div><div class="doc-meta">Policy #CEE-00291 · AXA Mansard · 14 Jan 2026 · PDF</div></div><div class="doc-dl">↓</div></div>
+      <div class="doc-item" onclick="fakeDownload('CEE-00291-cert.pdf')"><div class="doc-icon">🏅</div><div><div class="doc-name">Insurance Certificate — Electronic Equipment</div><div class="doc-meta">Valid 14 Jan 2026 – 14 Jan 2027 · PDF</div></div><div class="doc-dl">↓</div></div>
+      <div class="doc-item" onclick="fakeDownload('CMT-00104-schedule.pdf')"><div class="doc-icon">📄</div><div><div class="doc-name">Motor Insurance Policy Schedule</div><div class="doc-meta">Policy #CMT-00104 · Leadway Assurance · 8 May 2025 · PDF</div></div><div class="doc-dl">↓</div></div>
+      <div class="doc-item" onclick="fakeDownload('CMT-00104-cert.pdf')"><div class="doc-icon">🏅</div><div><div class="doc-name">Motor Insurance Certificate (Road Use)</div><div class="doc-meta">Valid 8 May 2025 – 8 May 2026 · PDF</div></div><div class="doc-dl">↓</div></div>
+    </div>
+    <div class="section-card" style="margin-top:14px">
+      <div class="section-head"><div class="section-head-title">Claim documents</div></div>
+      <div class="doc-item" onclick="fakeDownload('CLM-0047-report.pdf')"><div class="doc-icon">📋</div><div><div class="doc-name">Assessor Report — Claim #CLM-0047</div><div class="doc-meta">VI Garage assessment · 26 Apr 2026 · PDF</div></div><div class="doc-dl">↓</div></div>
+      <div class="doc-item" onclick="fakeDownload('CLM-0047-estimate.pdf')"><div class="doc-icon">🔧</div><div><div class="doc-name">Repair Estimate — Claim #CLM-0047</div><div class="doc-meta">Rear bumper · ₦185,000 · VI Garage · 26 Apr 2026 · PDF</div></div><div class="doc-dl">↓</div></div>
+    </div>
+  </div><!-- /documents -->
+
+  <!-- ══════════ ACCOUNT ══════════ -->
+  <div id="page-account" style="display:none">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Account</div>
+        <div class="page-sub">Manage your profile and notification preferences</div>
+      </div>
+    </div>
+    <div class="section-card" style="max-width:540px">
+      <div class="section-head"><div class="section-head-title">Business profile</div></div>
+      <div style="padding:20px;display:flex;flex-direction:column;gap:14px">
+        <div class="form-group" style="margin:0"><label>Business name</label><input type="text" value="Bright Supermarkets Ltd"></div>
+        <div class="form-group" style="margin:0"><label>Contact name</label><input type="text" value="Adaeze Bright"></div>
+        <div class="form-group" style="margin:0"><label>WhatsApp number</label><input type="tel" value="0803 555 1234"></div>
+        <div class="form-group" style="margin:0"><label>Email address</label><input type="email" value="adaeze@brightsupermarkets.ng"></div>
+        <div class="form-group" style="margin:0"><label>Business address</label><input type="text" value="14 Admiralty Way, Lekki Phase 1, Lagos"></div>
+        <div class="form-group" style="margin:0"><label>RC Number</label><input type="text" value="RC 1204385"></div>
+        <button class="btn-primary" style="align-self:flex-start" onclick="showToast('Profile saved successfully')">Save changes</button>
+      </div>
+    </div>
+    <div class="section-card" style="max-width:540px;margin-top:14px">
+      <div class="section-head"><div class="section-head-title">Notifications</div></div>
+      <div style="padding:20px;display:flex;flex-direction:column;gap:16px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:16px">
+          <div><div style="font-size:13px;font-weight:500;color:var(--ink)">Renewal reminders</div><div style="font-size:12px;color:var(--inkl)">WhatsApp alerts 30, 14 and 7 days before expiry</div></div>
+          <div onclick="toggleNotif(this)" data-on="true" style="width:36px;height:20px;border-radius:10px;background:var(--gl);cursor:pointer;transition:background .2s;flex-shrink:0"></div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:16px">
+          <div><div style="font-size:13px;font-weight:500;color:var(--ink)">Claim status updates</div><div style="font-size:12px;color:var(--inkl)">Message when your claim moves to the next stage</div></div>
+          <div onclick="toggleNotif(this)" data-on="true" style="width:36px;height:20px;border-radius:10px;background:var(--gl);cursor:pointer;transition:background .2s;flex-shrink:0"></div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:16px">
+          <div><div style="font-size:13px;font-weight:500;color:var(--ink)">Payment receipts by email</div><div style="font-size:12px;color:var(--inkl)">Confirmation email after each premium payment</div></div>
+          <div onclick="toggleNotif(this)" data-on="false" style="width:36px;height:20px;border-radius:10px;background:var(--crd2);cursor:pointer;transition:background .2s;flex-shrink:0"></div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /account -->
+
+</main>
+
+<!-- ══ FILE CLAIM MODAL ══ -->
+<div class="modal-overlay" id="claim-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('claim-modal')">✕</button>
+    <div id="claim-form">
+      <div class="modal-title">File a claim</div>
+      <div class="modal-sub">Tell us what happened — we handle everything with the insurer.</div>
+      <div class="form-group">
+        <label>Which policy?</label>
+        <select>
+          <option>Electronic Equipment — Policy #CEE-00291</option>
+          <option selected>Motor Insurance — Policy #CMT-00104</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Type of incident</label>
+        <select>
+          <option>Accidental damage</option>
+          <option>Theft</option>
+          <option>Total loss</option>
+          <option selected>Collision / road accident</option>
+          <option>Fire damage</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Date of incident</label>
+        <input type="date" value="2026-04-24">
+      </div>
+      <div class="form-group">
+        <label>What happened?</label>
+        <textarea placeholder="Location, what was damaged, any third parties involved…"></textarea>
+      </div>
+      <button class="btn-primary" style="width:100%;justify-content:center" onclick="submitClaim()">Submit claim →</button>
+      <div style="margin-top:10px;text-align:center;font-size:12px;color:var(--inkl)">Or send photos to your handler on <span style="color:var(--g);font-weight:600;cursor:pointer" onclick="openWhatsApp()">WhatsApp</span></div>
+    </div>
+    <div class="success-state" id="claim-success">
+      <div class="success-icon">✅</div>
+      <div class="success-title">Claim filed!</div>
+      <div class="success-sub">Logged as <strong>#CLM-0048</strong>. Tolu Adegoke will contact you on WhatsApp within 2 hours with next steps.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ RENEW MODAL ══ -->
+<div class="modal-overlay" id="renew-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('renew-modal')">✕</button>
+    <div id="renew-form">
+      <div class="modal-title">Renew motor insurance</div>
+      <div class="modal-sub">Toyota Corolla 2019 · ABC 123 LA · Comprehensive · Leadway Assurance</div>
+      <div style="background:var(--gp);border-radius:var(--radsm);padding:14px;margin-bottom:18px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:13px;color:var(--inkl)">Annual premium</span><span style="font-size:13px;font-weight:600;color:var(--ink)">₦32,000</span></div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:13px;color:var(--inkl)">Sum insured</span><span style="font-size:13px;font-weight:600;color:var(--ink)">₦3,600,000</span></div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:13px;color:var(--inkl)">Cover period</span><span style="font-size:13px;font-weight:600;color:var(--ink)">8 May 2026 – 8 May 2027</span></div>
+        <div style="border-top:1px solid var(--gpp);padding-top:8px;margin-top:4px;display:flex;justify-content:space-between">
+          <span style="font-size:14px;font-weight:600;color:var(--ink)">Total due today</span>
+          <span style="font-family:var(--fd);font-size:17px;font-weight:800;color:var(--g)">₦32,000</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Payment method</label>
+        <select>
+          <option>Card ending ···4520 (Zenith Bank)</option>
+          <option>Bank transfer</option>
+          <option>USSD</option>
+        </select>
+      </div>
+      <button class="btn-primary" style="width:100%;justify-content:center" onclick="submitRenew()">Pay ₦32,000 →</button>
+      <div style="margin-top:10px;text-align:center;font-size:11px;color:var(--inkf)">🔒 Secured · NAICOM-regulated</div>
+    </div>
+    <div class="success-state" id="renew-success">
+      <div class="success-icon">🎉</div>
+      <div class="success-title">Policy renewed!</div>
+      <div class="success-sub">Your motor policy is now active until <strong>8 May 2027</strong>. Updated certificate sent to your email.</div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const PAGES = ['overview','policies','claims','documents','account'];
+
+function setPage(id, clicked) {
+  PAGES.forEach(p => {
+    const el = document.getElementById('page-' + p);
+    if(el) el.style.display = p === id ? 'block' : 'none';
+  });
+  document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+  if(clicked) clicked.classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function switchTab(btn, panelId) {
+  const card = btn.closest('.section-card');
+  card.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  card.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  const panel = document.getElementById(panelId);
+  if(panel) panel.classList.add('active');
+}
+
+function openClaimModal() {
+  document.getElementById('claim-form').style.display = 'block';
+  document.getElementById('claim-success').style.display = 'none';
+  document.getElementById('claim-modal').classList.add('open');
+}
+function openRenewModal() {
+  document.getElementById('renew-form').style.display = 'block';
+  document.getElementById('renew-success').style.display = 'none';
+  document.getElementById('renew-modal').classList.add('open');
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+function submitClaim() {
+  document.getElementById('claim-form').style.display = 'none';
+  document.getElementById('claim-success').style.display = 'block';
+  setTimeout(() => closeModal('claim-modal'), 3000);
+}
+function submitRenew() {
+  document.getElementById('renew-form').style.display = 'none';
+  document.getElementById('renew-success').style.display = 'block';
+  setTimeout(() => closeModal('renew-modal'), 3200);
+}
+function openWhatsApp() {
+  window.open('https://wa.me/2348000000000?text=Hi+Tolu,+I+need+help+with+my+Cova+policy', '_blank');
+}
+function fakeDownload(name) {
+  showToast('Downloading ' + name + '…');
+}
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.transform = 'translateX(-50%) translateY(0)';
+  setTimeout(() => { t.style.transform = 'translateX(-50%) translateY(80px)'; }, 2500);
+}
+function toggleMobNav() {
+  document.getElementById('mob-sidebar').classList.toggle('open');
+  document.getElementById('mob-overlay').classList.toggle('open');
+}
+function toggleNotif(el) {
+  const on = el.dataset.on === 'true';
+  el.dataset.on = String(!on);
+  el.style.background = !on ? 'var(--gl)' : 'var(--crd2)';
+}
+document.querySelectorAll('.modal-overlay').forEach(o => {
+  o.addEventListener('click', e => { if(e.target === o) o.classList.remove('open'); });
+});
+</script>
+</body>
+</html>

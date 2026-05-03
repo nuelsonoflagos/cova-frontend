@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cova — Policy details</title>
+<script src="api-client.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --g:#0A5C45;--gm:#137A5C;--gl:#1D9E75;--gp:#E6F5F0;--gpp:#d0ede4;
+  --cream:#F7F4EE;--crd:#E8E4DB;--crd2:#D8D3C8;
+  --ink:#0F1A14;--inkm:#2D3E35;--inkl:#5A6E63;--inkf:#9AADA3;
+  --w:#fff;--r:#C0392B;--am:#D4860A;--amp:#FEF3E2;
+  --fd:'Syne',sans-serif;--fb:'DM Sans',sans-serif;
+  --rad:18px;--radsm:10px;--radxs:8px;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--fb);background:linear-gradient(180deg, var(--cream) 0%, #ECF8F3 100%);color:var(--ink);min-height:100vh}
+a{text-decoration:none;color:inherit}
+nav{display:flex;align-items:center;justify-content:space-between;padding:26px 5vw;max-width:1200px;margin:0 auto}
+.logo{font-family:var(--fd);font-size:22px;font-weight:800;color:var(--g)}
+.logo span{color:var(--gl)}
+.nav-cta{font-family:var(--fd);font-size:14px;font-weight:700;color:var(--w);background:var(--g);padding:12px 20px;border-radius:999px;transition:all .2s}
+.nav-cta:hover{background:var(--gm)}
+.main-wrap{max-width:1200px;margin:0 auto;padding:28px 5vw 60px}
+.page-intro{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:32px;flex-wrap:wrap}
+.page-title{font-family:var(--fd);font-size:clamp(30px,4vw,44px);font-weight:800;line-height:1.05;max-width:780px}
+.policy-meta{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.policy-number{font-size:14px;font-weight:600;color:var(--inkl);letter-spacing:0.04em}
+.status-pill{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:700;padding:10px 16px;border-radius:999px;background:var(--gpp);color:var(--g)}
+.status-pill.active{background:rgba(29,158,117,.12);color:var(--g)}
+.policy-grid{display:grid;grid-template-columns:1.6fr 1fr;gap:24px;margin-bottom:28px}
+.card{background:var(--w);border:1px solid var(--crd);border-radius:28px;padding:28px;box-shadow:0 24px 70px rgba(10,92,69,.08)}
+.card h2{font-family:var(--fd);font-size:20px;font-weight:800;color:var(--ink);margin-bottom:18px}
+.cover-summary{display:grid;grid-template-columns:repeat(2,minmax(150px,1fr));gap:18px}
+.summary-item{background:var(--gp);border-radius:18px;padding:18px;min-height:110px;display:flex;flex-direction:column;justify-content:space-between;gap:12px}
+.summary-label{font-size:12px;font-weight:700;color:var(--inkl);text-transform:uppercase;letter-spacing:0.12em}
+.summary-value{font-size:18px;font-weight:700;color:var(--ink)}
+.summary-strong{font-size:22px;color:var(--g)}
+.handler-card{display:flex;flex-direction:column;gap:18px}
+.handler-top{display:flex;align-items:center;gap:18px}
+.handler-avatar{width:88px;height:88px;border-radius:24px;background:linear-gradient(135deg, rgba(10,92,69,.15), rgba(29,158,117,.15));display:grid;place-items:center;font-size:24px;color:var(--g);font-weight:800}
+.handler-info{display:flex;flex-direction:column;gap:8px}
+.handler-name{font-size:20px;font-weight:800;color:var(--ink)}
+.handler-role{font-size:14px;color:var(--inkl)}
+.whatsapp-btn{display:inline-flex;align-items:center;gap:10px;justify-content:center;padding:14px 18px;border-radius:16px;border:none;background:var(--gl);color:var(--w);font-weight:700;cursor:pointer;transition:all .2s}
+.whatsapp-btn:hover{background:var(--gm)}
+.support-note{font-size:14px;color:var(--inkf);line-height:1.7}
+.table-wrap{overflow-x:auto}
+.table{width:100%;border-collapse:collapse}
+.table th,.table td{padding:16px 14px;text-align:left;border-bottom:1px solid var(--crd)}
+.table th{font-size:13px;font-weight:700;color:var(--inkm);text-transform:uppercase;letter-spacing:0.08em}
+.table td{font-size:15px;color:var(--ink)}
+.status-chip{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:999px;font-size:13px;font-weight:600}
+.status-chip.paid{background:var(--gpp);color:var(--g)}
+.status-chip.pending{background:var(--amp);color:var(--am)}
+.status-chip.failed{background:rgba(192,57,43,.12);color:var(--r)}
+.docs-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.doc-card{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--gp);border-radius:18px;padding:18px;min-height:100px}
+.doc-meta{display:flex;flex-direction:column;gap:6px}
+.doc-title{font-size:15px;font-weight:700;color:var(--ink)}
+.doc-sub{font-size:13px;color:var(--inkf)}
+.doc-link{font-size:13px;font-weight:700;color:var(--g)}
+.page-actions{display:flex;flex-direction:column;gap:16px;margin-top:28px}
+.secondary-btn{display:inline-flex;align-items:center;justify-content:center;padding:15px 18px;border-radius:16px;border:2px solid var(--g);background:transparent;color:var(--g);font-weight:700;cursor:pointer;transition:all .2s}
+.secondary-btn:hover{background:var(--gp)}
+.btn-primary{display:inline-flex;align-items:center;justify-content:center;padding:18px 22px;border-radius:20px;background:var(--g);color:var(--w);font-family:var(--fd);font-size:17px;font-weight:700;border:none;cursor:pointer;transition:all .2s}
+.btn-primary:hover{background:var(--gm);transform:translateY(-1px)}
+.collapsed-note{font-size:14px;color:var(--inkl);line-height:1.7;margin-top:8px}
+.modal-overlay{position:fixed;inset:0;background:rgba(15,26,20,.45);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;padding:24px;z-index:1000}
+.modal-overlay.open{display:flex}
+.modal{background:var(--w);border-radius:28px;max-width:520px;width:100%;padding:28px;box-shadow:0 40px 80px rgba(10,92,69,.15)}
+.modal-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:18px}
+.modal-title{font-family:var(--fd);font-size:20px;font-weight:800;color:var(--ink)}
+.modal-close{width:38px;height:38px;border:none;border-radius:12px;background:var(--gp);color:var(--ink);font-size:18px;cursor:pointer}
+.modal-copy{font-size:14px;color:var(--inkl);line-height:1.75;margin-bottom:24px}
+.form-group{display:flex;flex-direction:column;gap:10px;margin-bottom:18px}
+.form-group label{font-size:13px;font-weight:700;color:var(--inkm)}
+.form-group input{width:100%;padding:14px 16px;border:1.5px solid var(--crd);border-radius:16px;background:var(--gp);color:var(--ink);outline:none;transition:border-color .2s}
+.form-group input:focus{border-color:var(--gl);background:#fff}
+.file-hint{font-size:13px;color:var(--inkf)}
+.modal-actions{display:flex;gap:14px;flex-wrap:wrap;justify-content:flex-end}
+@media(max-width:1024px){.policy-grid{grid-template-columns:1fr}} 
+@media(max-width:760px){
+  .page-intro{align-items:flex-start}
+  .page-title{font-size:32px}
+  .cover-summary{grid-template-columns:1fr}
+  .docs-grid{grid-template-columns:1fr}
+}
+@media(max-width:580px){
+  nav{flex-direction:column;align-items:flex-start;gap:16px}
+  .page-title{font-size:28px}
+  .policy-meta{width:100%}
+  .card{padding:22px}
+  .handler-top{flex-direction:column;align-items:flex-start}
+  .handler-avatar{width:76px;height:76px}
+  .policy-number{font-size:13px}
+}
+
+/* Product badges */
+.product-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+.product-badge.device {
+  background: rgba(22, 160, 133, 0.12);
+  color: #16A085;
+}
+.product-badge.motor {
+  background: rgba(52, 152, 219, 0.12);
+  color: #3498DB;
+}
+.product-badge.life {
+  background: rgba(233, 30, 99, 0.12);
+  color: #E91E63;
+}
+.product-badge.health {
+  background: rgba(39, 174, 96, 0.12);
+  color: #27AE60;
+}
+.product-badge.travel {
+  background: rgba(243, 156, 18, 0.12);
+  color: #F39C12;
+}
+.product-badge.property {
+  background: rgba(230, 126, 34, 0.12);
+  color: #E67E22;
+}
+.product-badge.investment {
+  background: rgba(155, 89, 182, 0.12);
+  color: #9B59B6;
+}
+.product-badge.group {
+  background: rgba(142, 68, 173, 0.12);
+  color: #8E44AD;
+}
+.product-badge.fire {
+  background: rgba(231, 76, 60, 0.12);
+  color: #E74C3C;
+}
+.product-badge.workmen {
+  background: rgba(241, 196, 15, 0.12);
+  color: #D4AC0D;
+}
+.product-badge.gpa {
+  background: rgba(211, 84, 0, 0.12);
+  color: #D35400;
+}
+
+/* Hide elements dynamically */
+.hidden {
+  display: none !important;
+}
+</style>
+</head>
+<body>
+<nav>
+  <a href="cova-dashboard.html" class="logo">Cov<span>a</span></a>
+  <a href="cova-dashboard.html" class="nav-cta">← Back to dashboard</a>
+</nav>
+<main class="main-wrap">
+  <section class="page-intro">
+    <div>
+      <div id="productBadge" class="product-badge device">📱 Electronic Equipment</div>
+      <p class="policy-number" id="policyNumber">Policy #COVA-EP-9357</p>
+      <h1 class="page-title" id="pageTitle">Electronic policy details</h1>
+    </div>
+    <span class="status-pill active" id="statusBadge">Active</span>
+  </section>
+
+  <div class="policy-grid">
+    <article class="card">
+      <h2>Cover summary</h2>
+      <div class="cover-summary">
+        <div class="summary-item">
+          <span class="summary-label">Device</span>
+          <span class="summary-value summary-strong">iPhone 17 Pro Max</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">Insurer</span>
+          <span class="summary-value">Acme Underwriting</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">Cover type</span>
+          <span class="summary-value">Electronic all-risk</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">Sum insured</span>
+          <span class="summary-value">₦1,450,000</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">Start date</span>
+          <span class="summary-value">1 Mar 2026</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">End date</span>
+          <span class="summary-value">29 Feb 2027</span>
+        </div>
+      </div>
+    </article>
+
+    <aside class="card handler-card">
+      <div class="handler-top">
+        <div class="handler-avatar">JN</div>
+        <div class="handler-info">
+          <span class="handler-name">Jane Nwosu</span>
+          <span class="handler-role">Your dedicated policy handler</span>
+          <span class="support-note">Available weekdays 9am–5pm. Reach out for claims support, device swaps, and policy questions.</span>
+        </div>
+      </div>
+      <button class="whatsapp-btn" onclick="window.open('https://wa.me/2348012345678','_blank')">📱 WhatsApp handler</button>
+      <div class="collapsed-note">Need an update? Your handler can help confirm cover terms and process any device changes for electronic policies.</div>
+    </aside>
+  </div>
+
+  <!-- Policy Details Container (hidden by default, populated by API) -->
+  <article class="card" id="policy-details" style="display:none;">
+    <h2>Policy information</h2>
+    <div style="background: var(--gp); border-radius: 18px; padding: 18px;">
+      <p><strong>Policy ID:</strong> <span id="policy-id">-</span></p>
+      <p><strong>Product type:</strong> <span id="policy-product">-</span></p>
+      <p><strong>Status:</strong> <span id="policy-status">-</span></p>
+      <p><strong>Premium:</strong> ₦<span id="policy-premium">-</span></p>
+      <p><strong>Sum insured:</strong> ₦<span id="policy-coverage">-</span></p>
+      <p><strong>Start date:</strong> <span id="policy-start">-</span></p>
+      <p><strong>End date:</strong> <span id="policy-end">-</span></p>
+    </div>
+  </article>
+
+  <article class="card">
+    <h2>Payment history</h2>
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Amount</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1 Mar 2026</td>
+            <td>₦145,000</td>
+            <td><span class="status-chip paid">Paid</span></td>
+          </tr>
+          <tr>
+            <td>1 Apr 2026</td>
+            <td>₦145,000</td>
+            <td><span class="status-chip paid">Paid</span></td>
+          </tr>
+          <tr>
+            <td>1 May 2026</td>
+            <td>₦145,000</td>
+            <td><span class="status-chip pending">Pending</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </article>
+
+  <article class="card">
+    <h2>Policy documents</h2>
+    <div class="docs-grid">
+      <div class="doc-card">
+        <div class="doc-meta">
+          <span class="doc-title">Policy schedule</span>
+          <span class="doc-sub">Download the full schedule for your electronic cover.</span>
+        </div>
+        <a href="#" class="doc-link">Download</a>
+      </div>
+      <div class="doc-card">
+        <div class="doc-meta">
+          <span class="doc-title">Certificate</span>
+          <span class="doc-sub">Official cover certificate for your device.</span>
+        </div>
+        <a href="#" class="doc-link">Download</a>
+      </div>
+    </div>
+  </article>
+
+  <article class="card" id="productActions">
+    <h2 id="actionsTitle">Device management</h2>
+    <p class="collapsed-note" id="actionsNote">This is an electronic policy, so you can swap devices if you have a replacement unit ready. We will verify new details before updating your cover.</p>
+    <div class="page-actions">
+      <!-- Device actions -->
+      <div id="deviceActions">
+        <button class="secondary-btn" onclick="openModal('swapDevice')">Swap device</button>
+        <button class="btn-primary">File a claim</button>
+      </div>
+      
+      <!-- Motor actions -->
+      <div id="motorActions" class="hidden">
+        <button class="secondary-btn" onclick="openModal('updateVehicle')">Update vehicle details</button>
+        <button class="btn-primary">File a claim</button>
+      </div>
+      
+      <!-- Health actions -->
+      <div id="healthActions" class="hidden">
+        <button class="secondary-btn" onclick="openModal('addDependant')">Add dependant</button>
+        <button class="btn-primary">File a claim</button>
+      </div>
+      
+      <!-- Investment actions -->
+      <div id="investmentActions" class="hidden">
+        <button class="btn-primary" onclick="openModal('viewStatement')">View statement</button>
+      </div>
+      
+      <!-- Other actions -->
+      <div id="otherActions" class="hidden">
+        <button class="secondary-btn" onclick="openModal('renew')">Renew</button>
+        <button class="secondary-btn" onclick="openModal('amend')">Amend</button>
+        <button class="btn-primary">File a claim</button>
+      </div>
+    </div>
+  </article>
+</main>
+
+<!-- Swap Device Modal -->
+<div class="modal-overlay" id="swapDeviceModal" role="dialog" aria-modal="true">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <h2 class="modal-title">Swap device details</h2>
+        <p class="modal-copy">Upload replacement device details and we will send a confirmation once new cover is active.</p>
+      </div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <form onsubmit="handleAction('swapDevice', event)">
+      <div class="form-group">
+        <label for="deviceModel">Device model</label>
+        <input id="deviceModel" type="text" placeholder="iPhone 17 Pro Max" required>
+      </div>
+      <div class="form-group">
+        <label for="serialNumber">Serial number</label>
+        <input id="serialNumber" type="text" placeholder="SN: 1A2B3C4D5E" required>
+      </div>
+      <div class="form-group">
+        <label for="devicePhoto">Upload photo</label>
+        <input id="devicePhoto" type="file" accept="image/*" required>
+        <span class="file-hint">PNG, JPG or HEIC. Max 10MB.</span>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="secondary-btn" onclick="closeModal()">Cancel</button>
+        <button type="submit" class="btn-primary">Submit swap request</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Update Vehicle Modal -->
+<div class="modal-overlay" id="updateVehicleModal" role="dialog" aria-modal="true">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <h2 class="modal-title">Update vehicle details</h2>
+        <p class="modal-copy">Update your vehicle information to keep your motor insurance policy accurate.</p>
+      </div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <form onsubmit="handleAction('updateVehicle', event)">
+      <div class="form-group">
+        <label for="vehicleMake">Vehicle make and model</label>
+        <input id="vehicleMake" type="text" placeholder="Toyota Camry 2020" required>
+      </div>
+      <div class="form-group">
+        <label for="plateNumber">Plate number</label>
+        <input id="plateNumber" type="text" placeholder="ABC 123 LA" required>
+      </div>
+      <div class="form-group">
+        <label for="currentValue">Current market value</label>
+        <input id="currentValue" type="text" placeholder="₦8,500,000" required>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="secondary-btn" onclick="closeModal()">Cancel</button>
+        <button type="submit" class="btn-primary">Update details</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Add Dependant Modal -->
+<div class="modal-overlay" id="addDependantModal" role="dialog" aria-modal="true">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <h2 class="modal-title">Add dependant</h2>
+        <p class="modal-copy">Add a family member to your health insurance policy.</p>
+      </div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <form onsubmit="handleAction('addDependant', event)">
+      <div class="form-group">
+        <label for="dependantName">Full name</label>
+        <input id="dependantName" type="text" placeholder="John Doe" required>
+      </div>
+      <div class="form-group">
+        <label for="dependantRelationship">Relationship</label>
+        <input id="dependantRelationship" type="text" placeholder="Spouse, Child, Parent" required>
+      </div>
+      <div class="form-group">
+        <label for="dependantDOB">Date of birth</label>
+        <input id="dependantDOB" type="date" required>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="secondary-btn" onclick="closeModal()">Cancel</button>
+        <button type="submit" class="btn-primary">Add dependant</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- View Statement Modal -->
+<div class="modal-overlay" id="viewStatementModal" role="dialog" aria-modal="true">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <h2 class="modal-title">Investment statement</h2>
+        <p class="modal-copy">View your current investment performance and projected growth.</p>
+      </div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div style="background: var(--gp); border-radius: 18px; padding: 18px; margin-bottom: 18px;">
+      <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+        <span style="font-size: 14px; color: var(--inkf);">Total contributions</span>
+        <span style="font-size: 16px; font-weight: 700; color: var(--ink);">₦2,400,000</span>
+      </div>
+      <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+        <span style="font-size: 14px; color: var(--inkf);">Current value</span>
+        <span style="font-size: 16px; font-weight: 700; color: var(--g);">₦2,880,000</span>
+      </div>
+      <div style="display: flex; justify-content: space-between;">
+        <span style="font-size: 14px; color: var(--inkf);">Projected maturity value</span>
+        <span style="font-size: 16px; font-weight: 700; color: var(--gl);">₦4,500,000</span>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn-primary" onclick="closeModal()">Download full statement</button>
+    </div>
+  </div>
+</div>
+
+<!-- Renew Modal -->
+<div class="modal-overlay" id="renewModal" role="dialog" aria-modal="true">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <h2 class="modal-title">Renew policy</h2>
+        <p class="modal-copy">Review and renew your policy for another term.</p>
+      </div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div style="background: var(--gp); border-radius: 18px; padding: 18px; margin-bottom: 18px;">
+      <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+        <span style="font-size: 14px; color: var(--inkf);">Renewal premium</span>
+        <span style="font-size: 20px; font-weight: 800; color: var(--g);">₦145,000</span>
+      </div>
+      <div style="font-size: 13px; color: var(--inkf);">Valid until: 29 Feb 2028</div>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="secondary-btn" onclick="closeModal()">Cancel</button>
+      <button type="submit" class="btn-primary" onclick="proceedToPayment()">Pay & Renew</button>
+    </div>
+  </div>
+</div>
+
+<!-- Amend Modal -->
+<div class="modal-overlay" id="amendModal" role="dialog" aria-modal="true">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <h2 class="modal-title">Amend policy</h2>
+        <p class="modal-copy">Make changes to your policy cover or terms.</p>
+      </div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <form onsubmit="handleAction('amend', event)">
+      <div class="form-group">
+        <label for="amendReason">Reason for amendment</label>
+        <input id="amendReason" type="text" placeholder="Describe the change you need" required>
+      </div>
+      <div class="form-group">
+        <label for="amendDetails">Additional details</label>
+        <input id="amendDetails" type="text" placeholder="Any other relevant information">
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="secondary-btn" onclick="closeModal()">Cancel</button>
+        <button type="submit" class="btn-primary">Submit request</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+// Product type configuration
+const PRODUCT_TYPES = {
+  device: {
+    badge: '📱 Electronic Equipment',
+    badgeClass: 'device',
+    title: 'Electronic policy details',
+    coverFields: [
+      { label: 'Device', value: 'iPhone 17 Pro Max', highlight: true },
+      { label: 'IMEI', value: '3591052190442742' },
+      { label: 'Cover type', value: 'Electronic all-risk' },
+      { label: 'Sum insured', value: '₦1,450,000' },
+      { label: 'Start date', value: '1 Mar 2026' },
+      { label: 'End date', value: '29 Feb 2027' }
+    ],
+    actionsId: 'deviceActions',
+    actionsTitle: 'Device management',
+    actionsNote: 'This is an electronic policy, so you can swap devices if you have a replacement unit ready. We will verify new details before updating your cover.'
+  },
+  motor: {
+    badge: '🚗 Motor Insurance',
+    badgeClass: 'motor',
+    title: 'Motor policy details',
+    coverFields: [
+      { label: 'Vehicle', value: 'Toyota Camry 2020', highlight: true },
+      { label: 'Plate number', value: 'ABC 123 LA' },
+      { label: 'Cover type', value: 'Comprehensive' },
+      { label: 'Sum insured', value: '₦8,500,000' },
+      { label: 'Start date', value: '8 May 2025' },
+      { label: 'End date', value: '8 May 2026' }
+    ],
+    actionsId: 'motorActions',
+    actionsTitle: 'Vehicle management',
+    actionsNote: 'Keep your vehicle details current. Updates will be verified before cover adjustment.'
+  },
+  life: {
+    badge: '❤️ Life Insurance',
+    badgeClass: 'life',
+    title: 'Life policy details',
+    coverFields: [
+      { label: 'Plan type', value: 'Term Life', highlight: true },
+      { label: 'Sum assured', value: '₦50,000,000' },
+      { label: 'Policy term', value: '20 years' },
+      { label: 'Beneficiary', value: 'Jane Nwosu (Spouse)' },
+      { label: 'Start date', value: '15 Jan 2025' },
+      { label: 'End date', value: '15 Jan 2045' }
+    ],
+    actionsId: 'otherActions',
+    actionsTitle: 'Policy management',
+    actionsNote: 'You can amend beneficiary details or renew your policy when needed.'
+  },
+  health: {
+    badge: '🏥 Health Insurance',
+    badgeClass: 'health',
+    title: 'Health policy details',
+    coverFields: [
+      { label: 'Plan tier', value: 'Gold', highlight: true },
+      { label: 'HMO', value: 'AIICO Health' },
+      { label: 'Enrolled members', value: '4 (1 primary + 3)' },
+      { label: 'Primary hospital', value: 'Lagos University Teaching Hospital' },
+      { label: 'Start date', value: '1 Feb 2025' },
+      { label: 'End date', value: '31 Jan 2026' }
+    ],
+    actionsId: 'healthActions',
+    actionsTitle: 'Health plan management',
+    actionsNote: 'Add or remove dependants from your health plan. Changes take effect on the next billing cycle.'
+  },
+  travel: {
+    badge: '✈️ Travel Insurance',
+    badgeClass: 'travel',
+    title: 'Travel policy details',
+    coverFields: [
+      { label: 'Destination', value: 'Dubai, UAE', highlight: true },
+      { label: 'Trip dates', value: '15–22 May 2026' },
+      { label: 'Travellers', value: '2 adults' },
+      { label: 'Cover type', value: 'Comprehensive travel' },
+      { label: 'Departure date', value: '15 May 2026' },
+      { label: 'Return date', value: '22 May 2026' }
+    ],
+    actionsId: 'otherActions',
+    actionsTitle: 'Trip management',
+    actionsNote: 'Extend your cover or make amendments before departure.'
+  },
+  property: {
+    badge: '🏠 Property Insurance',
+    badgeClass: 'property',
+    title: 'Property policy details',
+    coverFields: [
+      { label: 'Address', value: '42 Adetokunbo Ademola St, VI', highlight: true },
+      { label: 'Building value', value: '₦85,000,000' },
+      { label: 'Contents value', value: '₦15,000,000' },
+      { label: 'Perils', value: 'Fire, Flood, Burglary' },
+      { label: 'Start date', value: '10 Mar 2025' },
+      { label: 'End date', value: '10 Mar 2026' }
+    ],
+    actionsId: 'otherActions',
+    actionsTitle: 'Property management',
+    actionsNote: 'Update property value or add coverage for additional perils.'
+  },
+  investment: {
+    badge: '📈 Investment Plan',
+    badgeClass: 'investment',
+    title: 'Investment policy details',
+    coverFields: [
+      { label: 'Plan type', value: 'Education Fund', highlight: true },
+      { label: 'Monthly contribution', value: '₦50,000' },
+      { label: 'Total contributed', value: '₦2,400,000' },
+      { label: 'Projected value', value: '₦4,500,000' },
+      { label: 'Maturity date', value: '15 Aug 2035' },
+      { label: 'Current value', value: '₦2,880,000' }
+    ],
+    actionsId: 'investmentActions',
+    actionsTitle: 'Investment management',
+    actionsNote: 'Track your investment growth and make additional contributions anytime.'
+  },
+  group: {
+    badge: '👥 Group Insurance',
+    badgeClass: 'group',
+    title: 'Group policy details',
+    coverFields: [
+      { label: 'Company', value: 'Bright Supermarkets Ltd', highlight: true },
+      { label: 'Enrolled staff', value: '48 employees' },
+      { label: 'Cover type', value: 'Group Life + GPA + Workmen\'s' },
+      { label: 'Annual premium', value: '₦8,200,000' },
+      { label: 'Start date', value: '1 Jan 2025' },
+      { label: 'End date', value: '31 Dec 2025' }
+    ],
+    actionsId: 'otherActions',
+    actionsTitle: 'Group policy management',
+    actionsNote: 'Add or remove staff members from your group cover. Premiums adjust automatically.'
+  },
+  fire: {
+    badge: '🔥 Fire Insurance',
+    badgeClass: 'fire',
+    title: 'Fire policy details',
+    coverFields: [
+      { label: 'Company', value: 'Bright Supermarkets Ltd', highlight: true },
+      { label: 'Property type', value: 'Warehouse' },
+      { label: 'Building value', value: '₦150,000,000' },
+      { label: 'Contents value', value: '₦80,000,000' },
+      { label: 'Start date', value: '15 Feb 2025' },
+      { label: 'End date', value: '15 Feb 2026' }
+    ],
+    actionsId: 'otherActions',
+    actionsTitle: 'Fire policy management',
+    actionsNote: 'Update property values or add additional perils to your cover.'
+  },
+  workmen: {
+    badge: '👷 Workmen\'s Compensation',
+    badgeClass: 'workmen',
+    title: 'Workmen\'s policy details',
+    coverFields: [
+      { label: 'Company', value: 'Bright Supermarkets Ltd', highlight: true },
+      { label: 'Total staff', value: '48 employees' },
+      { label: 'NSITF compliant', value: 'Yes ✓' },
+      { label: 'Annual premium', value: '₦4,800,000' },
+      { label: 'Start date', value: '1 Jan 2025' },
+      { label: 'End date', value: '31 Dec 2025' }
+    ],
+    actionsId: 'otherActions',
+    actionsTitle: 'Workmen\'s policy management',
+    actionsNote: 'Add new employees or update staff details as your workforce changes.'
+  },
+  gpa: {
+    badge: '🤝 Group Personal Accident',
+    badgeClass: 'gpa',
+    title: 'GPA policy details',
+    coverFields: [
+      { label: 'Company', value: 'Bright Supermarkets Ltd', highlight: true },
+      { label: 'Covered staff', value: '48 employees' },
+      { label: 'Cover type', value: '24hr worldwide' },
+      { label: 'Annual premium', value: '₦1,440,000' },
+      { label: 'Start date', value: '1 Jan 2025' },
+      { label: 'End date', value: '31 Dec 2025' }
+    ],
+    actionsId: 'otherActions',
+    actionsTitle: 'GPA policy management',
+    actionsNote: 'Add or remove staff from your GPA coverage. Premiums adjust automatically.'
+  }
+};
+
+// Get product type from URL or default to device
+function getProductType() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const type = urlParams.get('type');
+  return type && PRODUCT_TYPES[type] ? type : 'device';
+}
+
+// Update page content based on product type
+function updatePageForProductType(type) {
+  const product = PRODUCT_TYPES[type];
+  if (!product) return;
+
+  // Update badge
+  const badge = document.getElementById('productBadge');
+  badge.className = `product-badge ${product.badgeClass}`;
+  badge.textContent = product.badge;
+
+  // Update title
+  document.getElementById('pageTitle').textContent = product.title;
+
+  // Update policy number based on type
+  const policyNumbers = {
+    device: '#COVA-EP-9357',
+    motor: '#COVA-MT-1248',
+    life: '#COVA-LF-3842',
+    health: '#COVA-HT-7291',
+    travel: '#COVA-TR-2847',
+    property: '#COVA-PR-8472',
+    investment: '#COVA-IN-5928',
+    group: '#COVA-GR-3847',
+    fire: '#COVA-FR-9284',
+    workmen: '#COVA-WM-4827',
+    gpa: '#COVA-GP-7483'
+  };
+  document.getElementById('policyNumber').textContent = `Policy ${policyNumbers[type] || '#COVA-0000'}`;
+
+  // Update cover summary fields
+  const coverSummary = document.querySelector('.cover-summary');
+  coverSummary.innerHTML = product.coverFields.map(field => `
+    <div class="summary-item">
+      <span class="summary-label">${field.label}</span>
+      <span class="summary-value ${field.highlight ? 'summary-strong' : ''}">${field.value}</span>
+    </div>
+  `).join('');
+
+  // Update actions section
+  document.getElementById('actionsTitle').textContent = product.actionsTitle;
+  document.getElementById('actionsNote').textContent = product.actionsNote;
+
+  // Show correct action buttons
+  document.querySelectorAll('#productActions > .page-actions > div').forEach(el => el.classList.add('hidden'));
+  document.getElementById(product.actionsId).classList.remove('hidden');
+}
+
+// Modal functions
+function openModal(actionType) {
+  const modal = document.getElementById(actionType + 'Modal');
+  if (modal) modal.classList.add('open');
+}
+
+function closeModal() {
+  document.querySelectorAll('.modal-overlay').forEach(modal => modal.classList.remove('open'));
+}
+
+function handleAction(actionType, event) {
+  event.preventDefault();
+  
+  const messages = {
+    swapDevice: 'Swap request submitted. Your handler will contact you shortly.',
+    updateVehicle: 'Vehicle details updated successfully.',
+    addDependant: 'Dependant added to your health plan.',
+    renew: 'Policy renewed successfully. Confirmation sent to your email.',
+    amend: 'Amendment request submitted. Your handler will review shortly.'
+  };
+
+  closeModal();
+  alert(messages[actionType] || 'Action completed successfully.');
+}
+
+async function proceedToPayment() {
+  const policyId = new URLSearchParams(window.location.search).get('policy_id');
+  const amount = new URLSearchParams(window.location.search).get('amount');
+  const user = JSON.parse(localStorage.getItem('user'));
+  
+  const result = await initializePayment(policyId, amount, user.email);
+  
+  if (result.ok) {
+    // Redirect to Paystack
+    window.location.href = result.data.authorizationUrl;
+  } else {
+    alert('Payment initialization failed: ' + result.data.error.message);
+  }
+}
+
+// Initialize page
+window.addEventListener('DOMContentLoaded', async () => {
+  const policyId = new URLSearchParams(window.location.search).get('id');
+  
+  if (!policyId) {
+    alert('Policy ID not found');
+    return;
+  }
+  
+  const result = await getPolicy(policyId);
+  
+  if (result.ok) {
+    displayPolicy(result.data.policy);
+  } else {
+    alert('Error loading policy: ' + result.data.error.message);
+  }
+});
+
+function displayPolicy(policy) {
+  // Update policy number
+  document.getElementById('policyNumber').textContent = 'Policy #' + policy.id;
+  
+  // Update status badge
+  const statusBadge = document.getElementById('statusBadge');
+  statusBadge.textContent = policy.status || 'Active';
+  
+  // Update cover summary
+  const coverSummary = document.querySelector('.cover-summary');
+  if (coverSummary && policy.metadata) {
+    const metadata = policy.metadata;
+    coverSummary.innerHTML = policy.product_type === 'device' ? `
+      <div class="summary-item">
+        <span class="summary-label">Device</span>
+        <span class="summary-value summary-strong">${metadata.device_name || 'N/A'}</span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">IMEI</span>
+        <span class="summary-value">${metadata.imei || 'N/A'}</span>
+      </div>
+    ` : `
+      <div class="summary-item">
+        <span class="summary-label">Insurer</span>
+        <span class="summary-value">${policy.insurer || 'N/A'}</span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">Cover type</span>
+        <span class="summary-value">${policy.cover_type || 'N/A'}</span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">Sum insured</span>
+        <span class="summary-value">₦${policy.sum_insured ? policy.sum_insured.toLocaleString() : '0'}</span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">Start date</span>
+        <span class="summary-value">${policy.start_date || 'N/A'}</span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">End date</span>
+        <span class="summary-value">${policy.end_date || 'N/A'}</span>
+      </div>
+    `;
+  }
+  
+  // Update handler info
+  const handlerName = document.querySelector('.handler-name');
+  if (handlerName && policy.handler) {
+    handlerName.textContent = policy.handler.name || 'Not assigned';
+  }
+}
+
+// Get product type from URL or default to device
+function getProductType() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const type = urlParams.get('type');
+  return type && PRODUCT_TYPES[type] ? type : 'device';
+}
+
+// Update page content based on product type
+function updatePageForProductType(type) {
+  const product = PRODUCT_TYPES[type];
+  if (!product) return;
+
+  // Update badge
+  const badge = document.getElementById('productBadge');
+  badge.className = `product-badge ${product.badgeClass}`;
+  badge.textContent = product.badge;
+
+  // Update title
+  document.getElementById('pageTitle').textContent = product.title;
+
+  // Update policy number based on type
+  const policyNumbers = {
+    device: '#COVA-EP-9357',
+    motor: '#COVA-MT-1248',
+    life: '#COVA-LF-3842',
+    health: '#COVA-HT-7291',
+    travel: '#COVA-TR-2847',
+    property: '#COVA-PR-8472',
+    investment: '#COVA-IN-5928',
+    group: '#COVA-GR-3847',
+    fire: '#COVA-FR-9284',
+    workmen: '#COVA-WM-4827',
+    gpa: '#COVA-GP-7483'
+  };
+  document.getElementById('policyNumber').textContent = `Policy ${policyNumbers[type] || '#COVA-0000'}`;
+
+  // Update cover summary fields
+  const coverSummary = document.querySelector('.cover-summary');
+  coverSummary.innerHTML = product.coverFields.map(field => `
+    <div class="summary-item">
+      <span class="summary-label">${field.label}</span>
+      <span class="summary-value ${field.highlight ? 'summary-strong' : ''}">${field.value}</span>
+    </div>
+  `).join('');
+
+  // Update actions section
+  document.getElementById('actionsTitle').textContent = product.actionsTitle;
+  document.getElementById('actionsNote').textContent = product.actionsNote;
+
+  // Show correct action buttons
+  document.querySelectorAll('#productActions > .page-actions > div').forEach(el => el.classList.add('hidden'));
+  document.getElementById(product.actionsId).classList.remove('hidden');
+}
+
+// Modal functions
+function openModal(actionType) {
+  const modal = document.getElementById(actionType + 'Modal');
+  if (modal) modal.classList.add('open');
+}
+
+function closeModal() {
+  document.querySelectorAll('.modal-overlay').forEach(modal => modal.classList.remove('open'));
+}
+
+function handleAction(actionType, event) {
+  event.preventDefault();
+  
+  const messages = {
+    swapDevice: 'Swap request submitted. Your handler will contact you shortly.',
+    updateVehicle: 'Vehicle details updated successfully.',
+    addDependant: 'Dependant added to your health plan.',
+    renew: 'Policy renewed successfully. Confirmation sent to your email.',
+    amend: 'Amendment request submitted. Your handler will review shortly.'
+  };
+
+  closeModal();
+  alert(messages[actionType] || 'Action completed successfully.');
+}
+
+// Close modals on overlay click
+document.querySelectorAll('.modal-overlay').forEach(modal => {
+  modal.addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+});
+
+// Close modals on escape key
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeModal();
+});
+</script>
+</body>
+</html>

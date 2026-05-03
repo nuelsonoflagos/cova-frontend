@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cova — Device management</title>
+<script src="api-client.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --g:#0A5C45;--gm:#137A5C;--gl:#1D9E75;--gp:#E6F5F0;--gpp:#d0ede4;
+  --cream:#F7F4EE;--crd:#E8E4DB;--crd2:#D8D3C8;
+  --ink:#0F1A14;--inkm:#2D3E35;--inkl:#5A6E63;--inkf:#9AADA3;
+  --w:#fff;--r:#C0392B;--am:#D4860A;--amp:#FEF3E2;
+  --fd:'Syne',sans-serif;--fb:'DM Sans',sans-serif;
+  --rad:18px;--radsm:10px;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--fb);background:linear-gradient(180deg, var(--cream) 0%, #ECF8F3 100%);color:var(--ink);min-height:100vh}
+a{text-decoration:none;color:inherit}
+nav{display:flex;align-items:center;justify-content:space-between;padding:26px 5vw;max-width:1200px;margin:0 auto}
+.logo{font-family:var(--fd);font-size:22px;font-weight:800;color:var(--g)}
+.logo span{color:var(--gl)}
+.nav-cta{font-family:var(--fd);font-size:14px;font-weight:700;color:var(--w);background:var(--g);padding:12px 20px;border-radius:999px;transition:all .2s}
+.nav-cta:hover{background:var(--gm)}
+.main-wrap{max-width:1200px;margin:0 auto;padding:24px 5vw 60px}
+.page-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;flex-wrap:wrap;margin-bottom:28px}
+.page-title{font-family:var(--fd);font-size:clamp(28px,4vw,40px);font-weight:800;color:var(--ink);line-height:1.05;max-width:760px}
+.page-actions{display:flex;gap:12px;flex-wrap:wrap}
+.btn-primary{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:14px 18px;border-radius:16px;background:var(--g);color:var(--w);font-weight:700;border:none;cursor:pointer;transition:all .2s;font-size:14px}
+.btn-primary:hover{background:var(--gm);transform:translateY(-1px)}
+.btn-secondary{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:14px 18px;border-radius:16px;border:2px solid var(--g);background:transparent;color:var(--g);font-weight:700;border:2px solid var(--crd);cursor:pointer;transition:all .2s;font-size:14px}
+.btn-secondary:hover{background:var(--gp);border-color:var(--g)}
+.card{background:var(--w);border:1px solid var(--crd);border-radius:28px;padding:28px;box-shadow:0 24px 70px rgba(10,92,69,.08)}
+.discount-badge{display:inline-flex;align-items:center;gap:6px;background:var(--amp);color:var(--am);padding:10px 14px;border-radius:16px;font-weight:700;font-size:12px;margin-bottom:18px}
+.controls{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:20px;flex-wrap:wrap}
+.search-box{flex:1;min-width:240px;display:flex;align-items:center;gap:10px;padding:12px 16px;border:1.5px solid var(--crd);border-radius:14px;background:var(--gp);transition:border-color .2s}
+.search-box:focus-within{border-color:var(--gl);background:#fff}
+.search-box input{width:100%;border:none;background:none;outline:none;font-size:14px;color:var(--ink)}
+.sort-select{padding:10px 14px;border:1.5px solid var(--crd);border-radius:14px;background:var(--gp);color:var(--ink);font-size:14px;cursor:pointer;transition:border-color .2s}
+.sort-select:focus{border-color:var(--gl);outline:none}
+.table-wrap{overflow-x:auto}
+.table{width:100%;border-collapse:collapse}
+.table th{padding:14px;text-align:left;font-size:12px;font-weight:700;color:var(--inkm);text-transform:uppercase;letter-spacing:0.1em;border-bottom:2px solid var(--crd);background:var(--gp)}
+.table td{padding:16px 14px;border-bottom:1px solid var(--crd);font-size:14px;color:var(--ink)}
+.device-col{font-weight:700;color:var(--g)}
+.imei-masked{font-family:monospace;color:var(--inkf);letter-spacing:1px;font-size:13px}
+.status-chip{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:999px;font-size:12px;font-weight:700}
+.status-chip.active{background:var(--gpp);color:var(--g)}
+.status-chip.inactive{background:var(--amp);color:var(--am)}
+.actions-cell{display:flex;gap:8px;flex-wrap:wrap}
+.action-btn{font-size:13px;font-weight:700;color:var(--g);background:none;border:none;cursor:pointer;padding:0;transition:color .2s}
+.action-btn:hover{color:var(--gl)}
+.action-btn.danger{color:var(--r)}
+.modal-overlay{position:fixed;inset:0;background:rgba(15,26,20,.45);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;padding:24px;z-index:1000}
+.modal-overlay.open{display:flex}
+.modal{background:var(--w);border-radius:28px;max-width:560px;width:100%;padding:32px;box-shadow:0 40px 80px rgba(10,92,69,.15);max-height:90vh;overflow-y:auto}
+.modal-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:22px}
+.modal-title{font-family:var(--fd);font-size:22px;font-weight:800;color:var(--ink)}
+.modal-close{width:40px;height:40px;border:none;border-radius:12px;background:var(--gp);color:var(--ink);font-size:20px;cursor:pointer}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.form-grid.full{grid-template-columns:1fr}
+.form-group{display:flex;flex-direction:column;gap:8px}
+.form-group label{font-size:13px;font-weight:700;color:var(--inkm)}
+.form-group input,
+.form-group select{width:100%;padding:12px 14px;border:1.5px solid var(--crd);border-radius:14px;background:var(--gp);color:var(--ink);font-size:14px;outline:none;transition:border-color .2s}
+.form-group input:focus,
+.form-group select:focus{border-color:var(--gl);background:#fff}
+.hint-text{font-size:12px;color:var(--inkf)}
+.file-input-wrap{display:flex;align-items:center;gap:12px}
+.file-input-wrap input[type=file]{flex:1}
+.file-input-wrap label{flex-shrink:0}
+.modal-actions{display:flex;gap:12px;margin-top:24px;justify-content:flex-end;flex-wrap:wrap}
+.btn-modal-primary{display:inline-flex;align-items:center;justify-content:center;padding:14px 20px;border-radius:14px;background:var(--g);color:var(--w);font-weight:700;border:none;cursor:pointer;transition:all .2s;font-size:14px}
+.btn-modal-primary:hover{background:var(--gm)}
+.btn-modal-secondary{display:inline-flex;align-items:center;justify-content:center;padding:14px 20px;border-radius:14px;border:2px solid var(--crd);background:var(--w);color:var(--ink);font-weight:700;border:2px solid var(--crd);cursor:pointer;transition:all .2s;font-size:14px}
+.btn-modal-secondary:hover{border-color:var(--g);background:var(--gp)}
+@media(max-width:1024px){.form-grid{grid-template-columns:1fr}.modal{max-width:90vw}}
+@media(max-width:768px){
+  nav{flex-direction:column;align-items:flex-start;gap:16px}
+  .page-head{flex-direction:column}
+  .page-actions{width:100%}
+  .page-actions .btn-primary{flex:1}
+  .controls{flex-direction:column;align-items:stretch}
+  .search-box{width:100%}
+  .sort-select{width:100%}
+  .card{padding:24px}
+  .table th,.table td{padding:12px 8px;font-size:12px}
+}
+@media(max-width:540px){
+  .page-title{font-size:24px}
+  .modal{padding:24px}
+  .page-actions{flex-direction:column}
+  .page-actions .btn-primary,.page-actions .btn-secondary{width:100%}
+}
+</style>
+</head>
+<body>
+<nav>
+  <a href="cova.html" class="logo">Cov<span>a</span></a>
+  <a href="cova-sme-dashboard.html" class="nav-cta">Back to dashboard</a>
+</nav>
+<main class="main-wrap">
+  <div class="page-head">
+    <h1 class="page-title">Device management</h1>
+    <div class="page-actions">
+      <button class="btn-primary" onclick="openAddModal()">+ Add device</button>
+      <button class="btn-secondary" onclick="importCSV()">📥 Bulk import CSV</button>
+      <button class="btn-secondary" onclick="exportList()">📤 Export list</button>
+    </div>
+  </div>
+
+  <article class="card">
+    <div class="discount-badge">🎁 10% fleet discount on 5+ devices</div>
+    
+    <div class="controls">
+      <div class="search-box">
+        <span>🔍</span>
+        <input type="text" id="searchInput" placeholder="Search staff name, device, IMEI..." onkeyup="filterTable()">
+      </div>
+      <select class="sort-select" id="sortSelect" onchange="sortTable()">
+        <option value="">Sort by</option>
+        <option value="name">Name A–Z</option>
+        <option value="device">Device name</option>
+        <option value="cost">Cost (high–low)</option>
+        <option value="date">Recently added</option>
+      </select>
+    </div>
+
+    <div class="table-wrap">
+      <table class="table" id="devicesTable">
+        <thead>
+          <tr>
+            <th>Staff member</th>
+            <th>Device</th>
+            <th>IMEI</th>
+            <th>Cover type</th>
+            <th>Insurer</th>
+            <th>Monthly cost</th>
+            <th>Status</th>
+            <th>Date added</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Chioma Adeyemi</td>
+            <td><span class="device-col">iPhone 17 Pro Max</span></td>
+            <td><span class="imei-masked">****5891</span></td>
+            <td>Electronic all-risk</td>
+            <td>Acme Underwriting</td>
+            <td>₦145,000</td>
+            <td><span class="status-chip active">Active</span></td>
+            <td>1 Mar 2026</td>
+            <td><div class="actions-cell"><button class="action-btn" onclick="openSwapModal(1)">Swap</button><button class="action-btn" onclick="fileClaim()">Claim</button><button class="action-btn danger" onclick="openRemoveModal(1)">Remove</button></div></td>
+          </tr>
+          <tr>
+            <td>David Okonkwo</td>
+            <td><span class="device-col">Samsung S24 Ultra</span></td>
+            <td><span class="imei-masked">****0923</span></td>
+            <td>Electronic all-risk</td>
+            <td>Acme Underwriting</td>
+            <td>₦145,000</td>
+            <td><span class="status-chip active">Active</span></td>
+            <td>15 Feb 2026</td>
+            <td><div class="actions-cell"><button class="action-btn" onclick="openSwapModal(2)">Swap</button><button class="action-btn" onclick="fileClaim()">Claim</button><button class="action-btn danger" onclick="openRemoveModal(2)">Remove</button></div></td>
+          </tr>
+          <tr>
+            <td>Grace Mensah</td>
+            <td><span class="device-col">MacBook Pro 14"</span></td>
+            <td><span class="imei-masked">****7834</span></td>
+            <td>Electronic all-risk</td>
+            <td>Acme Underwriting</td>
+            <td>₦190,000</td>
+            <td><span class="status-chip active">Active</span></td>
+            <td>8 Feb 2026</td>
+            <td><div class="actions-cell"><button class="action-btn" onclick="openSwapModal(3)">Swap</button><button class="action-btn" onclick="fileClaim()">Claim</button><button class="action-btn danger" onclick="openRemoveModal(3)">Remove</button></div></td>
+          </tr>
+          <tr>
+            <td>Kwame Boateng</td>
+            <td><span class="device-col">iPad Air M2</span></td>
+            <td><span class="imei-masked">****2847</span></td>
+            <td>Electronic all-risk</td>
+            <td>Acme Underwriting</td>
+            <td>₦135,000</td>
+            <td><span class="status-chip active">Active</span></td>
+            <td>22 Jan 2026</td>
+            <td><div class="actions-cell"><button class="action-btn" onclick="openSwapModal(4)">Swap</button><button class="action-btn" onclick="fileClaim()">Claim</button><button class="action-btn danger" onclick="openRemoveModal(4)">Remove</button></div></td>
+          </tr>
+          <tr>
+            <td>Blessing Eze</td>
+            <td><span class="device-col">Sony Alpha 7IV</span></td>
+            <td><span class="imei-masked">****1923</span></td>
+            <td>Electronic all-risk</td>
+            <td>Acme Underwriting</td>
+            <td>₦110,000</td>
+            <td><span class="status-chip active">Active</span></td>
+            <td>5 Jan 2026</td>
+            <td><div class="actions-cell"><button class="action-btn" onclick="openSwapModal(5)">Swap</button><button class="action-btn" onclick="fileClaim()">Claim</button><button class="action-btn danger" onclick="openRemoveModal(5)">Remove</button></div></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </article>
+</main>
+
+<!-- Add Device Modal -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title">Add device to fleet</h2>
+      <button class="modal-close" onclick="closeAddModal()">×</button>
+    </div>
+    <form onsubmit="submitAddDevice(event)">
+      <div class="form-grid full">
+        <div class="form-group">
+          <label for="staffName">Staff member name</label>
+          <input id="staffName" type="text" placeholder="Chinedu Okoro" required>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="deviceType">Device type</label>
+          <select id="deviceType" required>
+            <option value="">Choose type</option>
+            <option value="phone">Smartphone</option>
+            <option value="laptop">Laptop</option>
+            <option value="tablet">Tablet</option>
+            <option value="camera">Camera</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="brandModel">Brand & model</label>
+          <input id="brandModel" type="text" placeholder="iPhone 17 Pro Max" required>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="imei">IMEI/Serial number</label>
+          <input id="imei" type="text" placeholder="358240123456789" required>
+          <span class="hint-text">Find on device or box</span>
+        </div>
+        <div class="form-group">
+          <label for="value">Device value (₦)</label>
+          <input id="value" type="number" placeholder="1450000" required>
+        </div>
+      </div>
+      <div class="form-grid full">
+        <div class="form-group">
+          <label for="coverType">Cover type</label>
+          <select id="coverType" required>
+            <option value="">Select cover</option>
+            <option value="all-risk">Electronic all-risk</option>
+            <option value="accidental">Accidental damage only</option>
+            <option value="theft">Theft & loss</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-grid full">
+        <div class="form-group">
+          <label for="policyAssign">Assign to policy</label>
+          <select id="policyAssign" required>
+            <option value="">Select policy</option>
+            <option value="SME-DEV-2024">SME Device Fleet (SME-DEV-2024)</option>
+            <option value="CORP-EL-2025">Corporate Electronics (CORP-EL-2025)</option>
+            <option value="new">Create new policy</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-modal-secondary" onclick="closeAddModal()">Cancel</button>
+        <button type="submit" class="btn-modal-primary">Add device</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Swap Device Modal -->
+<div class="modal-overlay" id="swapModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title">Swap device</h2>
+      <button class="modal-close" onclick="closeSwapModal()">×</button>
+    </div>
+    <form onsubmit="submitSwapDevice(event)">
+      <div class="form-grid full">
+        <div class="form-group">
+          <label>Current device holder</label>
+          <input type="text" id="currentStaff" readonly style="background:var(--gp);cursor:not-allowed">
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="newBrandModel">New device model</label>
+          <input id="newBrandModel" type="text" placeholder="iPhone 17 Pro" required>
+        </div>
+        <div class="form-group">
+          <label for="newIMEI">New IMEI/Serial</label>
+          <input id="newIMEI" type="text" placeholder="SN: XXXXXXX" required>
+        </div>
+      </div>
+      <div class="form-grid full">
+        <div class="form-group">
+          <label for="devicePhoto">Device photo</label>
+          <div class="file-input-wrap">
+            <input id="devicePhoto" type="file" accept="image/*" required>
+            <label style="font-size:12px;color:var(--inkf)">PNG, JPG or HEIC</label>
+          </div>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="newValue">New device value (₦)</label>
+          <input id="newValue" type="number" placeholder="1250000" required>
+        </div>
+        <div class="form-group">
+          <label>Premium adjustment</label>
+          <input type="text" id="premiumAdjust" readonly style="background:var(--gp);cursor:not-allowed;color:var(--g);font-weight:700">
+          <span class="hint-text" style="color:var(--gl)">Auto-calculated from value</span>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-modal-secondary" onclick="closeSwapModal()">Cancel</button>
+        <button type="submit" class="btn-modal-primary">Confirm swap</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Remove Device Modal -->
+<div class="modal-overlay" id="removeModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title">Remove device from policy</h2>
+      <button class="modal-close" onclick="closeRemoveModal()">×</button>
+    </div>
+    <div style="text-align:center;padding:20px 0">
+      <div style="font-size:48px;margin-bottom:16px">⚠️</div>
+      <p style="font-size:15px;color:var(--ink);margin-bottom:20px">Are you sure you want to remove <strong id="removeDeviceName">iPhone 17 Pro Max</strong> from the fleet?</p>
+      <div style="background:var(--gpp);padding:16px;border-radius:14px;margin-bottom:24px">
+        <div style="font-size:12px;color:var(--inkm);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px">Pro-rata refund</div>
+        <div id="refundAmount" style="font-size:28px;font-family:var(--fd);font-weight:800;color:var(--g)">₦48,000</div>
+        <div style="font-size:13px;color:var(--inkf);margin-top:8px">Calculated based on unused premium period</div>
+      </div>
+      <p style="font-size:13px;color:var(--inkf);margin-bottom:24px">This action cannot be undone. The staff member will receive a refund within 5-7 business days.</p>
+    </div>
+    <div class="modal-actions" style="justify-content:center">
+      <button type="button" class="btn-modal-secondary" onclick="closeRemoveModal()">Cancel</button>
+      <button type="button" class="btn-modal-primary" onclick="confirmRemove()">Confirm removal</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Sample device data
+let devices = [
+  { id: 1, name: 'Chioma Adeyemi', device: 'iPhone 17 Pro Max', imei: '3582401234585891', cover: 'Electronic all-risk', insurer: 'Acme Underwriting', cost: 145000, status: 'Active', date: '1 Mar 2026' },
+  { id: 2, name: 'David Okonkwo', device: 'Samsung S24 Ultra', imei: '35824012345670923', cover: 'Electronic all-risk', insurer: 'Acme Underwriting', cost: 145000, status: 'Active', date: '15 Feb 2026' },
+  { id: 3, name: 'Grace Mensah', device: 'MacBook Pro 14', imei: 'C02X1234567834', cover: 'Electronic all-risk', insurer: 'Acme Underwriting', cost: 190000, status: 'Active', date: '8 Feb 2026' },
+  { id: 4, name: 'Kwame Boateng', device: 'iPad Air M2', imei: 'DMPW12345672847', cover: 'Electronic all-risk', insurer: 'Acme Underwriting', cost: 135000, status: 'Active', date: '22 Jan 2026' },
+  { id: 5, name: 'Blessing Eze', device: 'Sony Alpha 7IV', imei: '3582401234561923', cover: 'Electronic all-risk', insurer: 'Acme Underwriting', cost: 110000, status: 'Active', date: '5 Jan 2026' }
+];
+
+let currentRemoveId = null;
+
+// Modal functions
+function openAddModal() {
+  document.getElementById('addModal').classList.add('open');
+}
+
+function closeAddModal() {
+  document.getElementById('addModal').classList.remove('open');
+  document.getElementById('staffName').value = '';
+  document.getElementById('deviceType').value = '';
+  document.getElementById('brandModel').value = '';
+  document.getElementById('imei').value = '';
+  document.getElementById('value').value = '';
+  document.getElementById('coverType').value = '';
+  document.getElementById('policyAssign').value = '';
+}
+
+function openSwapModal(deviceId) {
+  const device = devices.find(d => d.id === deviceId);
+  if (device) {
+    document.getElementById('currentStaff').value = device.name;
+    document.getElementById('swapModal').classList.add('open');
+    document.getElementById('newBrandModel').value = '';
+    document.getElementById('newIMEI').value = '';
+    document.getElementById('devicePhoto').value = '';
+    document.getElementById('newValue').value = '';
+    document.getElementById('premiumAdjust').value = '';
+  }
+}
+
+function closeSwapModal() {
+  document.getElementById('swapModal').classList.remove('open');
+}
+
+function openRemoveModal(deviceId) {
+  const device = devices.find(d => d.id === deviceId);
+  if (device) {
+    currentRemoveId = deviceId;
+    document.getElementById('removeDeviceName').textContent = device.device;
+    // Calculate pro-rata refund (example: 30% of annual premium for 4 months remaining)
+    const monthlyPremium = device.cost;
+    const monthsRemaining = 4;
+    const refund = monthlyPremium * monthsRemaining;
+    document.getElementById('refundAmount').textContent = formatCurrency(refund);
+    document.getElementById('removeModal').classList.add('open');
+  }
+}
+
+function closeRemoveModal() {
+  document.getElementById('removeModal').classList.remove('open');
+  currentRemoveId = null;
+}
+
+// Form submissions
+function submitAddDevice(event) {
+  event.preventDefault();
+  const name = document.getElementById('staffName').value;
+  const deviceType = document.getElementById('deviceType').value;
+  const brandModel = document.getElementById('brandModel').value;
+  const imei = document.getElementById('imei').value;
+  const value = parseInt(document.getElementById('value').value);
+  const coverType = document.getElementById('coverType').value;
+  const policyAssign = document.getElementById('policyAssign').value;
+  
+  // Calculate monthly premium (1% of device value)
+  const monthlyPremium = Math.round(value * 0.01);
+  
+  // Add new device
+  const newDevice = {
+    id: devices.length + 1,
+    name: name,
+    device: brandModel,
+    imei: imei,
+    cover: coverType === 'all-risk' ? 'Electronic all-risk' : coverType,
+    insurer: 'Acme Underwriting',
+    cost: monthlyPremium,
+    status: 'Active',
+    date: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+  };
+  
+  devices.unshift(newDevice);
+  renderTable();
+  checkFleetDiscount();
+  closeAddModal();
+  
+  // Show success message
+  showNotification(`Device added for ${name}. Fleet discount applied.`);
+}
+
+function submitSwapDevice(event) {
+  event.preventDefault();
+  const newValue = parseInt(document.getElementById('newValue').value);
+  const staff = document.getElementById('currentStaff').value;
+  const newDevice = document.getElementById('newBrandModel').value;
+  
+  alert(`Device swap confirmed for ${staff}. ${newDevice} is now covered with updated premium.`);
+  closeSwapModal();
+}
+
+function confirmRemove() {
+  if (currentRemoveId) {
+    devices = devices.filter(d => d.id !== currentRemoveId);
+    renderTable();
+    checkFleetDiscount();
+    closeRemoveModal();
+    showNotification('Device removed from policy. Refund will be processed within 5-7 days.');
+  }
+}
+
+// Table functions
+function filterTable() {
+  const input = document.getElementById('searchInput').value.toLowerCase();
+  const rows = document.querySelectorAll('#devicesTable tbody tr');
+  
+  rows.forEach(row => {
+    const text = row.innerText.toLowerCase();
+    row.style.display = text.includes(input) ? '' : 'none';
+  });
+}
+
+function sortTable() {
+  const select = document.getElementById('sortSelect').value;
+  
+  switch(select) {
+    case 'name':
+      devices.sort((a, b) => a.name.localeCompare(b.name));
+      break;
+    case 'device':
+      devices.sort((a, b) => a.device.localeCompare(b.device));
+      break;
+    case 'cost':
+      devices.sort((a, b) => b.cost - a.cost);
+      break;
+    case 'date':
+      devices.sort((a, b) => new Date(b.date) - new Date(a.date));
+      break;
+    default:
+      devices.sort((a, b) => a.id - b.id);
+  }
+  
+  renderTable();
+}
+
+function renderTable() {
+  const tbody = document.querySelector('#devicesTable tbody');
+  if (!tbody) return;
+  
+  tbody.innerHTML = '';
+  
+  devices.forEach(device => {
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${device.name}</td>
+      <td><span class="device-col">${device.device}</span></td>
+      <td><span class="imei-masked">****${device.imei.slice(-4)}</span></td>
+      <td>${device.cover}</td>
+      <td>${device.insurer}</td>
+      <td>${formatCurrency(device.cost)}</td>
+      <td><span class="status-chip ${device.status.toLowerCase()}">${device.status}</span></td>
+      <td>${device.date}</td>
+      <td><div class="actions-cell">
+        <button class="action-btn" onclick="openSwapModal(${device.id})">Swap</button>
+        <button class="action-btn" onclick="fileClaim()">Claim</button>
+        <button class="action-btn danger" onclick="openRemoveModal(${device.id})">Remove</button>
+      </div></td>
+    `;
+    tbody.appendChild(row);
+  });
+}
+
+function formatCurrency(amount) {
+  return '₦' + amount.toLocaleString('en-NG');
+}
+
+// Fleet discount
+function checkFleetDiscount() {
+  const badge = document.querySelector('.discount-badge');
+  if (devices.length >= 5) {
+    badge.style.display = 'inline-flex';
+    badge.textContent = '🎁 10% fleet discount active';
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+// Export and import
+function exportList() {
+  const headers = ['Staff member', 'Device', 'IMEI', 'Cover type', 'Insurer', 'Monthly cost', 'Status', 'Date added'];
+  const rows = devices.map(d => [
+    d.name, d.device, d.imei, d.cover, d.insurer, formatCurrency(d.cost), d.status, d.date
+  ]);
+  
+  const csvContent = [headers, ...rows].map(row => row.join(',')).join('\n');
+  const blob = new Blob([csvContent], { type: 'text/csv' });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'device-fleet-export.csv';
+  a.click();
+  window.URL.revokeObjectURL(url);
+  
+  showNotification('Device list exported successfully');
+}
+
+function importCSV() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.csv';
+  input.onchange = (e) => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = e.target.result;
+      const lines = text.split('\n');
+      const imported = lines.slice(1).filter(line => line.trim()).map((line, index) => {
+        const [name, device, imei, cover, insurer, cost, status, date] = line.split(',');
+        return {
+          id: devices.length + index + 1,
+          name: name || '',
+          device: device || '',
+          imei: imei || '',
+          cover: cover || 'Electronic all-risk',
+          insurer: insurer || 'Acme Underwriting',
+          cost: parseInt(cost?.replace(/[^\d]/g, '')) || 0,
+          status: status || 'Active',
+          date: date || new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+        };
+      });
+      
+      devices = [...imported, ...devices];
+      renderTable();
+      checkFleetDiscount();
+      showNotification(`${imported.length} devices imported successfully`);
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+
+// Actions
+function fileClaim() {
+  window.location.href = 'cova-claim.html';
+}
+
+// Notifications
+function showNotification(message) {
+  const notification = document.createElement('div');
+  notification.style.cssText = `
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    background: var(--g);
+    color: var(--w);
+    padding: 14px 20px;
+    border-radius: 16px;
+    font-weight: 700;
+    z-index: 2000;
+    box-shadow: 0 8px 32px rgba(10,92,69,0.3);
+    animation: slideIn 0.3s ease;
+  `;
+  notification.textContent = message;
+  document.body.appendChild(notification);
+  
+  setTimeout(() => {
+    notification.style.animation = 'slideOut 0.3s ease';
+    setTimeout(() => notification.remove(), 300);
+  }, 3000);
+}
+
+// Auto-calculate premium on swap
+document.getElementById('newValue')?.addEventListener('input', function(e) {
+  const value = parseInt(e.target.value) || 0;
+  const monthlyPremium = Math.round(value * 0.01);
+  const currentCost = 145000; // Example current cost
+  const adjustment = monthlyPremium - currentCost;
+  
+  const premiumAdjust = document.getElementById('premiumAdjust');
+  if (adjustment > 0) {
+    premiumAdjust.value = '+' + formatCurrency(adjustment) + ' /month';
+  } else {
+    premiumAdjust.value = formatCurrency(adjustment) + ' /month';
+  }
+});
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+  renderTable();
+  checkFleetDiscount();
+  
+  // Add animation styles
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes slideOut {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(100%); opacity: 0; }
+    }
+  `;
+  document.head.appendChild(style);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cova Travel Insurance Onboarding</title>
+<script src="api-client.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--g:#0A5C45;--gm:#137A5C;--gl:#1D9E75;--gp:#E6F5F0;--gpp:#d0ede4;--cream:#F7F4EE;--crd:#E8E4DB;--ink:#0F1A14;--inkm:#2D3E35;--inkl:#5A6E63;--inkf:#9AADA3;--w:#fff;--r:#C0392B;--rp:#FDECEA;--am:#D4860A;--amp:#FEF3E2;--fd:'Syne',sans-serif;--fb:'DM Sans',sans-serif;--rad:16px;--rads:10px;--radsm:8px;--shadow:0 2px 12px rgba(10,92,69,0.08)}
+html{scroll-behavior:smooth}
+body{font-family:var(--fb);background:var(--cream);color:var(--ink);line-height:1.6;min-height:100vh}
+nav{padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between;background:var(--w);border-bottom:1px solid var(--crd)}
+.logo{font-family:var(--fd);font-size:20px;font-weight:800;color:var(--g)}
+.logo span{color:var(--gl)}
+.nav-back{font-size:13px;color:var(--inkl);text-decoration:none;display:flex;align-items:center;gap:6px;cursor:pointer}
+.nav-back:hover{color:var(--g)}
+.progress-bar{background:var(--w);border-bottom:1px solid var(--crd);padding:16px 24px}
+.progress-steps{display:flex;align-items:center;gap:0;max-width:600px;margin:0 auto}
+.prog-step{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;position:relative}
+.prog-step:not(:last-child)::after{content:'';position:absolute;top:14px;left:50%;width:100%;height:2px;background:var(--crd);z-index:0}
+.prog-step.done:not(:last-child)::after{background:var(--gl)}
+.prog-dot{width:28px;height:28px;border-radius:50%;border:2px solid var(--crd);background:var(--w);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--inkf);z-index:1;position:relative;transition:all .3s}
+.prog-step.done .prog-dot{background:var(--gl);border-color:var(--gl);color:var(--w)}
+.prog-step.active .prog-dot{background:var(--g);border-color:var(--g);color:var(--w)}
+.prog-label{font-size:11px;color:var(--inkf);font-weight:400;text-align:center;white-space:nowrap}
+.prog-step.active .prog-label{color:var(--g);font-weight:500}
+.prog-step.done .prog-label{color:var(--gl)}
+.main{max-width:620px;margin:0 auto;padding:32px 24px 80px}
+.step-panel{display:none}
+.step-panel.active{display:block;animation:fadeUp .35s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.step-title{font-family:var(--fd);font-size:26px;font-weight:800;color:var(--ink);letter-spacing:-0.5px;margin-bottom:6px}
+.step-sub{font-size:15px;color:var(--inkl);margin-bottom:28px;font-weight:300;line-height:1.6}
+.form-group{margin-bottom:20px}
+.form-group label{display:block;font-size:13px;font-weight:500;color:var(--inkm);margin-bottom:7px}
+.form-group input,.form-group select{width:100%;padding:14px 16px;border:1.5px solid var(--crd);border-radius:var(--radsm);font-family:var(--fb);font-size:15px;color:var(--ink);background:var(--w);outline:none;transition:border-color .2s,box-shadow .2s}
+.form-group input:focus,.form-group select:focus{border-color:var(--gl);box-shadow:0 0 0 3px rgba(29,158,117,0.1)}
+.form-group input::placeholder{color:var(--inkf)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.card-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:20px}
+.plan-card{border:2px solid var(--crd);border-radius:var(--rad);padding:22px;cursor:pointer;transition:all .2s;background:var(--w);position:relative}
+.plan-card:hover{border-color:var(--gl)}
+.plan-card.selected{border-color:var(--gl);background:var(--gp);box-shadow:0 8px 26px rgba(10,92,69,0.08)}
+.plan-card h3{font-family:var(--fd);font-size:16px;font-weight:700;margin-bottom:8px}
+.plan-card p{font-size:14px;color:var(--inkl);line-height:1.6}
+.plan-radio{position:absolute;top:18px;right:18px;width:18px;height:18px;border-radius:50%;border:2px solid var(--crd);background:var(--w);display:flex;align-items:center;justify-content:center;transition:all .2s}
+.plan-card.selected .plan-radio{border-color:var(--gl);background:var(--gl)}
+.plan-radio::after{content:'';width:8px;height:8px;border-radius:50%;background:var(--w);opacity:0;transition:opacity .2s}
+.plan-card.selected .plan-radio::after{opacity:1}
+.hint-box{background:var(--gp);border-radius:var(--radsm);padding:14px 16px;color:var(--inkl);margin-bottom:20px}
+.summary-card{background:var(--w);border:1px solid var(--crd);border-radius:var(--rad);padding:24px;margin-bottom:20px}
+.summary-title{font-family:var(--fd);font-size:16px;font-weight:700;color:var(--ink);margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--crd)}
+.summary-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--crd);font-size:14px}
+.summary-row:last-child{border-bottom:none}
+.summary-total{display:flex;justify-content:space-between;align-items:center;padding:14px 0 0;margin-top:4px}
+.summary-total-label{font-family:var(--fd);font-size:16px;font-weight:700;color:var(--ink)}
+.summary-total-price{font-family:var(--fd);font-size:24px;font-weight:800;color:var(--g)}
+.btn-primary{width:100%;padding:17px;background:var(--g);color:var(--w);border:none;border-radius:var(--radsm);font-family:var(--fd);font-size:16px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-primary:hover{background:var(--gm);transform:translateY(-1px)}
+.btn-secondary{width:100%;padding:14px;background:transparent;color:var(--g);border:2px solid rgba(10,92,69,0.2);border-radius:var(--radsm);font-family:var(--fd);font-size:15px;font-weight:600;cursor:pointer;transition:all .2s;margin-top:10px}
+.btn-secondary:hover{border-color:var(--g);background:var(--gp)}
+.traveller-list{display:grid;gap:18px;margin-bottom:20px}
+.traveller-card{background:var(--w);border:1.5px solid var(--crd);border-radius:18px;padding:18px}
+.small-text{font-size:13px;color:var(--inkf);margin-top:6px}
+.success-screen{text-align:center;padding:40px 0;display:none}
+.success-screen.active{display:block;animation:fadeUp .4s ease both}
+.success-circle{width:80px;height:80px;background:var(--gp);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:36px;margin:0 auto 20px}
+.success-screen h2{font-family:var(--fd);font-size:28px;font-weight:800;color:var(--ink);margin-bottom:10px;letter-spacing:-0.5px}
+.success-screen p{font-size:15px;color:var(--inkl);max-width:420px;margin:0 auto 28px;line-height:1.65}
+.field-error{font-size:12px;color:var(--r);margin-top:4px;display:none}
+.form-group.error input,.form-group.error select{border-color:var(--r)}
+.form-group.error .field-error{display:block}
+@media(max-width:520px){.form-row{grid-template-columns:1fr}.card-grid{grid-template-columns:1fr}.traveller-list{grid-template-columns:1fr}.progress-steps{flex-direction:column;align-items:flex-start}.prog-step:not(:last-child)::after{display:none}}
+</style>
+  <meta id="paystack-key" content="pk_test_mock_key_12345">
+</head>
+<body>
+<nav><div class="logo">Cov<span>a</span></div><a class="nav-back" onclick="goBack()">← Back</a></nav>
+<div class="progress-bar"><div class="progress-steps"><div class="prog-step active" id="prog-1"><div class="prog-dot">1</div><div class="prog-label">Trip type</div></div><div class="prog-step" id="prog-2"><div class="prog-dot">2</div><div class="prog-label">Trip details</div></div><div class="prog-step" id="prog-3"><div class="prog-dot">3</div><div class="prog-label">Traveller details</div></div><div class="prog-step" id="prog-4"><div class="prog-dot">4</div><div class="prog-label">Plan</div></div><div class="prog-step" id="prog-5"><div class="prog-dot">5</div><div class="prog-label">Summary</div></div></div></div>
+<div class="main">
+  <div class="step-panel active" id="step-1"><div class="step-title">Choose your trip</div><div class="step-sub">Select the type of travel cover you need.</div><div class="card-grid"><div class="plan-card selected" id="trip-single" onclick="selectTrip('Single Trip')"><div class="plan-radio"></div><h3>Single Trip</h3><p>One journey, one policy for a fixed period.</p></div><div class="plan-card" id="trip-annual" onclick="selectTrip('Annual Multi-Trip')"><div class="plan-radio"></div><h3>Annual Multi-Trip</h3><p>Cover multiple journeys for a year.</p></div><div class="plan-card" id="trip-student" onclick="selectTrip('Student Protection')"><div class="plan-radio"></div><h3>Student Protection</h3><p>Study abroad cover designed for international students.</p></div><div class="plan-card" id="trip-pilgrimage" onclick="selectTrip('Pilgrimage Protection')"><div class="plan-radio"></div><h3>Pilgrimage Protection</h3><p>Special cover for Hajj or Umrah journeys.</p></div></div><button class="btn-primary" onclick="nextStep(1)">Continue →</button></div>
+  
+  <!-- STEP 1a: Contact Info -->
+  <div class="step-panel" id="step-1a">
+    <div class="step-title">Your Details</div>
+    <div class="step-sub">Provide your contact info to secure your quote.</div>
+    <div class="form-row">
+      <div class="form-group" id="fg-fn"><label>First name</label><input type="text" id="fn" placeholder="Emeka"><div class="field-error">Required</div></div>
+      <div class="form-group" id="fg-ln"><label>Last name</label><input type="text" id="ln" placeholder="Adekunle"><div class="field-error">Required</div></div>
+    </div>
+    <div class="form-group" id="fg-phone"><label>WhatsApp number</label><input type="tel" id="phone" placeholder="080 xxxx xxxx"><div class="field-error">Enter a valid Nigerian number</div></div>
+    <div class="form-group" id="fg-email"><label>Email address</label><input type="email" id="email" placeholder="emeka@business.com"><div class="field-error">Enter a valid email</div></div>
+    
+    <div class="form-group">
+      <label>Are you insuring for yourself or your business?</label>
+      <select id="account-type" onchange="toggleBusinessFields()">
+        <option value="personal">Myself — personal</option>
+        <option value="business">My business — company</option>
+      </select>
+    </div>
+    <div id="business-fields" style="display:none">
+      <div class="form-group" id="fg-companyname"><label>Company name</label><input type="text" id="companyname" placeholder="e.g. Cova Tech Ltd"></div>
+      <div class="form-group" id="fg-rcnumber"><label>RC Number (Optional)</label><input type="text" id="rcnumber" placeholder="e.g. RC 123456"></div>
+    </div>
+
+    <div class="form-group">
+      <label>Where should we send your verification code?</label>
+      <div class="login-tabs" style="display:flex;gap:8px;background:var(--gp);padding:6px;border-radius:12px;margin-bottom:10px">
+        <div class="login-tab active" id="tab-opt-phone" onclick="selectOtpMethod('phone')" style="flex:1;text-align:center;padding:10px;font-size:13px;font-weight:600;cursor:pointer;border-radius:8px;background:var(--w);box-shadow:0 2px 8px rgba(0,0,0,.05)">WhatsApp</div>
+        <div class="login-tab" id="tab-opt-email" onclick="selectOtpMethod('email')" style="flex:1;text-align:center;padding:10px;font-size:13px;font-weight:600;cursor:pointer;border-radius:8px;color:var(--inkl)">Email</div>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="nextStep('1a')">Continue →</button>
+    <button class="btn-secondary" onclick="prevStep('1a')">← Go back</button>
+  </div>
+
+  <!-- STEP 1b: OTP Verification -->
+  <div class="step-panel" id="step-1b">
+    <div class="step-title">Verify your contact</div>
+    <div class="step-sub">We've sent a 6-digit code to <strong id="otp-destination"></strong>.</div>
+    <div class="form-group" id="fg-otp">
+      <div style="display:flex;gap:10px;justify-content:space-between;margin:20px 0" class="otp-inputs" id="signup-otp-container">
+        <input type="text" maxlength="1" style="width:45px;height:50px;text-align:center;font-size:20px;font-weight:700;border-radius:12px;border:1.5px solid var(--crd);background:var(--gp)" onkeyup="moveToNext(this, event)">
+        <input type="text" maxlength="1" style="width:45px;height:50px;text-align:center;font-size:20px;font-weight:700;border-radius:12px;border:1.5px solid var(--crd);background:var(--gp)" onkeyup="moveToNext(this, event)">
+        <input type="text" maxlength="1" style="width:45px;height:50px;text-align:center;font-size:20px;font-weight:700;border-radius:12px;border:1.5px solid var(--crd);background:var(--gp)" onkeyup="moveToNext(this, event)">
+        <input type="text" maxlength="1" style="width:45px;height:50px;text-align:center;font-size:20px;font-weight:700;border-radius:12px;border:1.5px solid var(--crd);background:var(--gp)" onkeyup="moveToNext(this, event)">
+        <input type="text" maxlength="1" style="width:45px;height:50px;text-align:center;font-size:20px;font-weight:700;border-radius:12px;border:1.5px solid var(--crd);background:var(--gp)" onkeyup="moveToNext(this, event)">
+        <input type="text" maxlength="1" style="width:45px;height:50px;text-align:center;font-size:20px;font-weight:700;border-radius:12px;border:1.5px solid var(--crd);background:var(--gp)" onkeyup="moveToNext(this, event)">
+      </div>
+      <div class="field-error">Please enter the 6-digit code</div>
+    </div>
+    <button class="btn-primary" onclick="nextStep('1b')">Verify & Continue →</button>
+    <button class="btn-secondary" onclick="prevStep('1b')">← Go back</button>
+  </div>
+
+  <div class="step-panel" id="step-2"><div class="step-title">Trip details</div><div class="step-sub">Tell us where and when you'll travel.</div><div class="form-group"><label>Destination region</label><select id="travel-region" onchange="updateSchengenWarning()"><option value="Europe/Schengen">Europe / Schengen</option><option value="Americas">Americas</option><option value="Asia">Asia</option><option value="Africa">Africa</option><option value="Middle East">Middle East</option><option value="Worldwide">Worldwide</option></select></div><div class="form-row"><div class="form-group"><label>Departure date</label><input type="date" id="travel-depart"></div><div class="form-group"><label>Return date</label><input type="date" id="travel-return"></div></div><div class="form-group"><label>Number of travellers</label><input type="number" id="travel-count" min="1" max="8" value="1" onchange="renderTravellerForms()"></div><div id="student-fields" style="display:none"><div class="form-row"><div class="form-group"><label>Institution name</label><input type="text" id="student-institution" placeholder="University name"></div><div class="form-group"><label>Course end date</label><input type="date" id="student-end"></div></div></div><div id="pilgrimage-fields" style="display:none"><div class="form-row"><div class="form-group"><label>Type</label><select id="pilgrimage-type"><option>Hajj</option><option>Umrah</option></select></div><div class="form-group"><label>Package operator</label><input type="text" id="pilgrimage-operator" placeholder="Travel operator"></div></div></div><div class="hint-box" id="schengen-warning" style="display:none">Schengen trips require minimum €30,000 medical cover. We'll ensure your plan meets the requirement.</div><button class="btn-primary" onclick="nextStep(2)">Continue →</button><button class="btn-secondary" onclick="prevStep(2)">← Go back</button></div>
+  <div class="step-panel" id="step-3"><div class="step-title">Traveller details</div><div class="step-sub">Provide each traveler's basic passport and birth details.</div><div class="traveller-list" id="traveller-list"></div><button class="btn-primary" onclick="nextStep(3)">Continue →</button><button class="btn-secondary" onclick="prevStep(3)">← Go back</button></div>
+  <div class="step-panel" id="step-4"><div class="step-title">Choose a plan</div><div class="step-sub">Pick a travel package that matches your needs.</div><div class="card-grid"><div class="plan-card selected" id="plan-standard" onclick="selectPlan('Standard',1200)"><div class="plan-radio"></div><h3>Standard</h3><p>Medical, repatriation, cancellation cover.</p><p class="small-text">₦1,200 per person/day</p></div><div class="plan-card" id="plan-premium" onclick="selectPlan('Premium',1800)"><div class="plan-radio"></div><h3>Premium</h3><p>Standard plus baggage, delay and liability.</p><p class="small-text">₦1,800 per person/day</p></div><div class="plan-card" id="plan-elite" onclick="selectPlan('Elite',2500)"><div class="plan-radio"></div><h3>Elite</h3><p>Premium plus adventure sports and business equipment.</p><p class="small-text">₦2,500 per person/day</p></div></div><button class="btn-primary" onclick="nextStep(4)">Continue →</button><button class="btn-secondary" onclick="prevStep(4)">← Go back</button></div>
+  <div class="step-panel" id="step-5"><div class="step-title">Summary & pay</div><div class="step-sub">Review your trip insurance and pay online.</div><div class="summary-card"><div class="summary-title">Travel summary</div><div class="summary-row"><span>Trip type</span><span id="summary-trip">Single Trip</span></div><div class="summary-row"><span>Region</span><span id="summary-region">Europe/Schengen</span></div><div class="summary-row"><span>Travellers</span><span id="summary-travellers">1</span></div><div class="summary-row"><span>Plan</span><span id="summary-plan">Standard</span></div><div class="summary-row"><span>Price per person/day</span><span id="summary-price">₦1,200</span></div><div class="summary-total"><span class="summary-total-label">Estimated total</span><span class="summary-total-price" id="summary-total">₦1,200</span></div></div><button class="btn-primary" onclick="submitForm()">Pay securely with Paystack →</button><button class="btn-secondary" onclick="prevStep(5)">← Go back</button></div>
+  <div class="success-screen" id="success"><div class="success-circle">✅</div><h2>Travel policy issued</h2><p>Your travel insurance is ready. Policy documentation is available to download, and emergency support is on standby.</p><div class="summary-card"><div class="summary-title">Your travel documents</div><div class="summary-row"><span>Policy number</span><span id="policy-number">COV-TRV-00000</span></div><div class="summary-row"><span>Emergency line</span><span>+234 700 000 1111</span></div><a href="#" class="btn-secondary" style="text-align:center">Download policy document</a></div></div>
+</div>
+<script>
+let currentStep=1;let tripType='Single Trip';let selectedPlan='Standard';let perDay=1200;
+function goBack(){
+  if(currentStep === "1a") { prevStep("1a"); return; }
+  if(currentStep === "1b") { prevStep("1b"); return; }if(currentStep>1)prevStep(currentStep);else window.history.back();}
+function selectTrip(type){tripType=type;document.querySelectorAll('#step-1 .plan-card').forEach(c=>c.classList.remove('selected'));document.getElementById('trip-'+type.toLowerCase().replace(/ /g,'-')).classList.add('selected');renderTripExtra();}
+function renderTripExtra(){document.getElementById('student-fields').style.display=tripType==='Student Protection'?'block':'none';document.getElementById('pilgrimage-fields').style.display=tripType==='Pilgrimage Protection'?'block':'none';updateSchengenWarning();}
+function updateSchengenWarning(){document.getElementById('schengen-warning').style.display=document.getElementById('travel-region').value==='Europe/Schengen'?'block':'none';}
+function renderTravellerForms(){const count=Math.max(1,Math.min(8,parseInt(document.getElementById('travel-count').value)||1));const list=document.getElementById('traveller-list');list.innerHTML='';for(let i=1;i<=count;i++){const card=document.createElement('div');card.className='traveller-card';card.innerHTML=`<div style="font-weight:700;margin-bottom:12px">Traveller ${i}</div><div class="form-row"><div class="form-group"><label>Name</label><input type="text" id="traveller-name-${i}" placeholder="Full name"></div><div class="form-group"><label>Date of birth</label><input type="date" id="traveller-dob-${i}"></div></div><div class="form-group"><label>Passport number</label><input type="text" id="traveller-passport-${i}" placeholder="Passport number"></div>`;list.appendChild(card);}updateSummary();}
+function selectPlan(plan,price){selectedPlan=plan;perDay=price;document.querySelectorAll('#step-4 .plan-card').forEach(c=>c.classList.remove('selected'));document.getElementById('plan-'+plan.toLowerCase()).classList.add('selected');updateSummary();}
+function updateSummary(){const travellers=parseInt(document.getElementById('travel-count').value)||1;const region=document.getElementById('travel-region').value;const depart=document.getElementById('travel-depart').value;const ret=document.getElementById('travel-return').value;let days=1;if(depart&&ret){const d1=new Date(depart);const d2=new Date(ret);days=Math.max(1,Math.round((d2-d1)/(1000*60*60*24))+1);}document.getElementById('summary-trip').textContent=tripType;document.getElementById('summary-region').textContent=region;document.getElementById('summary-travellers').textContent=travellers;document.getElementById('summary-plan').textContent=selectedPlan;document.getElementById('summary-price').textContent='₦'+perDay.toLocaleString('en-NG');document.getElementById('summary-total').textContent='₦'+(perDay*travellers*days).toLocaleString('en-NG');}
+function validateStep(step){if(step===2){let ok=true;[['travel-depart'],['travel-return']].forEach(([id])=>{const el=document.getElementById(id);const grp=el.closest('.form-group');if(!el.value){grp.classList.add('error');ok=false;}else grp.classList.remove('error');});return ok;}return true;}
+function nextStep(from){if(!validateStep(from))return; if(from===2){renderTravellerForms();updateSummary();} if(from===3){updateSummary();}goToStep(from+1);}
+  if(from === 1){
+    document.getElementById('step-1').classList.remove('active');
+    document.getElementById('step-1a').classList.add('active');
+    return;
+  }
+  if(from === '1a'){
+    if(!validateContact()) return;
+    const dest = otpMethod === 'phone' ? document.getElementById('phone').value : document.getElementById('email').value;
+    const dEl = document.getElementById('otp-destination');
+    if(dEl) dEl.textContent = dest;
+    document.getElementById('step-1a').classList.remove('active');
+    document.getElementById('step-1b').classList.add('active');
+    const firstOtp = document.querySelector('#signup-otp-container input');
+    if(firstOtp) firstOtp.focus();
+    return;
+  }
+  if(from === '1b'){
+    if(!validateOTP()) return;
+    document.getElementById('step-1b').classList.remove('active');
+    document.getElementById('step-2').classList.add('active');
+    if(typeof updateProgress === 'function') updateProgress(2);
+    else if(typeof goToStep === 'function') {
+        currentStep = 2;
+        for(let i=1; i<=6; i++) {
+           let pr = document.getElementById('prog-'+i);
+           if(pr){
+              pr.classList.remove('active', 'done');
+              if(i<2) pr.classList.add('done');
+              if(i===2) pr.classList.add('active');
+           }
+        }
+    }
+    return;
+  }
+
+function prevStep(cur){
+  if(cur === '1a') {
+    document.getElementById('step-1a').classList.remove('active');
+    document.getElementById('step-1').classList.add('active');
+    return;
+  }
+  if(cur === '1b') {
+    document.getElementById('step-1b').classList.remove('active');
+    document.getElementById('step-1a').classList.add('active');
+    return;
+  }
+  if(cur === 2) {
+    document.getElementById('step-2').classList.remove('active');
+    document.getElementById('step-1b').classList.add('active');
+    return;
+  }
+goToStep(cur-1);}function goToStep(n){document.querySelectorAll('.step-panel').forEach(p=>p.classList.remove('active'));document.getElementById('step-'+n).classList.add('active');for(let i=1;i<=5;i++){const prog=document.getElementById('prog-'+i);prog.classList.remove('active','done');if(i<n)prog.classList.add('done');if(i===n)prog.classList.add('active')}currentStep=n;window.scrollTo({top:0,behavior:'smooth'});}
+
+let otpMethod = 'phone';
+function selectOtpMethod(method) {
+  otpMethod = method;
+  const tPhone = document.getElementById('tab-opt-phone');
+  const tEmail = document.getElementById('tab-opt-email');
+  if(method === 'phone') {
+    if(tPhone) { tPhone.style.background = 'var(--w)'; tPhone.style.color = 'var(--ink)'; tPhone.style.boxShadow = '0 2px 8px rgba(0,0,0,.05)'; }
+    if(tEmail) { tEmail.style.background = 'transparent'; tEmail.style.color = 'var(--inkl)'; tEmail.style.boxShadow = 'none'; }
+  } else {
+    if(tEmail) { tEmail.style.background = 'var(--w)'; tEmail.style.color = 'var(--ink)'; tEmail.style.boxShadow = '0 2px 8px rgba(0,0,0,.05)'; }
+    if(tPhone) { tPhone.style.background = 'transparent'; tPhone.style.color = 'var(--inkl)'; tPhone.style.boxShadow = 'none'; }
+  }
+}
+function toggleBusinessFields(){
+  const type = document.getElementById('account-type');
+  const bf = document.getElementById('business-fields');
+  if(type && bf) bf.style.display = type.value === 'business' ? 'block' : 'none';
+}
+function moveToNext(el, event) {
+  if (event.key === 'Backspace') {
+    if (el.previousElementSibling) el.previousElementSibling.focus();
+  } else if (el.value.length === 1) {
+    if (el.nextElementSibling) el.nextElementSibling.focus();
+  }
+}
+function validateContact(){
+  let ok = true;
+  [['fg-fn','fn',v=>v.trim().length>1],['fg-ln','ln',v=>v.trim().length>1],
+   ['fg-phone','phone',v=>v.replace(/\D/g,'').length>=10],
+   ['fg-email','email',v=>/\S+@\S+\.\S+/.test(v)]
+  ].forEach(([g,f,fn])=>{
+    const grp=document.getElementById(g);
+    const el=document.getElementById(f);
+    if(grp && el) {
+        if(!fn(el.value)){grp.classList.add('error');ok=false;}
+        else grp.classList.remove('error');
+    }
+  });
+  return ok;
+}
+function validateOTP(){
+  let otp = '';
+  document.querySelectorAll('#signup-otp-container input').forEach(i => otp += i.value);
+  const grp = document.getElementById('fg-otp');
+  if(otp.length < 6){ if(grp) grp.classList.add('error'); return false; }
+  if(grp) grp.classList.remove('error');
+  return true;
+}
+
+
+function submitForm(){
+  const emailEl = document.getElementById('email');
+  const phoneEl = document.getElementById('phone');
+  const amountEl = document.getElementById('summary-price');
+  
+  const email = emailEl ? emailEl.value : 'user@example.com';
+  const phone = phoneEl ? phoneEl.value : '08000000000';
+  let amountStr = '0';
+  if(amountEl) amountStr = amountEl.textContent.replace(/[^0-9]/g, '');
+  if(!amountStr) amountStr = '1000'; // fallback
+  
+  const amountKobo = parseInt(amountStr, 10) * 100;
+  
+  const pkMeta = document.getElementById('paystack-key');
+  const pk = pkMeta ? pkMeta.content : 'pk_test_mock_key_12345';
+  
+  // Use global PaystackPop or window.PaystackPop
+  const popup = new PaystackPop();
+  const config = {
+    key: pk,
+    email: email,
+    amount: amountKobo,
+    currency: 'NGN',
+    ref: 'COVA-TRAVEL-' + Date.now(),
+    metadata: {
+      custom_fields: [
+        { display_name: "Product Type", variable_name: "product_type", value: "TRAVEL" },
+        { display_name: "Customer Phone", variable_name: "customer_phone", value: phone }
+      ]
+    },
+    onSuccess: function(response) {
+      localStorage.setItem('cova_last_ref', response.reference);
+      document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+      const successEl = document.getElementById('success');
+      if(successEl) successEl.classList.add('active');
+      window.scrollTo({top:0, behavior:'smooth'});
+    },
+    onCancel: function() {
+      const t = document.createElement('div');
+      t.textContent = 'Payment cancelled';
+      t.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--crd);color:white;padding:12px 24px;border-radius:8px;z-index:9999;font-weight:600;';
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 3000);
+    }
+  };
+  
+  // One-time payment
+  
+  popup.setup(config);
+  popup.openIframe();
+}
+
+async function submitTravelPolicy() {
+  // Get form data
+  const destination = document.getElementById('destination').value;
+  const travelDuration = parseInt(document.getElementById('duration').value);
+  const tripType = document.getElementById('trip-type').value;
+  
+  // Validation
+  if (!destination || !travelDuration || !tripType) {
+    alert('Please fill in all fields');
+    return;
+  }
+  
+  // Calculate premium
+  const premium = calculateTravelPremium(travelDuration, tripType);
+  
+  // Prepare data for backend
+  const policyData = {
+    product_type: 'travel',
+    cover_type: tripType,
+    insurer: 'Zenith',
+    sum_insured: premium * 2, // Sum insured = 2x premium
+    premium_amount: premium,
+    premium_frequency: 'once',
+    start_date: new Date().toISOString().split('T')[0],
+    end_date: new Date(Date.now() + travelDuration * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    metadata: {
+      destination: destination,
+      duration_days: travelDuration,
+      trip_type: tripType,
+    },
+  };
+  
+  // Call API
+  const result = await createPolicy(policyData);
+  
+  if (result.ok) {
+    const policyId = result.data.policy.id;
+    alert('Policy created! Proceeding to payment...');
+    // Redirect to payment
+    window.location.href = `cova-claim.html?policy_id=${policyId}&amount=${policyData.premium_amount}`;
+  } else {
+    alert('Error creating policy: ' + result.data.error.message);
+  }
+}
+
+function calculateTravelPremium(duration, tripType) {
+  const baseRates = {
+    'single': 5000,
+    'multi': 8000,
+  };
+  return (baseRates[tripType] || 5000) * (duration / 7); // Weekly base rate
+}
+
+</script>
+  <script src="https://cdn.jsdelivr.net/npm/@paystack/inline-js/dist/inline.min.js">
+function submitForm(){
+  const emailEl = document.getElementById('email');
+  const phoneEl = document.getElementById('phone');
+  const amountEl = document.getElementById('summary-price');
+  
+  const email = emailEl ? emailEl.value : 'user@example.com';
+  const phone = phoneEl ? phoneEl.value : '08000000000';
+  let amountStr = '0';
+  if(amountEl) amountStr = amountEl.textContent.replace(/[^0-9]/g, '');
+  if(!amountStr) amountStr = '1000'; // fallback
+  
+  const amountKobo = parseInt(amountStr, 10) * 100;
+  
+  const pkMeta = document.getElementById('paystack-key');
+  const pk = pkMeta ? pkMeta.content : 'pk_test_mock_key_12345';
+  
+  // Use global PaystackPop or window.PaystackPop
+  const popup = new PaystackPop();
+  const config = {
+    key: pk,
+    email: email,
+    amount: amountKobo,
+    currency: 'NGN',
+    ref: 'COVA-TRAVEL-' + Date.now(),
+    metadata: {
+      custom_fields: [
+        { display_name: "Product Type", variable_name: "product_type", value: "TRAVEL" },
+        { display_name: "Customer Phone", variable_name: "customer_phone", value: phone }
+      ]
+    },
+    onSuccess: function(response) {
+      localStorage.setItem('cova_last_ref', response.reference);
+      document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+      const successEl = document.getElementById('success');
+      if(successEl) successEl.classList.add('active');
+      window.scrollTo({top:0, behavior:'smooth'});
+    },
+    onCancel: function() {
+      const t = document.createElement('div');
+      t.textContent = 'Payment cancelled';
+      t.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--crd);color:white;padding:12px 24px;border-radius:8px;z-index:9999;font-weight:600;';
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 3000);
+    }
+  };
+  
+  // One-time payment
+  
+  popup.setup(config);
+  popup.openIframe();
+}
+
+</script>
+</body>
+</html>

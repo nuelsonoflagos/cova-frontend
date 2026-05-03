@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cova Fire & Perils Onboarding</title>
+<script src="api-client.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--g:#0A5C45;--gm:#137A5C;--gl:#1D9E75;--gp:#E6F5F0;--crd:#E8E4DB;--cream:#F7F4EE;--ink:#0F1A14;--inkm:#2D3E35;--inkl:#5A6E63;--inkf:#9AADA3;--w:#fff;--r:#C0392B;--rp:#FDECEA;--am:#D4860A;--amp:#FEF3E2;--fd:'Syne',sans-serif;--fb:'DM Sans',sans-serif;--rad:16px;--radsm:10px;--shadow:0 2px 20px rgba(10,92,69,0.08)}
+html{scroll-behavior:smooth}
+body{font-family:var(--fb);background:var(--cream);color:var(--ink);min-height:100vh;line-height:1.6}
+nav{padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between;background:var(--w);border-bottom:1px solid var(--crd)}
+.logo{font-family:var(--fd);font-size:20px;font-weight:800;color:var(--g)}
+.logo span{color:var(--gl)}
+.nav-back{font-size:13px;color:var(--inkl);text-decoration:none;display:flex;align-items:center;gap:6px;cursor:pointer}
+.nav-back:hover{color:var(--g)}
+.progress-bar{background:var(--w);border-bottom:1px solid var(--crd);padding:16px 24px}
+.progress-steps{display:flex;align-items:center;gap:0;max-width:680px;margin:0 auto}
+.prog-step{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;position:relative}
+.prog-step:not(:last-child)::after{content:'';position:absolute;top:14px;left:50%;width:100%;height:2px;background:var(--crd);z-index:0}
+.prog-step.done:not(:last-child)::after{background:var(--gl)}
+.prog-dot{width:28px;height:28px;border-radius:50%;border:2px solid var(--crd);background:var(--w);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--inkf);z-index:1}
+.prog-step.done .prog-dot{background:var(--gl);border-color:var(--gl);color:var(--w)}
+.prog-step.active .prog-dot{background:var(--g);border-color:var(--g);color:var(--w)}
+.prog-label{font-size:11px;color:var(--inkf);font-weight:400;text-align:center;white-space:nowrap}
+.prog-step.active .prog-label{color:var(--g);font-weight:500}
+.prog-step.done .prog-label{color:var(--gl)}
+.main{max-width:720px;margin:0 auto;padding:32px 24px 80px}
+.step-panel{display:none}
+.step-panel.active{display:block;animation:fadeUp .35s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.step-title{font-family:var(--fd);font-size:28px;font-weight:800;color:var(--ink);margin-bottom:8px}
+.step-sub{font-size:15px;color:var(--inkl);margin-bottom:24px;font-weight:300;line-height:1.7}
+.form-group{margin-bottom:20px}
+.form-group label{display:block;font-size:13px;font-weight:600;color:var(--inkm);margin-bottom:8px}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:14px 16px;border:1.5px solid var(--crd);border-radius:var(--radsm);font-family:var(--fb);font-size:15px;color:var(--ink);background:var(--w);outline:none;transition:border-color .2s,box-shadow .2s}
+.form-group input:focus,.form-group select:focus{border-color:var(--gl);box-shadow:0 0 0 3px rgba(29,158,117,0.1)}
+.form-group input::placeholder{color:var(--inkf)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.checkbox-grid-6{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:20px}
+.checkbox-card{border:2px solid var(--crd);border-radius:var(--rad);padding:22px;cursor:pointer;transition:all .2s;background:var(--w);position:relative}
+.checkbox-card:hover{border-color:var(--gl)}
+.checkbox-card.selected{border-color:var(--gl);background:var(--gp);box-shadow:0 10px 30px rgba(10,92,69,0.08)}
+.checkbox-card h3{font-family:var(--fd);font-size:16px;font-weight:700;margin-bottom:8px}
+.checkbox-card p{font-size:14px;color:var(--inkl);line-height:1.6}
+.checkbox-badge{position:absolute;top:18px;right:18px;width:18px;height:18px;border-radius:50%;border:2px solid var(--crd);display:flex;align-items:center;justify-content:center;background:var(--w)}
+.checkbox-card.selected .checkbox-badge{border-color:var(--gl);background:var(--gl);color:var(--w)}
+.radio-grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px}
+.radio-card{border:1.5px solid var(--crd);border-radius:18px;padding:18px;cursor:pointer;transition:all .2s;background:var(--w)}
+.radio-card:hover{border-color:var(--gl)}
+.radio-card.selected{border-color:var(--gl);background:var(--gp)}
+.toggle-pill{display:inline-flex;align-items:center;gap:10px;padding:14px 18px;border-radius:999px;border:1.5px solid var(--crd);background:var(--w);cursor:pointer;transition:all .2s}
+.toggle-pill.selected{border-color:var(--gl);background:var(--gp)}
+.toggle-pill span{font-size:14px;color:var(--ink)}
+.summary-card{background:var(--w);border:1px solid var(--crd);border-radius:var(--rad);padding:24px;margin-bottom:20px}
+.summary-title{font-family:var(--fd);font-size:16px;font-weight:700;color:var(--ink);margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--crd)}
+.summary-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--crd);font-size:14px}
+.summary-row:last-child{border-bottom:none}
+.summary-total{display:flex;justify-content:space-between;align-items:center;padding:16px 0 0;margin-top:8px}
+.summary-total-label{font-family:var(--fd);font-size:16px;font-weight:700;color:var(--ink)}
+.summary-total-price{font-family:var(--fd);font-size:24px;font-weight:800;color:var(--g)}
+.badge{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:999px;background:var(--gp);color:var(--g);font-size:13px;font-weight:600;margin-bottom:20px}
+.btn-primary{width:100%;padding:17px;background:var(--g);color:var(--w);border:none;border-radius:var(--radsm);font-family:var(--fd);font-size:16px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-primary:hover{background:var(--gm);transform:translateY(-1px)}
+.btn-secondary{width:100%;padding:14px;background:transparent;color:var(--g);border:2px solid rgba(10,92,69,0.2);border-radius:var(--radsm);font-family:var(--fd);font-size:15px;font-weight:600;cursor:pointer;transition:all .2s;margin-top:12px}
+.btn-secondary:hover{border-color:var(--g);background:var(--gp)}
+.success-screen{text-align:center;padding:40px 0;display:none}
+.success-screen.active{display:block;animation:fadeUp .4s ease both}
+.success-circle{width:80px;height:80px;background:var(--gp);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:36px;margin:0 auto 20px}
+.success-screen h2{font-family:var(--fd);font-size:28px;font-weight:800;color:var(--ink);margin-bottom:10px;letter-spacing:-0.5px}
+.success-screen p{font-size:15px;color:var(--inkl);max-width:420px;margin:0 auto 28px;line-height:1.65}
+.alert-box{background:var(--amp);border-radius:var(--radsm);padding:16px;border:1px solid rgba(212,134,10,.3);color:var(--am);margin-bottom:20px}
+.field-error{font-size:12px;color:var(--r);margin-top:4px;display:none}
+.form-group.error input,.form-group.error select{border-color:var(--r)}
+.form-group.error .field-error{display:block}
+.asset-block{background:var(--w);border:1.5px solid var(--crd);border-radius:18px;padding:20px;margin-bottom:20px}
+.asset-header{font-family:var(--fd);font-size:15px;font-weight:700;color:var(--ink);margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.asset-header .icon{font-size:18px}
+@media(max-width:880px){.checkbox-grid-6{grid-template-columns:1fr}}@media(max-width:560px){.main{padding:24px 16px 60px}.form-row{grid-template-columns:1fr}.radio-grid-3{grid-template-columns:1fr}} 
+</style>
+  <meta id="paystack-key" content="pk_test_mock_key_12345">
+</head>
+<body>
+<nav><div class="logo">Cov<span>a</span></div><a class="nav-back" onclick="goBack()">← Back</a></nav>
+<div class="progress-bar"><div class="progress-steps"><div class="prog-step active" id="prog-1"><div class="prog-dot">1</div><div class="prog-label">Products</div></div><div class="prog-step" id="prog-2"><div class="prog-dot">2</div><div class="prog-label">Business details</div></div><div class="prog-step" id="prog-3"><div class="prog-dot">3</div><div class="prog-label">Asset details</div></div><div class="prog-step" id="prog-4"><div class="prog-dot">4</div><div class="prog-label">Risk</div></div><div class="prog-step" id="prog-5"><div class="prog-dot">5</div><div class="prog-label">Summary</div></div></div></div>
+<div class="main">
+  <div class="step-panel active" id="step-1"><div class="step-title">Choose fire & perils products</div><div class="step-sub">Select one or more covers for your business property and operations.</div><div class="checkbox-grid-6"><div class="checkbox-card selected" id="prod-fire" onclick="toggleProduct('fire')"><div class="checkbox-badge">✓</div><h3>Fire & Special Perils</h3><p>Building and contents against fire, lightning, explosion, and named perils.</p></div><div class="checkbox-card" id="prod-burglary" onclick="toggleProduct('burglary')"><div class="checkbox-badge">✓</div><h3>Burglary & Theft</h3><p>Cover against forced entry, theft of stock and contents.</p></div><div class="checkbox-card" id="prod-consequential" onclick="toggleProduct('consequential')"><div class="checkbox-badge">✓</div><h3>Consequential Loss</h3><p>Loss of profits following a fire or perils event.</p></div><div class="checkbox-card" id="prod-money" onclick="toggleProduct('money')"><div class="checkbox-badge">✓</div><h3>Money Insurance</h3><p>Cash on premises, in transit, and in safe.</p></div><div class="checkbox-card" id="prod-fidelity" onclick="toggleProduct('fidelity')"><div class="checkbox-badge">✓</div><h3>Fidelity Guarantee</h3><p>Cover against employee dishonesty or fraud.</p></div><div class="checkbox-card" id="prod-liability" onclick="toggleProduct('liability')"><div class="checkbox-badge">✓</div><h3>Public Liability</h3><p>Third-party injury and property damage liability.</p></div></div><div class="badge" id="bundle-badge" style="display:none"><span>Bundle discount</span>You selected 3+ products. Bundle saves up to 10% on total premium.</div><button class="btn-primary" onclick="nextStep(1)">Continue →</button></div>
+  
+  <!-- STEP 1a: Contact Info -->
+  <div class="step-panel" id="step-1a">
+    <div class="step-title">Your Details</div>
+    <div class="step-sub">Provide your contact info to secure your quote.</div>
+    <div class="form-row">
+      <div class="form-group" id="fg-fn"><label>First name</label><input type="text" id="fn" placeholder="Emeka"><div class="field-error">Required</div></div>
+      <div class="form-group" id="fg-ln"><label>Last name</label><input type="text" id="ln" placeholder="Adekunle"><div class="field-error">Required</div></div>
+    </div>
+    <div class="form-group" id="fg-phone"><label>WhatsApp number</label><input type="tel" id="phone" placeholder="080 xxxx xxxx"><div class="field-error">Enter a valid Nigerian number</div></div>
+    <div class="form-group" id="fg-email"><label>Email address</label><input type="email" id="email" placeholder="emeka@business.com"><div class="field-error">Enter a valid email</div></div>
+    
+    <div class="form-group">
+      <label>Are you insuring for yourself or your business?</label>
+      <select id="account-type" onchange="toggleBusinessFields()">
+        <option value="personal">Myself — personal</option>
+        <option value="business">My business — company</option>
+      </select>
+    </div>
+    <div id="business-fields" style="display:none">
+      <div class="form-group" id="fg-companyname"><label>Company name</label><input type="text" id="companyname" placeholder="e.g. Cova Tech Ltd"></div>
+      <div class="form-group" id="fg-rcnumber"><label>RC Number (Optional)</label><input type="text" id="rcnumber" placeholder="e.g. RC 123456"></div>
+    </div>
+
+    <div class="form-group">
+      <label>Where should we send your verification code?</label>
+      <div class="login-tabs" style="display:flex;gap:8px;background:var(--gp);padding:6px;border-radius:12px;margin-bottom:10px">
+        <div class="login-tab active" id="tab-opt-phone" onclick="selectOtpMethod('phone')" style="flex:1;text-align:center;padding:10px;font-size:13px;font-weight:600;cursor:pointer;border-radius:8px;background:var(--w);box-shadow:0 2px 8px rgba(0,0,0,.05)">WhatsApp</div>
+        <div class="login-tab" id="tab-opt-email" onclick="selectOtpMethod('email')" style="flex:1;text-align:center;padding:10px;font-size:13px;font-weight:600;cursor:pointer;border-radius:8px;color:var(--inkl)">Email</div>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="nextStep('1a')">Continue →</button>
+    <button class="btn-secondary" onclick="prevStep('1a')">← Go back</button>
+  </div>
+
+  <!-- STEP 1b: OTP Verification -->
+  <div class="step-panel" id="step-1b">
+    <div class="step-title">Verify your contact</div>
+    <div class="step-sub">We've sent a 6-digit code to <strong id="otp-destination"></strong>.</div>
+    <div class="form-group" id="fg-otp">
+      <div style="display:flex;gap:10px;justify-content:space-between;margin:20px 0" class="otp-inputs" id="signup-otp-container">
+        <input type="text" maxlength="1" style="width:45px;height:50px;text-align:center;font-size:20px;font-weight:700;border-radius:12px;border:1.5px solid var(--crd);background:var(--gp)" onkeyup="moveToNext(this, event)">
+        <input type="text" maxlength="1" style="width:45px;height:50px;text-align:center;font-size:20px;font-weight:700;border-radius:12px;border:1.5px solid var(--crd);background:var(--gp)" onkeyup="moveToNext(this, event)">
+        <input type="text" maxlength="1" style="width:45px;height:50px;text-align:center;font-size:20px;font-weight:700;border-radius:12px;border:1.5px solid var(--crd);background:var(--gp)" onkeyup="moveToNext(this, event)">
+        <input type="text" maxlength="1" style="width:45px;height:50px;text-align:center;font-size:20px;font-weight:700;border-radius:12px;border:1.5px solid var(--crd);background:var(--gp)" onkeyup="moveToNext(this, event)">
+        <input type="text" maxlength="1" style="width:45px;height:50px;text-align:center;font-size:20px;font-weight:700;border-radius:12px;border:1.5px solid var(--crd);background:var(--gp)" onkeyup="moveToNext(this, event)">
+        <input type="text" maxlength="1" style="width:45px;height:50px;text-align:center;font-size:20px;font-weight:700;border-radius:12px;border:1.5px solid var(--crd);background:var(--gp)" onkeyup="moveToNext(this, event)">
+      </div>
+      <div class="field-error">Please enter the 6-digit code</div>
+    </div>
+    <button class="btn-primary" onclick="nextStep('1b')">Verify & Continue →</button>
+    <button class="btn-secondary" onclick="prevStep('1b')">← Go back</button>
+  </div>
+
+  <div class="step-panel" id="step-2"><div class="step-title">Business details</div><div class="step-sub">Basic information about the insured business.</div><div class="form-group" id="fg-company"><label>Company name</label><input type="text" id="company-name" placeholder="Example Enterprises Limited"><div class="field-error">Enter company name</div></div><div class="form-row"><div class="form-group" id="fg-rc"><label>RC number</label><input type="text" id="company-rc" placeholder="RC1234567"><div class="field-error">Enter RC number</div></div><div class="form-group" id="fg-type"><label>Business type</label><input type="text" id="company-type" placeholder="Retail, Manufacturing, etc."></div></div><div class="form-group"><label>Address</label><input type="text" id="company-address" placeholder="No. 123, Example Street"></div><div class="form-row"><div class="form-group" id="fg-state"><label>State</label><select id="company-state"><option value="">Select state</option><option>Lagos</option><option>Abuja</option><option>Rivers</option><option>Enugu</option><option>Oyo</option><option>Others</option></select><div class="field-error">Select state</div></div><div class="form-group" id="fg-turnover"><label>Annual turnover (₦)</label><input type="number" id="annual-turnover" min="1000000" placeholder="500000000"><div class="field-error">Enter turnover</div></div></div><div class="form-group"><label>Staff count</label><input type="number" id="staff-count" min="1" placeholder="25"></div><button class="btn-primary" onclick="nextStep(2)">Continue →</button><button class="btn-secondary" onclick="prevStep(2)">← Go back</button></div>
+  <div class="step-panel" id="step-3"><div class="step-title">Asset details per product</div><div class="step-sub">Enter values and specifications for each selected product.</div>
+    <div class="asset-block" id="asset-fire"><div class="asset-header"><span class="icon">🔥</span>Fire & Special Perils</div><div class="form-row"><div class="form-group"><label>Building value</label><input type="number" id="fire-building" min="0" placeholder="50000000"></div><div class="form-group"><label>Contents value</label><input type="number" id="fire-contents" min="0" placeholder="10000000"></div></div><div class="form-group"><label>Stock value</label><input type="number" id="fire-stock" min="0" placeholder="15000000"></div></div>
+    <div class="asset-block" id="asset-burglary" style="display:none"><div class="asset-header"><span class="icon">🔓</span>Burglary & Theft</div><div class="form-row"><div class="form-group"><label>Stock value</label><input type="number" id="burg-stock" min="0" placeholder="12000000"></div><div class="form-group"><label>Contents value</label><input type="number" id="burg-contents" min="0" placeholder="8000000"></div></div></div>
+    <div class="asset-block" id="asset-consequential" style="display:none"><div class="asset-header"><span class="icon">📉</span>Consequential Loss</div><div class="form-row"><div class="form-group"><label>Monthly gross profit</label><input type="number" id="cl-gp" min="0" placeholder="3000000"></div><div class="form-group"><label>Indemnity period</label><select id="cl-period"><option value="3">3 months</option><option value="6">6 months</option><option value="12">12 months</option></select></div></div></div>
+    <div class="asset-block" id="asset-money" style="display:none"><div class="asset-header"><span class="icon">💵</span>Money Insurance</div><div class="form-row"><div class="form-group"><label>Max cash on premises</label><input type="number" id="money-premises" min="0" placeholder="2000000"></div><div class="form-group"><label>Max cash in transit</label><input type="number" id="money-transit" min="0" placeholder="5000000"></div></div></div>
+    <div class="asset-block" id="asset-fidelity" style="display:none"><div class="asset-header"><span class="icon">👥</span>Fidelity Guarantee</div><div class="form-group"><label>Staff to cover (names and roles)</label><textarea id="fidelity-staff" rows="3" placeholder="Jane Doe, Finance Manager; John Smith, Accountant"></textarea></div><div class="form-group"><label>Annual salary total (₦)</label><input type="number" id="fidelity-salary" min="0" placeholder="36000000"></div></div>
+    <div class="asset-block" id="asset-liability" style="display:none"><div class="asset-header"><span class="icon">⚖️</span>Public Liability</div><div class="form-row"><div class="form-group"><label>Nature of business</label><input type="text" id="liab-nature" placeholder="Retail, Warehousing, etc."></div><div class="form-group"><label>Estimated annual visitors</label><input type="number" id="liab-visitors" min="0" placeholder="50000"></div></div></div>
+  <button class="btn-primary" onclick="nextStep(3)">Continue →</button><button class="btn-secondary" onclick="prevStep(3)">← Go back</button></div>
+  <div class="step-panel" id="step-4"><div class="step-title">Risk management</div><div class="step-sub">Tell us about your security and fire protection measures.</div><div class="form-group"><label>Security measures (check all that apply)</label><div style="display:grid;gap:12px;margin-bottom:20px"><label class="toggle-pill" id="sec-cctv"><input type="checkbox" id="check-cctv" style="display:none"><span>CCTV</span></label><label class="toggle-pill" id="sec-guards"><input type="checkbox" id="check-guards" style="display:none"><span>Security guards</span></label><label class="toggle-pill" id="sec-alarm"><input type="checkbox" id="check-alarm" style="display:none"><span>Intruder alarm</span></label><label class="toggle-pill" id="sec-fence"><input type="checkbox" id="check-fence" style="display:none"><span>Fenced premises</span></label></div></div>
+<div class="form-group"><label>Fire suppression</label><div class="radio-grid-3"><div class="radio-card selected" id="supp-sprinklers" onclick="selectSuppression('sprinklers')"><strong>Sprinklers</strong></div><div class="radio-card" id="supp-extinguishers" onclick="selectSuppression('extinguishers')"><strong>Extinguishers</strong></div><div class="radio-card" id="supp-none" onclick="selectSuppression('none')"><strong>None</strong></div></div></div>
+<div class="form-group"><label>Previous claims (last 3 years)</label><div class="radio-grid-3"><div class="radio-card" id="claims-yes" onclick="selectClaims(true)"><strong>Yes</strong></div><div class="radio-card selected" id="claims-no" onclick="selectClaims(false)"><strong>No</strong></div></div></div>
+<button class="btn-primary" onclick="nextStep(4)">Continue →</button><button class="btn-secondary" onclick="prevStep(4)">← Go back</button></div>
+  <div class="step-panel" id="step-5"><div class="step-title">Review & pay</div><div class="step-sub">Premium breakdown by product with any bundle discount applied.</div><div class="summary-card"><div class="summary-title">Premium breakdown</div><div class="summary-row" id="row-fire"><span>Fire & Special Perils</span><span id="premium-fire">₦0</span></div><div class="summary-row" id="row-burglary"><span>Burglary & Theft</span><span id="premium-burglary">₦0</span></div><div class="summary-row" id="row-consequential"><span>Consequential Loss</span><span id="premium-consequential">₦0</span></div><div class="summary-row" id="row-money"><span>Money Insurance</span><span id="premium-money">₦0</span></div><div class="summary-row" id="row-fidelity"><span>Fidelity Guarantee</span><span id="premium-fidelity">₦0</span></div><div class="summary-row" id="row-liability"><span>Public Liability</span><span id="premium-liability">₦0</span></div><div class="summary-row" id="row-bundle" style="display:none;color:var(--g)"><span>Bundle discount (10%)</span><span id="premium-discount">-₦0</span></div><div class="summary-total"><span class="summary-total-label">Total annual premium</span><span class="summary-total-price" id="premium-total">₦0</span></div></div><button class="btn-primary" onclick="submitForm()">Pay securely with Paystack →</button><button class="btn-secondary" onclick="prevStep(5)">← Go back</button></div>
+  <div class="success-screen" id="success"><div class="success-circle">✅</div><h2>Policy issued</h2><p>Your fire and perils cover is active. Schedule and certificate sent to your email.</p><div class="summary-card"><div class="summary-title">Policy details</div><div class="summary-row"><span>Policy number</span><span id="policy-code">COV-FIRE-00000</span></div><div class="summary-row"><span>Insurer</span><span>AIICO / Leadway (panel)</span></div><div class="summary-row"><span>Status</span><span>Active</span></div></div></div>
+</div>
+<script>
+let currentStep=1;
+const productState={fire:true,burglary:false,consequential:false,money:false,fidelity:false,liability:false};
+let suppression='sprinklers';let hasClaims=false;
+function goBack(){
+  if(currentStep === "1a") { prevStep("1a"); return; }
+  if(currentStep === "1b") { prevStep("1b"); return; }if(currentStep>1)prevStep(currentStep);else window.history.back();}
+function toggleProduct(key){productState[key]=!productState[key];const card=document.getElementById('prod-'+key);card.classList.toggle('selected',productState[key]);updateBundleBadge();updateAssetPanels();}
+function updateBundleBadge(){const count=Object.values(productState).filter(Boolean).length;document.getElementById('bundle-badge').style.display=count>=3?'flex':'none';}
+function updateAssetPanels(){Object.entries(productState).forEach(([key,sel])=>{const panel=document.getElementById('asset-'+key);if(panel)panel.style.display=sel?'block':'none';});}
+function selectSuppression(value){suppression=value;['supp-sprinklers','supp-extinguishers','supp-none'].forEach(id=>document.getElementById(id).classList.toggle('selected',id==='supp-'+value));}
+function selectClaims(yes){hasClaims=yes;document.getElementById('claims-yes').classList.toggle('selected',yes);document.getElementById('claims-no').classList.toggle('selected',!yes);}
+function parseNumber(id){return Math.max(0,parseFloat(document.getElementById(id).value)||0);}
+function calcPremium(){let fire=0,burglary=0,consequential=0,money=0,fidelity=0,liability=0;
+if(productState.fire){const building=parseNumber('fire-building');const contents=parseNumber('fire-contents');const stock=parseNumber('fire-stock');fire=(building+contents+stock)*0.0005;}
+if(productState.burglary){const stock=parseNumber('burg-stock');const contents=parseNumber('burg-contents');burglary=(stock+contents)*0.0012;}
+if(productState.consequential){const gp=parseNumber('cl-gp');const period=Number(document.getElementById('cl-period').value)||12;consequential=gp*period*0.004;}
+if(productState.money){const premises=parseNumber('money-premises');const transit=parseNumber('money-transit');money=(premises+transit)*0.001;}
+if(productState.fidelity){const salary=parseNumber('fidelity-salary');fidelity=salary*0.003;}
+if(productState.liability){const visitors=parseNumber('liab-visitors');liability=Math.max(250000,visitors*5);}
+const total=fire+burglary+consequential+money+fidelity+liability;const count=Object.values(productState).filter(Boolean).length;const discount=count>=3?total*0.1:0;
+document.getElementById('premium-fire').textContent='₦'+Math.round(fire).toLocaleString('en-NG');
+document.getElementById('premium-burglary').textContent='₦'+Math.round(burglary).toLocaleString('en-NG');
+document.getElementById('premium-consequential').textContent='₦'+Math.round(consequential).toLocaleString('en-NG');
+document.getElementById('premium-money').textContent='₦'+Math.round(money).toLocaleString('en-NG');
+document.getElementById('premium-fidelity').textContent='₦'+Math.round(fidelity).toLocaleString('en-NG');
+document.getElementById('premium-liability').textContent='₦'+Math.round(liability).toLocaleString('en-NG');
+document.getElementById('row-bundle').style.display=discount>0?'flex':'none';
+document.getElementById('premium-discount').textContent='-₦'+Math.round(discount).toLocaleString('en-NG');
+document.getElementById('premium-total').textContent='₦'+Math.round(total-discount).toLocaleString('en-NG');
+return total-discount;}
+function togglePill(id){const el=document.getElementById(id);el.classList.toggle('selected',el.querySelector('input').checked);}
+['check-cctv','check-guards','check-alarm','check-fence'].forEach((id,i)=>{document.getElementById(id).addEventListener('change',()=>togglePill(['sec-cctv','sec-guards','sec-alarm','sec-fence'][i]));});
+function validateStep(step){if(step===1){const ok=Object.values(productState).some(Boolean);if(!ok){alert('Select at least one product.');}return ok;}if(step===2){let ok=true;[['company-name','Enter company name'],['company-rc','Enter RC number'],['company-state','Select state'],['annual-turnover','Enter turnover']].forEach(([id,msg])=>{const el=document.getElementById(id);const grp=document.getElementById('fg-'+id.replace(/-/g,''));if(!el.value.trim()){grp.classList.add('error');ok=false;} else grp.classList.remove('error');});return ok;}return true;}
+function nextStep(from){if(!validateStep(from))return;if(from===4)calcPremium();goToStep(from+1);}
+  if(from === 1){
+    document.getElementById('step-1').classList.remove('active');
+    document.getElementById('step-1a').classList.add('active');
+    return;
+  }
+  if(from === '1a'){
+    if(!validateContact()) return;
+    const dest = otpMethod === 'phone' ? document.getElementById('phone').value : document.getElementById('email').value;
+    const dEl = document.getElementById('otp-destination');
+    if(dEl) dEl.textContent = dest;
+    document.getElementById('step-1a').classList.remove('active');
+    document.getElementById('step-1b').classList.add('active');
+    const firstOtp = document.querySelector('#signup-otp-container input');
+    if(firstOtp) firstOtp.focus();
+    return;
+  }
+  if(from === '1b'){
+    if(!validateOTP()) return;
+    document.getElementById('step-1b').classList.remove('active');
+    document.getElementById('step-2').classList.add('active');
+    if(typeof updateProgress === 'function') updateProgress(2);
+    else if(typeof goToStep === 'function') {
+        currentStep = 2;
+        for(let i=1; i<=6; i++) {
+           let pr = document.getElementById('prog-'+i);
+           if(pr){
+              pr.classList.remove('active', 'done');
+              if(i<2) pr.classList.add('done');
+              if(i===2) pr.classList.add('active');
+           }
+        }
+    }
+    return;
+  }
+
+function prevStep(cur){
+  if(cur === '1a') {
+    document.getElementById('step-1a').classList.remove('active');
+    document.getElementById('step-1').classList.add('active');
+    return;
+  }
+  if(cur === '1b') {
+    document.getElementById('step-1b').classList.remove('active');
+    document.getElementById('step-1a').classList.add('active');
+    return;
+  }
+  if(cur === 2) {
+    document.getElementById('step-2').classList.remove('active');
+    document.getElementById('step-1b').classList.add('active');
+    return;
+  }
+goToStep(cur-1);}
+function goToStep(n){document.querySelectorAll('.step-panel').forEach(p=>p.classList.remove('active'));document.getElementById('step-'+n).classList.add('active');for(let i=1;i<=5;i++){const prog=document.getElementById('prog-'+i);prog.classList.remove('active','done');if(i<n)prog.classList.add('done');if(i===n)prog.classList.add('active')}currentStep=n;window.scrollTo({top:0,behavior:'smooth'});}
+
+let otpMethod = 'phone';
+function selectOtpMethod(method) {
+  otpMethod = method;
+  const tPhone = document.getElementById('tab-opt-phone');
+  const tEmail = document.getElementById('tab-opt-email');
+  if(method === 'phone') {
+    if(tPhone) { tPhone.style.background = 'var(--w)'; tPhone.style.color = 'var(--ink)'; tPhone.style.boxShadow = '0 2px 8px rgba(0,0,0,.05)'; }
+    if(tEmail) { tEmail.style.background = 'transparent'; tEmail.style.color = 'var(--inkl)'; tEmail.style.boxShadow = 'none'; }
+  } else {
+    if(tEmail) { tEmail.style.background = 'var(--w)'; tEmail.style.color = 'var(--ink)'; tEmail.style.boxShadow = '0 2px 8px rgba(0,0,0,.05)'; }
+    if(tPhone) { tPhone.style.background = 'transparent'; tPhone.style.color = 'var(--inkl)'; tPhone.style.boxShadow = 'none'; }
+  }
+}
+function toggleBusinessFields(){
+  const type = document.getElementById('account-type');
+  const bf = document.getElementById('business-fields');
+  if(type && bf) bf.style.display = type.value === 'business' ? 'block' : 'none';
+}
+function moveToNext(el, event) {
+  if (event.key === 'Backspace') {
+    if (el.previousElementSibling) el.previousElementSibling.focus();
+  } else if (el.value.length === 1) {
+    if (el.nextElementSibling) el.nextElementSibling.focus();
+  }
+}
+function validateContact(){
+  let ok = true;
+  [['fg-fn','fn',v=>v.trim().length>1],['fg-ln','ln',v=>v.trim().length>1],
+   ['fg-phone','phone',v=>v.replace(/\D/g,'').length>=10],
+   ['fg-email','email',v=>/\S+@\S+\.\S+/.test(v)]
+  ].forEach(([g,f,fn])=>{
+    const grp=document.getElementById(g);
+    const el=document.getElementById(f);
+    if(grp && el) {
+        if(!fn(el.value)){grp.classList.add('error');ok=false;}
+        else grp.classList.remove('error');
+    }
+  });
+  return ok;
+}
+function validateOTP(){
+  let otp = '';
+  document.querySelectorAll('#signup-otp-container input').forEach(i => otp += i.value);
+  const grp = document.getElementById('fg-otp');
+  if(otp.length < 6){ if(grp) grp.classList.add('error'); return false; }
+  if(grp) grp.classList.remove('error');
+  return true;
+}
+
+
+function submitForm(){
+  const emailEl = document.getElementById('email');
+  const phoneEl = document.getElementById('phone');
+  const amountEl = document.getElementById('summary-total');
+  
+  const email = emailEl ? emailEl.value : 'user@example.com';
+  const phone = phoneEl ? phoneEl.value : '08000000000';
+  let amountStr = '0';
+  if(amountEl) amountStr = amountEl.textContent.replace(/[^0-9]/g, '');
+  if(!amountStr) amountStr = '1000'; // fallback
+  
+  const amountKobo = parseInt(amountStr, 10) * 100;
+  
+  const pkMeta = document.getElementById('paystack-key');
+  const pk = pkMeta ? pkMeta.content : 'pk_test_mock_key_12345';
+  
+  // Use global PaystackPop or window.PaystackPop
+  const popup = new PaystackPop();
+  const config = {
+    key: pk,
+    email: email,
+    amount: amountKobo,
+    currency: 'NGN',
+    ref: 'COVA-FIRE-' + Date.now(),
+    metadata: {
+      custom_fields: [
+        { display_name: "Product Type", variable_name: "product_type", value: "FIRE" },
+        { display_name: "Customer Phone", variable_name: "customer_phone", value: phone }
+      ]
+    },
+    onSuccess: function(response) {
+      localStorage.setItem('cova_last_ref', response.reference);
+      document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+      const successEl = document.getElementById('success');
+      if(successEl) successEl.classList.add('active');
+      window.scrollTo({top:0, behavior:'smooth'});
+    },
+    onCancel: function() {
+      const t = document.createElement('div');
+      t.textContent = 'Payment cancelled';
+      t.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--crd);color:white;padding:12px 24px;border-radius:8px;z-index:9999;font-weight:600;';
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 3000);
+    }
+  };
+  
+  config.plan = 'PLN_mock123';
+  
+  popup.setup(config);
+  popup.openIframe();
+}
+
+</script>
+  <script src="https://cdn.jsdelivr.net/npm/@paystack/inline-js/dist/inline.min.js">
+
+async function submitFirePolicy() {
+  // Get form data
+  const propertyValue = parseFloat(document.getElementById('property-value').value);
+  const coverType = document.getElementById('cover-type').value;
+  const propertyType = document.getElementById('property-type').value;
+  
+  // Validation
+  if (!propertyValue || !coverType || !propertyType) {
+    alert('Please fill in all fields');
+    return;
+  }
+  
+  // Calculate premium
+  const premium = calculateFirePremium(propertyValue, coverType);
+  
+  // Prepare data for backend
+  const policyData = {
+    product_type: 'fire',
+    cover_type: coverType,
+    insurer: 'AXA',
+    sum_insured: propertyValue,
+    premium_amount: premium,
+    premium_frequency: 'monthly',
+    start_date: new Date().toISOString().split('T')[0],
+    end_date: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    metadata: {
+      property_type: propertyType,
+      property_value: propertyValue,
+    },
+  };
+  
+  // Call API
+  const result = await createPolicy(policyData);
+  
+  if (result.ok) {
+    const policyId = result.data.policy.id;
+    alert('Policy created! Proceeding to payment...');
+    // Redirect to payment
+    window.location.href = `cova-claim.html?policy_id=${policyId}&amount=${policyData.premium_amount}`;
+  } else {
+    alert('Error creating policy: ' + result.data.error.message);
+  }
+}
+
+function calculateFirePremium(propertyValue, coverType) {
+  if (coverType === 'fire-only') {
+    return propertyValue * 0.02; // 2% for fire only
+  } else if (coverType === 'fire-perils') {
+    return propertyValue * 0.04; // 4% for fire + perils
+  }
+  return 0;
+}
+
+<script src="https://cdn.jsdelivr.net/npm/@paystack/inline-js/dist/inline.min.js">
+function submitForm(){
+  const emailEl = document.getElementById('email');
+  const phoneEl = document.getElementById('phone');
+  const amountEl = document.getElementById('summary-total');
+  
+  const email = emailEl ? emailEl.value : 'user@example.com';
+  const phone = phoneEl ? phoneEl.value : '08000000000';
+  let amountStr = '0';
+  if(amountEl) amountStr = amountEl.textContent.replace(/[^0-9]/g, '');
+  if(!amountStr) amountStr = '1000'; // fallback
+  
+  const amountKobo = parseInt(amountStr, 10) * 100;
+  
+  const pkMeta = document.getElementById('paystack-key');
+  const pk = pkMeta ? pkMeta.content : 'pk_test_mock_key_12345';
+  
+  // Use global PaystackPop or window.PaystackPop
+  const popup = new PaystackPop();
+  const config = {
+    key: pk,
+    email: email,
+    amount: amountKobo,
+    currency: 'NGN',
+    ref: 'COVA-FIRE-' + Date.now(),
+    metadata: {
+      custom_fields: [
+        { display_name: "Product Type", variable_name: "product_type", value: "FIRE" },
+        { display_name: "Customer Phone", variable_name: "customer_phone", value: phone }
+      ]
+    },
+    onSuccess: function(response) {
+      localStorage.setItem('cova_last_ref', response.reference);
+      document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+      const successEl = document.getElementById('success');
+      if(successEl) successEl.classList.add('active');
+      window.scrollTo({top:0, behavior:'smooth'});
+    },
+    onCancel: function() {
+      const t = document.createElement('div');
+      t.textContent = 'Payment cancelled';
+      t.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--crd);color:white;padding:12px 24px;border-radius:8px;z-index:9999;font-weight:600;';
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 3000);
+    }
+  };
+  
+  config.plan = 'PLN_mock123';
+  
+  popup.setup(config);
+  popup.openIframe();
+}
+
+</script>
+</body>
+</html>

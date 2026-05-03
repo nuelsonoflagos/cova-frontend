@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cova — Staff Login</title>
+    <script src="api-client.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #0A5C45;
+            --primary-hover: #084A36;
+            --primary-light: #1D9E75;
+            --success: #1D9E75;
+            --warning: #F59E0B;
+            --danger: #C62828;
+            --background: #F7F4EE;
+            --background-light: #FAF8F3;
+            --white: #ffffff;
+            --gray-100: #F5F2EA;
+            --gray-200: #E8E4DB;
+            --gray-300: #D4D0C7;
+            --gray-400: #9A9588;
+            --gray-500: #6B6660;
+            --gray-600: #4A4540;
+            --gray-700: #2E2B27;
+            --shadow-sm: 0 1px 2px rgba(10, 92, 69, 0.05);
+            --shadow-md: 0 4px 12px rgba(10, 92, 69, 0.08);
+            --shadow-lg: 0 8px 24px rgba(10, 92, 69, 0.12);
+            --shadow-xl: 0 16px 48px rgba(10, 92, 69, 0.16);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 28px;
+            --font-heading: 'Syne', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-body: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: linear-gradient(135deg, #F7F4EE 0%, #EDE9E3 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: var(--gray-700);
+        }
+
+        .login-wrapper {
+            width: 100%;
+            max-width: 480px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .login-card {
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            padding: 40px;
+            width: 100%;
+            box-shadow: var(--shadow-xl);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 100%);
+        }
+
+        .logo {
+            font-family: var(--font-heading);
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 8px;
+            letter-spacing: -0.02em;
+        }
+
+        .logo span {
+            color: var(--primary-light);
+            font-weight: 800;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--gray-500);
+            font-size: 15px;
+            margin-bottom: 32px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 32px;
+            background: var(--gray-100);
+            padding: 4px;
+            border-radius: var(--radius-md);
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px 16px;
+            border: none;
+            background: transparent;
+            border-radius: var(--radius-sm);
+            font-family: var(--font-body);
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--gray-500);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn.active {
+            background: var(--white);
+            color: var(--primary);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .tab-btn:hover:not(.active) {
+            background: var(--gray-200);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--gray-600);
+            margin-bottom: 6px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius-md);
+            font-family: var(--font-body);
+            font-size: 15px;
+            color: var(--gray-700);
+            background: var(--white);
+            transition: all 0.2s ease;
+        }
+
+        .form-group input::placeholder {
+            color: var(--gray-400);
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(10, 92, 69, 0.08);
+        }
+
+        .form-group input.error {
+            border-color: var(--danger);
+        }
+
+        .error-message {
+            display: none;
+            color: var(--danger);
+            font-size: 13px;
+            font-weight: 500;
+            margin-top: 6px;
+            padding: 8px 12px;
+            background: #FEF2F2;
+            border-radius: var(--radius-sm);
+            border: 1px solid #FECACA;
+        }
+
+        .error-message.show {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            background: var(--primary);
+            border: none;
+            border-radius: var(--radius-md);
+            font-family: var(--font-body);
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--white);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow-md);
+        }
+
+        .submit-btn:hover {
+            background: var(--primary-hover);
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .back-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin-top: 24px;
+            color: var(--gray-500);
+            font-size: 14px;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .back-link:hover {
+            color: var(--primary);
+        }
+
+        .back-link svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .security-note {
+            margin-top: 32px;
+            padding: 12px 16px;
+            background: #FFFBEB;
+            border-radius: var(--radius-md);
+            border: 1px solid #FDE68A;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .security-note svg {
+            width: 20px;
+            height: 20px;
+            color: var(--warning);
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .security-note p {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--gray-600);
+            line-height: 1.4;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 540px) {
+            .login-card {
+                padding: 28px 24px;
+            }
+
+            .logo {
+                font-size: 28px;
+            }
+
+            .subtitle {
+                font-size: 14px;
+                margin-bottom: 24px;
+            }
+
+            .tabs {
+                margin-bottom: 24px;
+            }
+
+            .tab-btn {
+                padding: 10px 14px;
+                font-size: 13px;
+            }
+
+            .form-group input {
+                padding: 12px 14px;
+                font-size: 14px;
+            }
+
+            .submit-btn {
+                padding: 14px;
+                font-size: 15px;
+            }
+
+            .security-note {
+                margin-top: 24px;
+                padding: 10px 12px;
+            }
+
+            .security-note p {
+                font-size: 11px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            body {
+                padding: 16px;
+            }
+
+            .login-card {
+                padding: 24px 20px;
+            }
+
+            .logo {
+                font-size: 26px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-wrapper">
+        <div class="login-card">
+            <div class="logo">Cov<span>a</span></div>
+            <p class="subtitle">Staff login for administrators and handlers</p>
+
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="admin">Admin login</button>
+                <button class="tab-btn" data-tab="handler">Handler login</button>
+            </div>
+
+            <!-- Admin Login Form -->
+            <div class="tab-content active" id="admin-tab">
+                <form id="admin-form">
+                    <div class="form-group">
+                        <label for="admin-email">Email address</label>
+                        <input 
+                            type="email" 
+                            id="admin-email" 
+                            placeholder="admin@getcova.ng" 
+                            autocomplete="email"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="admin-password">Password</label>
+                        <input 
+                            type="password" 
+                            id="admin-password" 
+                            placeholder="Enter your password" 
+                            autocomplete="current-password"
+                        >
+                    </div>
+
+                    <div class="error-message" id="admin-error">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                        <span>Invalid credentials. Please try again.</span>
+                    </div>
+
+                    <button type="submit" class="submit-btn">Sign in as Admin</button>
+
+                    <a href="cova.html" class="back-link">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M19 12H5M12 19l-7-7 7-7"/>
+                        </svg>
+                        Back to main site
+                    </a>
+                </form>
+            </div>
+
+            <!-- Handler Login Form -->
+            <div class="tab-content" id="handler-tab">
+                <form id="handler-form">
+                    <div class="form-group">
+                        <label for="handler-email">Email address</label>
+                        <input 
+                            type="email" 
+                            id="handler-email" 
+                            placeholder="handler@getcova.ng" 
+                            autocomplete="email"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="handler-password">Password</label>
+                        <input 
+                            type="password" 
+                            id="handler-password" 
+                            placeholder="Enter your password" 
+                            autocomplete="current-password"
+                        >
+                    </div>
+
+                    <div class="error-message" id="handler-error">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                        <span>Invalid credentials. Please try again.</span>
+                    </div>
+
+                    <button type="submit" class="submit-btn">Sign in as Handler</button>
+
+                    <a href="cova.html" class="back-link">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M19 12H5M12 19l-7-7 7-7"/>
+                        </svg>
+                        Back to main site
+                    </a>
+                </form>
+            </div>
+
+            <div class="security-note">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+                <p>This page is for Cova staff only. Unauthorized access attempts are logged.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab switching
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tabName = btn.dataset.tab;
+
+                // Update active tab buttons
+                tabBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                // Show corresponding content
+                tabContents.forEach(content => {
+                    content.classList.remove('active');
+                    if (content.id === `${tabName}-tab`) {
+                        content.classList.add('active');
+                    }
+                });
+
+                // Clear any error messages when switching tabs
+                document.querySelectorAll('.error-message').forEach(el => {
+                    el.classList.remove('show');
+                });
+                document.querySelectorAll('input').forEach(input => {
+                    input.classList.remove('error');
+                });
+            });
+        });
+
+        // Admin login form
+        const adminForm = document.getElementById('admin-form');
+        const adminError = document.getElementById('admin-error');
+        const adminEmail = document.getElementById('admin-email');
+        const adminPassword = document.getElementById('admin-password');
+
+        adminForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const email = adminEmail.value.trim();
+            const password = adminPassword.value;
+
+            // Hardcoded credentials
+            const validEmail = 'admin@getcova.ng';
+            const validPassword = 'password123';
+
+            // Validate credentials
+            if (email === validEmail && password === validPassword) {
+                // Success - redirect to admin dashboard
+                window.location.href = 'cova-admin.html';
+            } else {
+                // Show error
+                adminEmail.classList.add('error');
+                adminPassword.classList.add('error');
+                adminError.classList.add('show');
+
+                // Remove error state after 3 seconds of interaction
+                const removeError = () => {
+                    adminEmail.classList.remove('error');
+                    adminPassword.classList.remove('error');
+                };
+
+                adminEmail.addEventListener('input', removeError, { once: true });
+                adminPassword.addEventListener('input', removeError, { once: true });
+            }
+        });
+
+        // Handler login form
+        const handlerForm = document.getElementById('handler-form');
+        const handlerError = document.getElementById('handler-error');
+        const handlerEmail = document.getElementById('handler-email');
+        const handlerPassword = document.getElementById('handler-password');
+
+        handlerForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const email = handlerEmail.value.trim();
+            const password = handlerPassword.value;
+
+            // Hardcoded credentials
+            const validEmail = 'handler@getcova.ng';
+            const validPassword = 'password123';
+
+            // Validate credentials
+            if (email === validEmail && password === validPassword) {
+                // Success - redirect to handler portal
+                window.location.href = 'cova-handler.html';
+            } else {
+                // Show error
+                handlerEmail.classList.add('error');
+                handlerPassword.classList.add('error');
+                handlerError.classList.add('show');
+
+                // Remove error state after 3 seconds of interaction
+                const removeError = () => {
+                    handlerEmail.classList.remove('error');
+                    handlerPassword.classList.remove('error');
+                };
+
+                handlerEmail.addEventListener('input', removeError, { once: true });
+                handlerPassword.addEventListener('input', removeError, { once: true });
+            }
+        });
+
+        // Log access attempts (placeholder for future implementation)
+        window.addEventListener('load', () => {
+            console.log('[Security] Access attempt logged:', {
+                timestamp: new Date().toISOString(),
+                userAgent: navigator.userAgent,
+                referrer: document.referrer
+            });
+
+            // TODO: Replace with actual logging to backend when Supabase is integrated
+        });
+
+        // Handle unauthorized access attempts (future implementation)
+        document.addEventListener('keydown', (e) => {
+            // Track suspicious activity patterns
+            // TODO: Implement rate limiting and security monitoring
+        });
+    </script>
+</body>
+</html>

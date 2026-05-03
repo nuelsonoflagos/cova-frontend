@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cova Health Insurance Onboarding</title>
+<script src="api-client.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--g:#0A5C45;--gm:#137A5C;--gl:#1D9E75;--gp:#E6F5F0;--gpp:#d0ede4;--cream:#F7F4EE;--crd:#E8E4DB;--ink:#0F1A14;--inkm:#2D3E35;--inkl:#5A6E63;--inkf:#9AADA3;--w:#fff;--r:#C0392B;--rp:#FDECEA;--am:#D4860A;--amp:#FEF3E2;--fd:'Syne',sans-serif;--fb:'DM Sans',sans-serif;--rad:16px;--rads:10px;--radsm:8px;--shadow:0 2px 12px rgba(10,92,69,0.08)}
+html{scroll-behavior:smooth}
+body{font-family:var(--fb);background:var(--cream);color:var(--ink);line-height:1.6;min-height:100vh}
+nav{padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between;background:var(--w);border-bottom:1px solid var(--crd)}
+.logo{font-family:var(--fd);font-size:20px;font-weight:800;color:var(--g)}
+.logo span{color:var(--gl)}
+.nav-back{font-size:13px;color:var(--inkl);text-decoration:none;display:flex;align-items:center;gap:6px;cursor:pointer}
+.nav-back:hover{color:var(--g)}
+.progress-bar{background:var(--w);border-bottom:1px solid var(--crd);padding:16px 24px}
+.progress-steps{display:flex;align-items:center;gap:0;max-width:600px;margin:0 auto}
+.prog-step{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;position:relative}
+.prog-step:not(:last-child)::after{content:'';position:absolute;top:14px;left:50%;width:100%;height:2px;background:var(--crd);z-index:0}
+.prog-step.done:not(:last-child)::after{background:var(--gl)}
+.prog-dot{width:28px;height:28px;border-radius:50%;border:2px solid var(--crd);background:var(--w);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--inkf);z-index:1;position:relative;transition:all .3s}
+.prog-step.done .prog-dot{background:var(--gl);border-color:var(--gl);color:var(--w)}
+.prog-step.active .prog-dot{background:var(--g);border-color:var(--g);color:var(--w)}
+.prog-label{font-size:11px;color:var(--inkf);font-weight:400;text-align:center;white-space:nowrap}
+.prog-step.active .prog-label{color:var(--g);font-weight:500}
+.prog-step.done .prog-label{color:var(--gl)}
+.main{max-width:620px;margin:0 auto;padding:32px 24px 80px}
+.step-panel{display:none}
+.step-panel.active{display:block;animation:fadeUp .35s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.step-title{font-family:var(--fd);font-size:26px;font-weight:800;color:var(--ink);letter-spacing:-0.5px;margin-bottom:6px}
+.step-sub{font-size:15px;color:var(--inkl);margin-bottom:28px;font-weight:300;line-height:1.6}
+.form-group{margin-bottom:20px}
+.form-group label{display:block;font-size:13px;font-weight:500;color:var(--inkm);margin-bottom:7px}
+.form-group input,.form-group select{width:100%;padding:14px 16px;border:1.5px solid var(--crd);border-radius:var(--radsm);font-family:var(--fb);font-size:15px;color:var(--ink);background:var(--w);outline:none;transition:border-color .2s,box-shadow .2s}
+.form-group input:focus,.form-group select:focus{border-color:var(--gl);box-shadow:0 0 0 3px rgba(29,158,117,0.1)}
+.form-group input::placeholder{color:var(--inkf)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.card-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:20px}
+.plan-card{border:2px solid var(--crd);border-radius:var(--rad);padding:22px;cursor:pointer;transition:all .2s;background:var(--w);position:relative}
+.plan-card:hover{border-color:var(--gl)}
+.plan-card.selected{border-color:var(--gl);background:var(--gp);box-shadow:0 8px 26px rgba(10,92,69,0.08)}
+.plan-card h3{font-family:var(--fd);font-size:16px;font-weight:700;margin-bottom:8px}
+.plan-card p{font-size:14px;color:var(--inkl);line-height:1.6}
+.plan-radio{position:absolute;top:18px;right:18px;width:18px;height:18px;border-radius:50%;border:2px solid var(--crd);background:var(--w);display:flex;align-items:center;justify-content:center;transition:all .2s}
+.plan-card.selected .plan-radio{border-color:var(--gl);background:var(--gl)}
+.plan-radio::after{content:'';width:8px;height:8px;border-radius:50%;background:var(--w);opacity:0;transition:opacity .2s}
+.plan-card.selected .plan-radio::after{opacity:1}
+.insurer-options{display:grid;gap:12px;margin-bottom:20px}
+.insurer-card{border:1.5px solid var(--crd);border-radius:18px;padding:16px;cursor:pointer;transition:all .2s;background:var(--w)}
+.insurer-card.selected{border-color:var(--gl);background:var(--gp)}
+.insurer-card:hover{border-color:var(--gl)}
+.hospital-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:20px}
+.hospital-card{border:2px solid var(--crd);border-radius:18px;padding:18px;cursor:pointer;transition:all .2s;background:var(--w)}
+.hospital-card.selected{border-color:var(--gl);background:var(--gp)}
+.hospital-card:hover{border-color:var(--gl)}
+.summary-card{background:var(--w);border:1px solid var(--crd);border-radius:var(--rad);padding:24px;margin-bottom:20px}
+.summary-title{font-family:var(--fd);font-size:16px;font-weight:700;color:var(--ink);margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--crd)}
+.summary-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--crd);font-size:14px}
+.summary-row:last-child{border-bottom:none}
+.summary-total{display:flex;justify-content:space-between;align-items:center;padding:14px 0 0;margin-top:4px}
+.summary-total-label{font-family:var(--fd);font-size:16px;font-weight:700;color:var(--ink)}
+.summary-total-price{font-family:var(--fd);font-size:24px;font-weight:800;color:var(--g)}
+.btn-primary{width:100%;padding:17px;background:var(--g);color:var(--w);border:none;border-radius:var(--radsm);font-family:var(--fd);font-size:16px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-primary:hover{background:var(--gm);transform:translateY(-1px)}
+.btn-secondary{width:100%;padding:14px;background:transparent;color:var(--g);border:2px solid rgba(10,92,69,0.2);border-radius:var(--radsm);font-family:var(--fd);font-size:15px;font-weight:600;cursor:pointer;transition:all .2s;margin-top:10px}
+.btn-secondary:hover{border-color:var(--g);background:var(--gp)}
+.success-screen{text-align:center;padding:40px 0;display:none}
+.success-screen.active{display:block;animation:fadeUp .4s ease both}
+.success-circle{width:80px;height:80px;background:var(--gp);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:36px;margin:0 auto 20px}
+.success-screen h2{font-family:var(--fd);font-size:28px;font-weight:800;color:var(--ink);margin-bottom:10px;letter-spacing:-0.5px}
+.success-screen p{font-size:15px;color:var(--inkl);max-width:420px;margin:0 auto 28px;line-height:1.65}
+.alert-box{background:var(--amp);border-radius:var(--radsm);padding:16px;border:1px solid rgba(212,134,10,.3);color:var(--am);margin-bottom:20px}
+.field-error{font-size:12px;color:var(--r);margin-top:4px;display:none}
+.form-group.error input,.form-group.error select{border-color:var(--r)}
+.form-group.error .field-error{display:block}
+@media(max-width:520px){.form-row{grid-template-columns:1fr}.card-grid{grid-template-columns:1fr}.hospital-grid{grid-template-columns:1fr}.insurer-options{grid-template-columns:1fr}.progress-steps{flex-direction:column;align-items:flex-start}.prog-step:not(:last-child)::after{display:none}}
+</style>
+  <meta id="paystack-key" content="pk_test_mock_key_12345">
+</head>
+<body>
+<nav><div class="logo">Cov<span>a</span></div><a class="nav-back" onclick="goBack()">← Back</a></nav>
+<div class="progress-bar"><div class="progress-steps"><div class="prog-step active" id="prog-1"><div class="prog-dot">1</div><div class="prog-label">Cover type</div></div><div class="prog-step" id="prog-2"><div class="prog-dot">2</div><div class="prog-label">Personal details</div></div><div class="prog-step" id="prog-3"><div class="prog-dot">3</div><div class="prog-label">Plan selection</div></div><div class="prog-step" id="prog-4"><div class="prog-dot">4</div><div class="prog-label">Hospital</div></div><div class="prog-step" id="prog-5"><div class="prog-dot">5</div><div class="prog-label">Summary</div></div></div></div>
+<div class="main">
+  <div class="step-panel active" id="step-1"><div class="step-title">Choose cover type</div><div class="step-sub">Select the health protection solution that fits your situation.</div><div class="card-grid"><div class="plan-card selected" id="cover-individual" onclick="selectCover('Individual')"><div class="plan-radio"></div><h3>Individual</h3><p>Designed for one person with core outpatient and emergency cover.</p></div><div class="plan-card" id="cover-family" onclick="selectCover('Family')"><div class="plan-radio"></div><h3>Family</h3><p>Cover for you plus up to 4 dependants in one plan.</p></div><div class="plan-card" id="cover-corporate" onclick="selectCover('Corporate/Group')"><div class="plan-radio"></div><h3>Corporate / Group</h3><p>Health cover for 5+ staff with company-sponsored benefits.</p></div></div><button class="btn-primary" onclick="nextStep(1)">Continue →</button></div>
+  <div class="step-panel" id="step-2"><div class="step-title">Tell us who is covered</div><div class="step-sub">We need a few details to tailor your health plan.</div><div class="form-group"><label>Full name</label><input type="text" id="health-name" placeholder="Amina Ibrahim"><div class="field-error">Enter your name</div></div><div class="form-row"><div class="form-group"><label>Date of birth</label><input type="date" id="health-dob"></div><div class="form-group"><label>State</label><select id="health-state"><option value="">Select state</option><option>Abuja</option><option>Lagos</option><option>Rivers</option><option>Enugu</option><option>Oyo</option><option>Others</option></select></div></div><div class="form-row"><div class="form-group"><label>Phone</label><input type="tel" id="health-phone" placeholder="08012345678"></div><div class="form-group"><label>Email</label><input type="email" id="health-email" placeholder="name@example.com"></div></div><div class="form-group" id="family-fields" style="display:none"><label>Dependants details</label><div class="summary-card" style="padding:16px"><div class="summary-row"><span>Child 1</span><span><input type="text" id="dep1-name" placeholder="Name" style="width:48%;margin-right:4%"><input type="date" id="dep1-dob" style="width:48%"></span></div><div class="summary-row"><span>Child 2</span><span><input type="text" id="dep2-name" placeholder="Name" style="width:48%;margin-right:4%"><input type="date" id="dep2-dob" style="width:48%"></span></div><div class="summary-row"><span>Child 3</span><span><input type="text" id="dep3-name" placeholder="Name" style="width:48%;margin-right:4%"><input type="date" id="dep3-dob" style="width:48%"></span></div><div class="summary-row"><span>Child 4</span><span><input type="text" id="dep4-name" placeholder="Name" style="width:48%;margin-right:4%"><input type="date" id="dep4-dob" style="width:48%"></span></div></div></div><div class="form-group" id="corp-fields" style="display:none"><label>Company details</label><div class="form-row"><div class="form-group"><input type="text" id="corp-name" placeholder="Company name"></div><div class="form-group"><input type="text" id="corp-rc" placeholder="RC number"></div></div><div class="form-row"><div class="form-group"><input type="number" id="corp-staff" placeholder="Staff count"></div><div class="form-group"><input type="text" id="corp-contact" placeholder="Company contact person"></div></div></div>
+    <div class="form-group" style="margin-top:15px">
+      <label>Are you insuring for yourself or your business?</label>
+      <select id="account-type" onchange="toggleBusinessFields()">
+        <option value="personal">Myself — personal</option>
+        <option value="business">My business — company</option>
+      </select>
+    </div>
+    <div id="business-fields" style="display:none">
+      <div class="form-group" id="fg-companyname"><label>Company name</label><input type="text" id="companyname" placeholder="e.g. Cova Tech Ltd"></div>
+      <div class="form-group" id="fg-rcnumber"><label>RC Number (Optional)</label><input type="text" id="rcnumber" placeholder="e.g. RC 123456"></div>
+    </div>
+
+    <div class="form-group">
+      <label>Where should we send your verification code?</label>
+      <div class="login-tabs" style="display:flex;gap:8px;background:var(--gp);padding:6px;border-radius:12px;margin-bottom:10px">
+        <div class="login-tab active" id="tab-opt-phone" onclick="selectOtpMethod('phone')" style="flex:1;text-align:center;padding:10px;font-size:13px;font-weight:600;cursor:pointer;border-radius:8px;background:var(--w);box-shadow:0 2px 8px rgba(0,0,0,.05)">WhatsApp</div>
+        <div class="login-tab" id="tab-opt-email" onclick="selectOtpMethod('email')" style="flex:1;text-align:center;padding:10px;font-size:13px;font-weight:600;cursor:pointer;border-radius:8px;color:var(--inkl)">Email</div>
+      </div>
+    </div>
+    
+<button class="btn-primary" onclick="nextStep(2)">Continue →</button><button class="btn-secondary" onclick="prevStep(2)">← Go back</button></div>
+  
+  <!-- STEP 2b: OTP Verification -->
+  <div class="step-panel" id="step-2b">
+    <div class="step-title">Verify your contact</div>
+    <div class="step-sub">We've sent a 6-digit code to <strong id="otp-destination"></strong>.</div>
+    <div class="form-group" id="fg-otp">
+      <div style="display:flex;gap:10px;justify-content:space-between;margin:20px 0" class="otp-inputs" id="signup-otp-container">
+        <input type="text" maxlength="1" style="width:45px;height:50px;text-align:center;font-size:20px;font-weight:700;border-radius:12px;border:1.5px solid var(--crd);background:var(--gp)" onkeyup="moveToNext(this, event)">
+        <input type="text" maxlength="1" style="width:45px;height:50px;text-align:center;font-size:20px;font-weight:700;border-radius:12px;border:1.5px solid var(--crd);background:var(--gp)" onkeyup="moveToNext(this, event)">
+        <input type="text" maxlength="1" style="width:45px;height:50px;text-align:center;font-size:20px;font-weight:700;border-radius:12px;border:1.5px solid var(--crd);background:var(--gp)" onkeyup="moveToNext(this, event)">
+        <input type="text" maxlength="1" style="width:45px;height:50px;text-align:center;font-size:20px;font-weight:700;border-radius:12px;border:1.5px solid var(--crd);background:var(--gp)" onkeyup="moveToNext(this, event)">
+        <input type="text" maxlength="1" style="width:45px;height:50px;text-align:center;font-size:20px;font-weight:700;border-radius:12px;border:1.5px solid var(--crd);background:var(--gp)" onkeyup="moveToNext(this, event)">
+        <input type="text" maxlength="1" style="width:45px;height:50px;text-align:center;font-size:20px;font-weight:700;border-radius:12px;border:1.5px solid var(--crd);background:var(--gp)" onkeyup="moveToNext(this, event)">
+      </div>
+      <div class="field-error">Please enter the 6-digit code</div>
+    </div>
+    <button class="btn-primary" onclick="nextStep('2b')">Verify & Continue →</button>
+    <button class="btn-secondary" onclick="prevStep('2b')">← Go back</button>
+  </div>
+
+  <div class="step-panel" id="step-3"><div class="step-title">Choose a plan</div><div class="step-sub">Select a tier and preferred insurer.</div><div class="card-grid"><div class="plan-card selected" id="plan-bronze" onclick="selectPlan('Bronze')"><div class="plan-radio"></div><h3>Bronze</h3><p>Outpatient + emergency cover for ₦45k/yr.</p></div><div class="plan-card" id="plan-silver" onclick="selectPlan('Silver')"><div class="plan-radio"></div><h3>Silver</h3><p>Bronze plus specialist care and dental for ₦95k/yr.</p></div><div class="plan-card" id="plan-gold" onclick="selectPlan('Gold')"><div class="plan-radio"></div><h3>Gold</h3><p>Silver plus maternity and optical for ₦180k/yr.</p></div></div><div class="insurer-options"><div class="insurer-card selected" id="ins-AIICO" onclick="selectInsurer('AIICO')"><strong>AIICO</strong></div><div class="insurer-card" id="ins-Hygeia" onclick="selectInsurer('Hygeia')"><strong>Hygeia</strong></div><div class="insurer-card" id="ins-Reliance" onclick="selectInsurer('Reliance HMO')"><strong>Reliance HMO</strong></div></div><button class="btn-primary" onclick="nextStep(3)">Continue →</button><button class="btn-secondary" onclick="prevStep(3)">← Go back</button></div>
+  <div class="step-panel" id="step-4"><div class="step-title">Primary hospital</div><div class="step-sub">Pick one Lagos hospital for your main care provider.</div><div class="hospital-grid"><div class="hospital-card selected" id="hosp-1" onclick="selectHospital('Lagos University Teaching Hospital')">Lagos University Teaching Hospital</div><div class="hospital-card" id="hosp-2" onclick="selectHospital('Reddington Hospital')">Reddington Hospital</div><div class="hospital-card" id="hosp-3" onclick="selectHospital('Lagoon Hospitals')">Lagoon Hospitals</div><div class="hospital-card" id="hosp-4" onclick="selectHospital('St. Nicholas Hospital')">St. Nicholas Hospital</div><div class="hospital-card" id="hosp-5" onclick="selectHospital('Evercare Hospital')">Evercare Hospital</div><div class="hospital-card" id="hosp-6" onclick="selectHospital('Cedarcrest Hospitals')">Cedarcrest Hospitals</div><div class="hospital-card" id="hosp-7" onclick="selectHospital('Rivers State University Teaching Hospital')">Rivers State University Teaching Hospital</div><div class="hospital-card" id="hosp-8" onclick="selectHospital('First Consultant Hospital')">First Consultant Hospital</div><div class="hospital-card" id="hosp-9" onclick="selectHospital('St. Gerard’s Hospital')">St. Gerard’s Hospital</div><div class="hospital-card" id="hosp-10" onclick="selectHospital('Shield Specialists Hospital')">Shield Specialists Hospital</div></div><div class="alert-box">Full network will be shared via WhatsApp once your plan is ready.</div><button class="btn-primary" onclick="nextStep(4)">Continue →</button><button class="btn-secondary" onclick="prevStep(4)">← Go back</button></div>
+  <div class="step-panel" id="step-5"><div class="step-title">Review & submit</div><div class="step-sub">Confirm the selected plan and pay securely.</div><div class="summary-card"><div class="summary-title">Health plan summary</div><div class="summary-row"><span>Cover</span><span id="summary-cover">Individual</span></div><div class="summary-row"><span>Name</span><span id="summary-name">—</span></div><div class="summary-row"><span>Plan</span><span id="summary-plan">Bronze</span></div><div class="summary-row"><span>Insurer</span><span id="summary-insurer">AIICO</span></div><div class="summary-row"><span>Primary hospital</span><span id="summary-hospital">Lagos University Teaching Hospital</span></div><div class="summary-total"><span class="summary-total-label">Annual premium</span><span class="summary-total-price" id="summary-price">₦45,000</span></div></div><button class="btn-primary" onclick="submitForm()">Pay securely with Paystack →</button><button class="btn-secondary" onclick="prevStep(5)">← Go back</button></div>
+  <div class="success-screen" id="success"><div class="success-circle">✅</div><h2>Health cover enrolled</h2><p>Your HMO plan is confirmed. We will send your membership cards within 5 working days.</p><div class="summary-card"><div class="summary-title">Enrollment details</div><div class="summary-row"><span>Policy number</span><span id="policy-number">COV-HMO-00000</span></div><div class="summary-row"><span>Tier</span><span id="policy-tier">Bronze</span></div><div class="summary-row"><span>Status</span><span>Enrolment confirmed</span></div></div></div>
+</div>
+<script>
+let currentStep=1;let coverType='Individual';let selectedPlan='Bronze';let selectedInsurer='AIICO';let selectedHospital='Lagos University Teaching Hospital';
+function goBack(){if(currentStep>1)prevStep(currentStep);else window.history.back();}
+function selectCover(type){coverType=type;document.querySelectorAll('.plan-card').forEach(c=>c.classList.remove('selected'));document.getElementById('cover-'+type.toLowerCase().replace(/\//g,'').replace(/ /g,'-')).classList.add('selected');document.getElementById('family-fields').style.display=type==='Family'?'block':'none';document.getElementById('corp-fields').style.display=type==='Corporate/Group'?'block':'none';}
+function selectPlan(plan){selectedPlan=plan;['plan-bronze','plan-silver','plan-gold'].forEach(id=>document.getElementById(id).classList.remove('selected'));document.getElementById('plan-'+plan.toLowerCase()).classList.add('selected');updatePrice();}
+function selectInsurer(name){selectedInsurer=name;['ins-AIICO','ins-Hygeia','ins-Reliance'].forEach(id=>document.getElementById(id).classList.remove('selected'));document.getElementById('ins-'+name.replace(/\s/g,'')).classList.add('selected');}
+function selectHospital(name){selectedHospital=name;document.querySelectorAll('.hospital-card').forEach(c=>c.classList.remove('selected'));const cards=document.querySelectorAll('.hospital-card');cards.forEach(card=>{if(card.textContent.trim()===name)card.classList.add('selected');});}
+function updatePrice(){const prices={Bronze:45000,Silver:95000,Gold:180000};document.getElementById('summary-price').textContent='₦'+prices[selectedPlan].toLocaleString('en-NG');}
+function validateStep(step){if(step===2){let ok=true;[['health-name','Enter your name'],['health-dob','Enter your date of birth'],['health-state','Select state'],['health-phone','Enter your phone'],['health-email','Enter email']].forEach(([id])=>{const el=document.getElementById(id);const grp=el.closest('.form-group');if(!el.value.trim()){grp.classList.add('error');ok=false;}else grp.classList.remove('error');});return ok;}return true;}
+function origNextStep(from){if(!validateStep(from))return; if(from===2){document.getElementById('summary-cover').textContent=coverType;document.getElementById('summary-name').textContent=document.getElementById('health-name').value;document.getElementById('summary-plan').textContent=selectedPlan;document.getElementById('summary-insurer').textContent=selectedInsurer;document.getElementById('summary-hospital').textContent=selectedHospital;updatePrice();}goToStep(from+1);}
+
+function nextStep(from){
+  if(from === 2){
+    // Before moving to OTP, validate contact step
+    // The original nextStep also validates, so let's just use it to validate but NOT route
+    // Wait, original nextStep routes immediately if validation passes.
+    // Instead of calling origNextStep, let's just do validateStep.
+    if(!validateStep(from)) return;
+    
+    const dest = otpMethod === 'phone' ? document.getElementById('health-phone').value : document.getElementById('health-email').value;
+    const dEl = document.getElementById('otp-destination');
+    if(dEl) dEl.textContent = dest;
+    document.getElementById('step-2').classList.remove('active');
+    document.getElementById('step-2b').classList.add('active');
+    const firstOtp = document.querySelector('#signup-otp-container input');
+    if(firstOtp) firstOtp.focus();
+    return;
+  }
+  if(from === '2b'){
+    if(!validateOTP()) return;
+    document.getElementById('step-2b').classList.remove('active');
+    // Now trigger the original nextStep logic for leaving 2
+    // Since origNextStep expects 'from', and it will route to 3
+    // We just call origNextStep(2) and it will do the summary updates and routing!
+    origNextStep(2);
+    return;
+  }
+  origNextStep(from);
+}
+
+
+
+function prevStep(cur){
+  if(cur === '2b') {
+    document.getElementById('step-2b').classList.remove('active');
+    document.getElementById('step-2').classList.add('active');
+    return;
+  }
+  if(cur === 3) {
+    document.getElementById('step-3').classList.remove('active');
+    document.getElementById('step-2b').classList.add('active');
+    return;
+  }
+goToStep(cur-1);}function goToStep(n){document.querySelectorAll('.step-panel').forEach(p=>p.classList.remove('active'));document.getElementById('step-'+n).classList.add('active');for(let i=1;i<=5;i++){const prog=document.getElementById('prog-'+i);prog.classList.remove('active','done');if(i<n)prog.classList.add('done');if(i===n)prog.classList.add('active')}currentStep=n;window.scrollTo({top:0,behavior:'smooth'});}
+
+let otpMethod = 'phone';
+function selectOtpMethod(method) {
+  otpMethod = method;
+  const tPhone = document.getElementById('tab-opt-phone');
+  const tEmail = document.getElementById('tab-opt-email');
+  if(method === 'phone') {
+    if(tPhone) { tPhone.style.background = 'var(--w)'; tPhone.style.color = 'var(--ink)'; tPhone.style.boxShadow = '0 2px 8px rgba(0,0,0,.05)'; }
+    if(tEmail) { tEmail.style.background = 'transparent'; tEmail.style.color = 'var(--inkl)'; tEmail.style.boxShadow = 'none'; }
+  } else {
+    if(tEmail) { tEmail.style.background = 'var(--w)'; tEmail.style.color = 'var(--ink)'; tEmail.style.boxShadow = '0 2px 8px rgba(0,0,0,.05)'; }
+    if(tPhone) { tPhone.style.background = 'transparent'; tPhone.style.color = 'var(--inkl)'; tPhone.style.boxShadow = 'none'; }
+  }
+}
+function toggleBusinessFields(){
+  const type = document.getElementById('account-type');
+  const bf = document.getElementById('business-fields');
+  if(type && bf) bf.style.display = type.value === 'business' ? 'block' : 'none';
+}
+function moveToNext(el, event) {
+  if (event.key === 'Backspace') {
+    if (el.previousElementSibling) el.previousElementSibling.focus();
+  } else if (el.value.length === 1) {
+    if (el.nextElementSibling) el.nextElementSibling.focus();
+  }
+}
+function validateOTP(){
+  let otp = '';
+  document.querySelectorAll('#signup-otp-container input').forEach(i => otp += i.value);
+  const grp = document.getElementById('fg-otp');
+  if(otp.length < 6){ if(grp) grp.classList.add('error'); return false; }
+  if(grp) grp.classList.remove('error');
+  return true;
+}
+
+
+function submitForm(){
+  const emailEl = document.getElementById('health-email');
+  const phoneEl = document.getElementById('health-phone');
+  const amountEl = document.getElementById('summary-price');
+  
+  const email = emailEl ? emailEl.value : 'user@example.com';
+  const phone = phoneEl ? phoneEl.value : '08000000000';
+  let amountStr = '0';
+  if(amountEl) amountStr = amountEl.textContent.replace(/[^0-9]/g, '');
+  if(!amountStr) amountStr = '1000'; // fallback
+  
+  const amountKobo = parseInt(amountStr, 10) * 100;
+  
+  const pkMeta = document.getElementById('paystack-key');
+  const pk = pkMeta ? pkMeta.content : 'pk_test_mock_key_12345';
+  
+  // Use global PaystackPop or window.PaystackPop
+  const popup = new PaystackPop();
+  const config = {
+    key: pk,
+    email: email,
+    amount: amountKobo,
+    currency: 'NGN',
+    ref: 'COVA-HEALTH-' + Date.now(),
+    metadata: {
+      custom_fields: [
+        { display_name: "Product Type", variable_name: "product_type", value: "HEALTH" },
+        { display_name: "Customer Phone", variable_name: "customer_phone", value: phone }
+      ]
+    },
+    onSuccess: function(response) {
+      localStorage.setItem('cova_last_ref', response.reference);
+      document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+      const successEl = document.getElementById('success');
+      if(successEl) successEl.classList.add('active');
+      window.scrollTo({top:0, behavior:'smooth'});
+    },
+    onCancel: function() {
+      const t = document.createElement('div');
+      t.textContent = 'Payment cancelled';
+      t.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--crd);color:white;padding:12px 24px;border-radius:8px;z-index:9999;font-weight:600;';
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 3000);
+    }
+  };
+  
+  config.plan = 'PLN_mock123';
+  
+  popup.setup(config);
+  popup.openIframe();
+}
+
+async function submitHealthPolicy() {
+  // Get form data
+  const planType = document.getElementById('plan-type').value;
+  const familyMembers = parseInt(document.getElementById('family-members').value) || 1;
+  
+  // Validation
+  if (!planType || !familyMembers) {
+    alert('Please fill in all fields');
+    return;
+  }
+  
+  // Calculate premium based on plan and family size
+  const basePremium = calculateHealthPremium(planType, familyMembers);
+  
+  // Prepare data for backend
+  const policyData = {
+    product_type: 'health',
+    cover_type: planType,
+    insurer: 'AIICO',
+    sum_insured: basePremium * 12, // Annual sum
+    premium_amount: basePremium,
+    premium_frequency: 'monthly',
+    start_date: new Date().toISOString().split('T')[0],
+    end_date: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    metadata: {
+      plan_type: planType,
+      family_members: familyMembers,
+    },
+  };
+  
+  // Call API
+  const result = await createPolicy(policyData);
+  
+  if (result.ok) {
+    const policyId = result.data.policy.id;
+    alert('Policy created! Proceeding to payment...');
+    // Redirect to payment
+    window.location.href = `cova-claim.html?policy_id=${policyId}&amount=${policyData.premium_amount}`;
+  } else {
+    alert('Error creating policy: ' + result.data.error.message);
+  }
+}
+
+function calculateHealthPremium(planType, familyMembers) {
+  // Example calculation
+  const baseRates = {
+    'basic': 5000,
+    'standard': 10000,
+    'premium': 20000,
+  };
+  return (baseRates[planType] || 5000) * familyMembers;
+}
+
+</script>
+  <script src="https://cdn.jsdelivr.net/npm/@paystack/inline-js/dist/inline.min.js">
+function submitForm(){
+  const emailEl = document.getElementById('health-email');
+  const phoneEl = document.getElementById('health-phone');
+  const amountEl = document.getElementById('summary-price');
+  
+  const email = emailEl ? emailEl.value : 'user@example.com';
+  const phone = phoneEl ? phoneEl.value : '08000000000';
+  let amountStr = '0';
+  if(amountEl) amountStr = amountEl.textContent.replace(/[^0-9]/g, '');
+  if(!amountStr) amountStr = '1000'; // fallback
+  
+  const amountKobo = parseInt(amountStr, 10) * 100;
+  
+  const pkMeta = document.getElementById('paystack-key');
+  const pk = pkMeta ? pkMeta.content : 'pk_test_mock_key_12345';
+  
+  // Use global PaystackPop or window.PaystackPop
+  const popup = new PaystackPop();
+  const config = {
+    key: pk,
+    email: email,
+    amount: amountKobo,
+    currency: 'NGN',
+    ref: 'COVA-HEALTH-' + Date.now(),
+    metadata: {
+      custom_fields: [
+        { display_name: "Product Type", variable_name: "product_type", value: "HEALTH" },
+        { display_name: "Customer Phone", variable_name: "customer_phone", value: phone }
+      ]
+    },
+    onSuccess: function(response) {
+      localStorage.setItem('cova_last_ref', response.reference);
+      document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+      const successEl = document.getElementById('success');
+      if(successEl) successEl.classList.add('active');
+      window.scrollTo({top:0, behavior:'smooth'});
+    },
+    onCancel: function() {
+      const t = document.createElement('div');
+      t.textContent = 'Payment cancelled';
+      t.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--crd);color:white;padding:12px 24px;border-radius:8px;z-index:9999;font-weight:600;';
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 3000);
+    }
+  };
+  
+  config.plan = 'PLN_mock123';
+  
+  popup.setup(config);
+  popup.openIframe();
+}
+
+</script>
+</body>
+</html>

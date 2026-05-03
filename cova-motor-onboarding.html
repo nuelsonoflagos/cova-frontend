@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cova — Motor Insurance</title>
+<script src="api-client.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --g:#0A5C45;--gm:#137A5C;--gl:#1D9E75;--gp:#E6F5F0;
+  --cream:#F7F4EE;--crd:#E8E4DB;
+  --ink:#0F1A14;--inkm:#2D3E35;--inkl:#5A6E63;--inkf:#9AADA3;
+  --w:#fff;--r:#C0392B;--rp:#FDECEA;--am:#D4860A;--amp:#FEF3E2;
+  --fd:'Syne',sans-serif;--fb:'DM Sans',sans-serif;
+  --rad:16px;--rads:10px;--radsm:8px;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--fb);background:var(--cream);color:var(--ink);line-height:1.6;min-height:100vh}
+
+nav{padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between;background:var(--w);border-bottom:1px solid var(--crd)}
+.logo{font-family:var(--fd);font-size:20px;font-weight:800;color:var(--g);text-decoration:none;display:block}
+.logo span{color:var(--gl)}
+.nav-back{font-size:13px;color:var(--inkl);text-decoration:none;display:flex;align-items:center;gap:6px;cursor:pointer;background:none;border:none;font-family:var(--fb)}
+.nav-back:hover{color:var(--g)}
+
+.progress-bar{background:var(--w);border-bottom:1px solid var(--crd);padding:16px 24px}
+.progress-steps{display:flex;align-items:center;max-width:640px;margin:0 auto}
+.prog-step{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;position:relative}
+.prog-step:not(:last-child)::after{content:'';position:absolute;top:14px;left:50%;width:100%;height:2px;background:var(--crd);z-index:0}
+.prog-step.done:not(:last-child)::after{background:var(--gl)}
+.prog-dot{width:28px;height:28px;border-radius:50%;border:2px solid var(--crd);background:var(--w);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--inkf);z-index:1;position:relative;transition:all .3s}
+.prog-step.done .prog-dot{background:var(--gl);border-color:var(--gl);color:var(--w)}
+.prog-step.active .prog-dot{background:var(--g);border-color:var(--g);color:var(--w)}
+.prog-label{font-size:11px;color:var(--inkf);text-align:center;white-space:nowrap}
+.prog-step.active .prog-label{color:var(--g);font-weight:500}
+.prog-step.done .prog-label{color:var(--gl)}
+
+.main{max-width:640px;margin:0 auto;padding:32px 24px 80px}
+
+.step-panel{display:none}
+.step-panel.active{display:block;animation:fadeUp .35s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+.step-title{font-family:var(--fd);font-size:26px;font-weight:800;color:var(--ink);letter-spacing:-0.5px;margin-bottom:6px}
+.step-sub{font-size:15px;color:var(--inkl);margin-bottom:28px;font-weight:300;line-height:1.6}
+
+.form-group{margin-bottom:20px}
+.form-group label{display:block;font-size:13px;font-weight:500;color:var(--inkm);margin-bottom:7px}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:14px 16px;border:1.5px solid var(--crd);border-radius:var(--radsm);font-family:var(--fb);font-size:15px;color:var(--ink);background:var(--w);outline:none;transition:border-color .2s,box-shadow .2s;-webkit-appearance:none}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--gl);box-shadow:0 0 0 3px rgba(29,158,117,0.1)}
+.form-group input::placeholder{color:var(--inkf)}
+.form-group .hint{font-size:12px;color:var(--inkf);margin-top:5px;line-height:1.5}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.field-error{font-size:12px;color:var(--r);margin-top:4px;display:none}
+.form-group.error input,.form-group.error select{border-color:var(--r)}
+.form-group.error .field-error{display:block}
+
+/* COVER TYPE SELECTOR */
+.cover-options{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px}
+.cover-opt{border:2px solid var(--crd);border-radius:var(--radsm);padding:18px 14px;text-align:center;cursor:pointer;transition:all .2s;background:var(--w)}
+.cover-opt:hover{border-color:var(--gl);background:var(--gp)}
+.cover-opt.selected{border-color:var(--gl);background:var(--gp)}
+.cover-opt-icon{font-size:26px;margin-bottom:8px}
+.cover-opt-name{font-size:13px;font-weight:600;color:var(--inkm);margin-bottom:4px}
+.cover-opt.selected .cover-opt-name{color:var(--g)}
+.cover-opt-desc{font-size:11px;color:var(--inkf);line-height:1.4}
+.cover-opt.selected .cover-opt-desc{color:var(--gm)}
+.cover-opt-price{font-size:12px;font-weight:600;color:var(--gl);margin-top:6px}
+
+/* INSURER SELECTOR */
+.insurer-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:8px}
+.insurer-opt{border:1.5px solid var(--crd);border-radius:var(--radsm);padding:14px 10px;text-align:center;cursor:pointer;transition:all .2s;background:var(--w)}
+.insurer-opt:hover{border-color:var(--gl);background:var(--gp)}
+.insurer-opt.selected{border-color:var(--gl);background:var(--gp)}
+.insurer-name{font-size:12px;font-weight:600;color:var(--inkm);margin-bottom:2px}
+.insurer-opt.selected .insurer-name{color:var(--g)}
+.insurer-rating{font-size:10px;color:var(--inkf)}
+.insurer-badge{font-size:10px;font-weight:600;color:var(--gl)}
+.insurer-rec{font-size:11px;color:var(--inkf);margin-top:8px;line-height:1.5}
+
+/* PHOTO UPLOAD */
+.photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
+.photo-grid-2{grid-template-columns:repeat(2,1fr)}
+.photo-slot{border:2px dashed var(--crd);border-radius:var(--radsm);aspect-ratio:4/3;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer;transition:all .2s;background:var(--w);position:relative;overflow:hidden}
+.photo-slot:hover{border-color:var(--gl);background:var(--gp)}
+.photo-slot.filled{border-style:solid;border-color:var(--gl);background:var(--gp)}
+.photo-slot-icon{font-size:20px;color:var(--inkf)}
+.photo-slot-label{font-size:11px;color:var(--inkf);font-weight:500;text-align:center;padding:0 6px}
+.photo-slot.filled .photo-slot-label{color:var(--gl)}
+.photo-check{position:absolute;top:6px;right:6px;width:18px;height:18px;background:var(--gl);border-radius:50%;display:none;align-items:center;justify-content:center;color:white;font-size:10px}
+.photo-slot.filled .photo-check{display:flex}
+.photo-input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.photo-preview{position:absolute;inset:0;object-fit:cover;border-radius:6px}
+.photo-note{font-size:12px;color:var(--inkm);line-height:1.6;padding:10px 14px;background:var(--amp);border-radius:var(--radsm);margin-bottom:16px}
+
+/* PREMIUM CALC */
+.premium-calc{background:var(--w);border:1px solid var(--crd);border-radius:var(--rad);padding:20px;margin-bottom:20px}
+.calc-title{font-size:13px;font-weight:500;color:var(--inkl);margin-bottom:12px}
+.calc-row{display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid var(--crd);color:var(--inkl)}
+.calc-row:last-child{border-bottom:none}
+.calc-row strong{color:var(--ink)}
+.calc-total{display:flex;justify-content:space-between;align-items:center;padding:14px 0 0;margin-top:4px;border-top:2px solid var(--crd)}
+.calc-total-label{font-family:var(--fd);font-size:15px;font-weight:700;color:var(--ink)}
+.calc-total-price{font-family:var(--fd);font-size:28px;font-weight:800;color:var(--g)}
+
+/* FREQ TABS */
+.freq-tabs{display:flex;background:var(--crd);border-radius:var(--radsm);padding:3px;gap:3px;margin-bottom:20px}
+.freq-tab{flex:1;padding:9px;text-align:center;border-radius:6px;font-size:13px;font-weight:500;color:var(--inkl);cursor:pointer;transition:all .2s}
+.freq-tab.active{background:var(--w);color:var(--g);box-shadow:0 2px 8px rgba(10,92,69,0.08)}
+.freq-tab .saving{font-size:10px;color:var(--gl);font-weight:600;display:block}
+
+/* INFO BOXES */
+.info-box{border-radius:var(--radsm);padding:12px 14px;display:flex;gap:10px;align-items:flex-start;margin-bottom:16px}
+.info-box.amber{background:var(--amp)}
+.info-box.green{background:var(--gp)}
+.info-box p{font-size:13px;line-height:1.55}
+.info-box.amber p{color:#7a4a0a}
+.info-box.green p{color:var(--g)}
+
+/* SUMMARY */
+.summary-card{background:var(--w);border:1px solid var(--crd);border-radius:var(--rad);padding:24px;margin-bottom:20px}
+.summary-section{margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--crd)}
+.summary-section:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.summary-section-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--inkf);margin-bottom:10px}
+.summary-row{display:flex;justify-content:space-between;font-size:13px;padding:4px 0}
+.summary-label{color:var(--inkl)}
+.summary-value{font-weight:500;color:var(--ink);text-align:right;max-width:60%}
+.summary-value.green{color:var(--gl)}
+.summary-total{display:flex;justify-content:space-between;align-items:center;padding:16px 0 0;border-top:2px solid var(--crd);margin-top:4px}
+.summary-total-label{font-family:var(--fd);font-size:16px;font-weight:700}
+.summary-total-price{font-family:var(--fd);font-size:26px;font-weight:800;color:var(--g)}
+
+/* BUTTONS */
+.btn-primary{width:100%;padding:17px;background:var(--g);color:var(--w);border:none;border-radius:var(--radsm);font-family:var(--fd);font-size:16px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-primary:hover{background:var(--gm);transform:translateY(-1px)}
+.btn-secondary{width:100%;padding:14px;background:transparent;color:var(--g);border:2px solid rgba(10,92,69,0.2);border-radius:var(--radsm);font-family:var(--fd);font-size:15px;font-weight:600;cursor:pointer;transition:all .2s;margin-top:10px}
+.btn-secondary:hover{border-color:var(--g);background:var(--gp)}
+
+/* SUCCESS */
+.success-screen{text-align:center;padding:40px 0;display:none}
+.success-screen.active{display:block;animation:fadeUp .4s ease both}
+.success-circle{width:80px;height:80px;background:var(--gp);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:36px;margin:0 auto 20px}
+.success-screen h2{font-family:var(--fd);font-size:28px;font-weight:800;color:var(--ink);margin-bottom:10px;letter-spacing:-0.5px}
+.success-screen p{font-size:15px;color:var(--inkl);max-width:420px;margin:0 auto 28px;line-height:1.65}
+.policy-card{background:var(--w);border:1px solid var(--crd);border-radius:var(--rad);padding:20px;text-align:left;margin-bottom:20px}
+.policy-num{font-family:monospace;font-size:12px;color:var(--inkf);margin-bottom:4px}
+.policy-detail{font-family:var(--fd);font-size:18px;font-weight:700;color:var(--ink);margin-bottom:12px}
+.policy-row{display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid var(--crd)}
+.policy-row:last-child{border-bottom:none}
+.whatsapp-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:16px;background:#25D366;color:var(--w);border:none;border-radius:var(--radsm);font-family:var(--fd);font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;text-decoration:none}
+.whatsapp-btn:hover{background:#1ebe5d;transform:translateY(-1px)}
+
+@media(max-width:520px){
+  .cover-options{grid-template-columns:1fr}
+  .insurer-grid{grid-template-columns:repeat(2,1fr)}
+  .photo-grid{grid-template-columns:repeat(2,1fr)}
+  .form-row,.form-row-3{grid-template-columns:1fr}
+}
+</style>
+  <meta id="paystack-key" content="pk_test_mock_key_12345">
+</head>
+<body>
+
+<nav>
+  <a href="cova.html" class="logo">Cov<span>a</span></a>
+  <button class="nav-back" onclick="goBack()">← Back</button>
+</nav>
+
+<div class="progress-bar">
+  <div class="progress-steps">
+    <div class="prog-step active" id="prog-1"><div class="prog-dot">1</div><div class="prog-label">Your details</div></div>
+    <div class="prog-step" id="prog-2"><div class="prog-dot">2</div><div class="prog-label">Vehicle info</div></div>
+    <div class="prog-step" id="prog-3"><div class="prog-dot">3</div><div class="prog-label">Cover type</div></div>
+    <div class="prog-step" id="prog-4"><div class="prog-dot">4</div><div class="prog-label">Photos</div></div>
+    <div class="prog-step" id="prog-5"><div class="prog-dot">5</div><div class="prog-label">Choose insurer</div></div>
+    <div class="prog-step" id="prog-6"><div class="prog-dot">6</div><div class="prog-label">Confirm</div></div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- STEP 1: Personal Details -->
+  <div class="step-panel active" id="step-1">
+    <div class="step-title">Motor insurance quote</div>
+    <div class="step-sub">We compare rates across 6 NAICOM-licensed insurers and find you the best deal. Takes 5 minutes.</div>
+    <div class="form-row">
+      <div class="form-group" id="fg-fn"><label>First name</label><input type="text" id="fn" placeholder="Emeka"><div class="field-error">Required</div></div>
+      <div class="form-group" id="fg-ln"><label>Last name</label><input type="text" id="ln" placeholder="Adekunle"><div class="field-error">Required</div></div>
+    </div>
+    <div class="form-group" id="fg-phone"><label>WhatsApp number</label><input type="tel" id="phone" placeholder="080 xxxx xxxx"><div class="hint">Claims and policy updates come here.</div><div class="field-error">Enter a valid Nigerian number</div></div>
+    <div class="form-group" id="fg-email"><label>Email address</label><input type="email" id="email" placeholder="emeka@business.com"><div class="field-error">Enter a valid email</div></div>
+    <div class="form-group">
+      <label>Are you insuring for yourself or your business?</label>
+      <select id="account-type" onchange="toggleBusinessFields()">
+        <option value="personal">Myself — personal vehicle</option>
+        <option value="business">My business — company vehicle</option>
+      </select>
+    </div>
+    <div id="business-fields" style="display:none">
+      <div class="form-group" id="fg-companyname">
+        <label>Company name</label>
+        <input type="text" id="companyname" placeholder="e.g. Cova Tech Ltd">
+        <div class="field-error">Please enter your company name</div>
+      </div>
+      <div class="form-group" id="fg-rcnumber">
+        <label>RC Number (Optional)</label>
+        <input type="text" id="rcnumber" placeholder="e.g. RC 123456">
+      </div>
+    </div>
+    
+    <div class="form-group">
+      <label>Where should we send your verification code?</label>
+      <div class="login-tabs" style="display:flex;gap:8px;background:var(--gp);padding:6px;border-radius:12px;margin-bottom:10px">
+        <div class="login-tab active" id="tab-opt-phone" onclick="selectOtpMethod('phone')" style="flex:1;text-align:center;padding:10px;font-size:13px;font-weight:600;cursor:pointer;border-radius:8px;background:var(--w);box-shadow:0 2px 8px rgba(0,0,0,.05)">WhatsApp</div>
+        <div class="login-tab" id="tab-opt-email" onclick="selectOtpMethod('email')" style="flex:1;text-align:center;padding:10px;font-size:13px;font-weight:600;cursor:pointer;border-radius:8px;color:var(--inkl)">Email</div>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group"><label>State of residence</label>
+        <select id="state">
+          <option value="">Select state...</option>
+          <option>Lagos</option><option>Abuja (FCT)</option><option>Rivers</option>
+          <option>Kano</option><option>Ogun</option><option>Oyo</option>
+          <option>Delta</option><option>Anambra</option><option>Other</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Vehicle is used for</label>
+        <select id="usage">
+          <option value="private">Private use</option>
+          <option value="business">Business use</option>
+          <option value="commercial">Commercial (hire/reward)</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="nextStep(1)">Continue →</button>
+  </div>
+
+  <!-- STEP 1b: OTP Verification -->
+  <div class="step-panel" id="step-1b">
+    <div class="step-title">Verify your contact</div>
+    <div class="step-sub">We've sent a 6-digit code to <strong id="otp-destination"></strong>.</div>
+
+    <div class="form-group" id="fg-otp">
+      <div style="display:flex;gap:10px;justify-content:space-between;margin:20px 0" class="otp-inputs" id="signup-otp-container">
+        <input type="text" maxlength="1" style="width:45px;height:50px;text-align:center;font-size:20px;font-weight:700;border-radius:12px;border:1.5px solid var(--crd);background:var(--gp)" onkeyup="moveToNext(this, event)">
+        <input type="text" maxlength="1" style="width:45px;height:50px;text-align:center;font-size:20px;font-weight:700;border-radius:12px;border:1.5px solid var(--crd);background:var(--gp)" onkeyup="moveToNext(this, event)">
+        <input type="text" maxlength="1" style="width:45px;height:50px;text-align:center;font-size:20px;font-weight:700;border-radius:12px;border:1.5px solid var(--crd);background:var(--gp)" onkeyup="moveToNext(this, event)">
+        <input type="text" maxlength="1" style="width:45px;height:50px;text-align:center;font-size:20px;font-weight:700;border-radius:12px;border:1.5px solid var(--crd);background:var(--gp)" onkeyup="moveToNext(this, event)">
+        <input type="text" maxlength="1" style="width:45px;height:50px;text-align:center;font-size:20px;font-weight:700;border-radius:12px;border:1.5px solid var(--crd);background:var(--gp)" onkeyup="moveToNext(this, event)">
+        <input type="text" maxlength="1" style="width:45px;height:50px;text-align:center;font-size:20px;font-weight:700;border-radius:12px;border:1.5px solid var(--crd);background:var(--gp)" onkeyup="moveToNext(this, event)">
+      </div>
+      <div class="field-error">Please enter the 6-digit code</div>
+    </div>
+
+    <button class="btn-primary" onclick="nextStep('1b')">Verify & Continue →</button>
+    <button class="btn-secondary" onclick="prevStep('1b')">← Go back</button>
+  </div>
+
+  <!-- STEP 2: Vehicle Details -->
+  <div class="step-panel" id="step-2">
+    <div class="step-title">Tell us about your vehicle</div>
+    <div class="step-sub">We need accurate details to generate your quote. All information is verified against FRSC records.</div>
+    <div class="form-row">
+      <div class="form-group" id="fg-make"><label>Vehicle make</label><input type="text" id="make" placeholder="Toyota"><div class="field-error">Required</div></div>
+      <div class="form-group" id="fg-model"><label>Model</label><input type="text" id="vmodel" placeholder="Camry SE"><div class="field-error">Required</div></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group" id="fg-year">
+        <label>Year of manufacture</label>
+        <select id="year"><option value="">Select year...</option></select>
+        <div class="field-error">Required</div>
+      </div>
+      <div class="form-group" id="fg-color"><label>Vehicle colour</label><input type="text" id="color" placeholder="Silver"><div class="field-error">Required</div></div>
+    </div>
+    <div class="form-group" id="fg-plate">
+      <label>Plate number</label>
+      <input type="text" id="plate" placeholder="e.g. LND 234 KJ" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()">
+      <div class="hint">Must match your current FRSC registration exactly.</div>
+      <div class="field-error">Required</div>
+    </div>
+    <div class="form-row">
+      <div class="form-group" id="fg-chassis">
+        <label>Chassis / VIN number</label>
+        <input type="text" id="chassis" placeholder="17 characters" maxlength="17" oninput="this.value=this.value.toUpperCase()">
+        <div class="hint">Found on dashboard near windscreen or driver door frame.</div>
+        <div class="field-error">Required</div>
+      </div>
+      <div class="form-group" id="fg-engine">
+        <label>Engine number</label>
+        <input type="text" id="engine" placeholder="On engine block" oninput="this.value=this.value.toUpperCase()">
+        <div class="field-error">Required</div>
+      </div>
+    </div>
+    <div class="form-group" id="fg-vvalue">
+      <label>Current market value (₦)</label>
+      <input type="number" id="vvalue" placeholder="8000000" min="500000" oninput="updateMotorPremium()">
+      <div class="hint">What would it cost to replace this vehicle today? Be accurate — this sets your claim limit.</div>
+      <div class="field-error">Enter at least ₦500,000</div>
+    </div>
+    <div class="info-box amber">
+      <span style="font-size:16px">⚠️</span>
+      <p><strong>Be accurate on vehicle value.</strong> If you undervalue and make a total loss claim, you'll only receive the stated value. If you overvalue, the insurer will depreciate to market value at claim time.</p>
+    </div>
+    <button class="btn-primary" onclick="nextStep(2)">Continue →</button>
+    <button class="btn-secondary" onclick="prevStep(2)">← Go back</button>
+  </div>
+
+  <!-- STEP 3: Cover Type -->
+  <div class="step-panel" id="step-3">
+    <div class="step-title">Choose your cover level</div>
+    <div class="step-sub">Pick the cover that fits how you use your vehicle.</div>
+    <div class="cover-options">
+      <div class="cover-opt" id="cov-third" onclick="selectCover('third',this)">
+        <div class="cover-opt-icon">🛡️</div>
+        <div class="cover-opt-name">Third Party</div>
+        <div class="cover-opt-desc">Covers damage to other people's vehicles and property. Legally required minimum.</div>
+        <div class="cover-opt-price" id="tp-price">~₦25,000/yr</div>
+      </div>
+      <div class="cover-opt" id="cov-tpft" onclick="selectCover('tpft',this)">
+        <div class="cover-opt-icon">🔥</div>
+        <div class="cover-opt-name">Third Party Fire & Theft</div>
+        <div class="cover-opt-desc">Third party cover plus protection if your vehicle is stolen or burns.</div>
+        <div class="cover-opt-price" id="tpft-price">~₦60,000/yr</div>
+      </div>
+      <div class="cover-opt selected" id="cov-comp" onclick="selectCover('comp',this)">
+        <div class="cover-opt-icon">⭐</div>
+        <div class="cover-opt-name">Comprehensive</div>
+        <div class="cover-opt-desc">Full protection. Your vehicle, third parties, theft, fire, flood, and more.</div>
+        <div class="cover-opt-price" id="comp-price">~₦320,000/yr</div>
+      </div>
+    </div>
+
+    <div class="info-box green" id="cover-info">
+      <span style="font-size:16px">💡</span>
+      <p id="cover-info-text"><strong>Comprehensive is recommended</strong> for vehicles above ₦3M. It covers your own vehicle for accidents, theft, fire, flood, and third party liability. If your car is financed or leased, your lender will require comprehensive.</p>
+    </div>
+
+    <div class="freq-tabs">
+      <div class="freq-tab active" onclick="setFreq('annual',this)">Annual <span class="saving">Best value</span></div>
+      <div class="freq-tab" onclick="setFreq('monthly',this)">Monthly</div>
+      <div class="freq-tab" onclick="setFreq('quarterly',this)">Quarterly</div>
+    </div>
+
+    <div class="premium-calc">
+      <div class="calc-title">Premium estimate</div>
+      <div class="calc-row"><span>Vehicle value</span><strong id="calc-vval">—</strong></div>
+      <div class="calc-row"><span>Cover type</span><strong id="calc-cover">Comprehensive</strong></div>
+      <div class="calc-row"><span>Usage</span><strong id="calc-usage">Private</strong></div>
+      <div class="calc-row"><span>Annual rate</span><strong id="calc-rate">4%</strong></div>
+      <div class="calc-total">
+        <span class="calc-total-label" id="calc-freq-label">Annual premium</span>
+        <span class="calc-total-price" id="calc-price">—</span>
+      </div>
+    </div>
+
+    <button class="btn-primary" onclick="nextStep(3)">Continue →</button>
+    <button class="btn-secondary" onclick="prevStep(3)">← Go back</button>
+  </div>
+
+  <!-- STEP 4: Vehicle Photos -->
+  <div class="step-panel" id="step-4">
+    <div class="step-title">Photograph your vehicle</div>
+    <div class="step-sub">6 photos required. Documents existing condition — protects you against disputed claims.</div>
+
+    <div class="photo-note">📸 Park in good lighting. Capture all angles clearly including existing dents or scratches. Pre-existing damage is noted and excluded from new claims — but you need the photos to prove it wasn't caused after the policy started.</div>
+
+    <div class="photo-grid" id="vehicle-photos">
+      <div class="photo-slot" id="vslot-1" onclick="triggerVPhoto(1)"><input type="file" class="photo-input" accept="image/*" onchange="handleVPhoto(this,1)"><span class="photo-slot-icon">📷</span><div class="photo-slot-label">Front view</div><div class="photo-check">✓</div></div>
+      <div class="photo-slot" id="vslot-2" onclick="triggerVPhoto(2)"><input type="file" class="photo-input" accept="image/*" onchange="handleVPhoto(this,2)"><span class="photo-slot-icon">📷</span><div class="photo-slot-label">Rear view</div><div class="photo-check">✓</div></div>
+      <div class="photo-slot" id="vslot-3" onclick="triggerVPhoto(3)"><input type="file" class="photo-input" accept="image/*" onchange="handleVPhoto(this,3)"><span class="photo-slot-icon">📷</span><div class="photo-slot-label">Driver side</div><div class="photo-check">✓</div></div>
+      <div class="photo-slot" id="vslot-4" onclick="triggerVPhoto(4)"><input type="file" class="photo-input" accept="image/*" onchange="handleVPhoto(this,4)"><span class="photo-slot-icon">📷</span><div class="photo-slot-label">Passenger side</div><div class="photo-check">✓</div></div>
+      <div class="photo-slot" id="vslot-5" onclick="triggerVPhoto(5)"><input type="file" class="photo-input" accept="image/*" onchange="handleVPhoto(this,5)"><span class="photo-slot-icon">📷</span><div class="photo-slot-label">Dashboard & odometer</div><div class="photo-check">✓</div></div>
+      <div class="photo-slot" id="vslot-6" onclick="triggerVPhoto(6)"><input type="file" class="photo-input" accept="image/*" onchange="handleVPhoto(this,6)"><span class="photo-slot-icon">📷</span><div class="photo-slot-label">Chassis number plate</div><div class="photo-check">✓</div></div>
+    </div>
+    <div id="photo-error" style="font-size:13px;color:var(--r);margin-bottom:14px;display:none">Please upload all 6 photos to continue.</div>
+
+    <div class="form-group">
+      <label>Upload proof of ownership <span style="color:var(--inkf);font-weight:400">(vehicle licence or purchase receipt)</span></label>
+      <input type="file" id="ownership-doc" accept="image/*,.pdf" style="padding:12px">
+      <div class="hint">JPEG, PNG or PDF. Max 5MB.</div>
+    </div>
+
+    <button class="btn-primary" onclick="nextStep(4)">Continue →</button>
+    <button class="btn-secondary" onclick="prevStep(4)">← Go back</button>
+  </div>
+
+  <!-- STEP 5: Choose Insurer -->
+  <div class="step-panel" id="step-5">
+    <div class="step-title">We found your best quotes</div>
+    <div class="step-sub">Based on your vehicle and cover type, here are our recommended insurers. All are NAICOM-licensed. We earn a commission from whichever you choose — it doesn't affect your price.</div>
+
+    <div class="insurer-grid" id="insurer-options">
+      <div class="insurer-opt selected" onclick="selectInsurer(this,'AXA Mansard','A+')">
+        <div class="insurer-badge">⭐ Recommended</div>
+        <div class="insurer-name">AXA Mansard</div>
+        <div class="insurer-rating">A+ rated · Fast claims</div>
+      </div>
+      <div class="insurer-opt" onclick="selectInsurer(this,'Leadway Assurance','A')">
+        <div class="insurer-badge" style="color:transparent">·</div>
+        <div class="insurer-name">Leadway Assurance</div>
+        <div class="insurer-rating">A rated · 60yr history</div>
+      </div>
+      <div class="insurer-opt" onclick="selectInsurer(this,'Zenith Insurance','A+')">
+        <div class="insurer-badge" style="color:transparent">·</div>
+        <div class="insurer-name">Zenith Insurance</div>
+        <div class="insurer-rating">A+ rated · Bank-backed</div>
+      </div>
+      <div class="insurer-opt" onclick="selectInsurer(this,'AIICO Insurance','A')">
+        <div class="insurer-badge" style="color:transparent">·</div>
+        <div class="insurer-name">AIICO Insurance</div>
+        <div class="insurer-rating">A rated · Wide network</div>
+      </div>
+      <div class="insurer-opt" onclick="selectInsurer(this,'Cornerstone Insurance','BBB')">
+        <div class="insurer-badge" style="color:transparent">·</div>
+        <div class="insurer-name">Cornerstone</div>
+        <div class="insurer-rating">BBB rated · Affordable</div>
+      </div>
+      <div class="insurer-opt" onclick="selectInsurer(this,'NEM Insurance','A')">
+        <div class="insurer-badge" style="color:transparent">·</div>
+        <div class="insurer-name">NEM Insurance</div>
+        <div class="insurer-rating">A rated · SME focus</div>
+      </div>
+    </div>
+    <p class="insurer-rec">All prices are regulated by NAICOM — the premium is the same regardless of insurer. Your choice is based on claim speed, network, and service quality. We recommend AXA Mansard for comprehensive motor based on fastest average claim settlement in Nigeria.</p>
+
+    <div class="info-box green" style="margin-top:16px">
+      <span style="font-size:16px">🛡️</span>
+      <p><strong>Cova handles your claim regardless of insurer.</strong> You always WhatsApp us — we chase the insurer on your behalf. You never deal with them directly unless you want to.</p>
+    </div>
+
+    <button class="btn-primary" onclick="nextStep(5)">Continue →</button>
+    <button class="btn-secondary" onclick="prevStep(5)">← Go back</button>
+  </div>
+
+  <!-- STEP 6: Summary & Pay -->
+  <div class="step-panel" id="step-6">
+    <div class="step-title">Review & confirm</div>
+    <div class="step-sub">Check everything is correct before we issue your policy.</div>
+
+    <div class="summary-card">
+      <div class="summary-section">
+        <div class="summary-section-title">Policyholder</div>
+        <div class="summary-row"><span class="summary-label">Name</span><span class="summary-value" id="sum-name">—</span></div>
+        <div class="summary-row"><span class="summary-label">WhatsApp</span><span class="summary-value" id="sum-phone">—</span></div>
+      </div>
+      <div class="summary-section">
+        <div class="summary-section-title">Vehicle</div>
+        <div class="summary-row"><span class="summary-label">Vehicle</span><span class="summary-value" id="sum-vehicle">—</span></div>
+        <div class="summary-row"><span class="summary-label">Plate number</span><span class="summary-value" id="sum-plate">—</span></div>
+        <div class="summary-row"><span class="summary-label">Market value</span><span class="summary-value" id="sum-vvalue">—</span></div>
+      </div>
+      <div class="summary-section">
+        <div class="summary-section-title">Policy</div>
+        <div class="summary-row"><span class="summary-label">Cover type</span><span class="summary-value" id="sum-cover">Comprehensive</span></div>
+        <div class="summary-row"><span class="summary-label">Insurer</span><span class="summary-value" id="sum-insurer">AXA Mansard</span></div>
+        <div class="summary-row"><span class="summary-label">Policy period</span><span class="summary-value">12 months from today</span></div>
+        <div class="summary-row"><span class="summary-label">Claim handling</span><span class="summary-value green">Cova (WhatsApp)</span></div>
+      </div>
+      <div class="summary-total">
+        <span class="summary-total-label">Total premium</span>
+        <span class="summary-total-price" id="sum-price">—</span>
+      </div>
+    </div>
+
+    <div class="info-box green">
+      <span style="font-size:16px">🛡️</span>
+      <p><strong>72-hour claim resolution guarantee.</strong> Something goes wrong — WhatsApp us. We assign a named handler, coordinate with the insurer and repair centre, and close the claim within 72 hours. Miss the SLA, your next renewal is discounted 10%.</p>
+    </div>
+
+    <button class="btn-primary" onclick="submitPolicy()">Pay securely with Paystack →</button>
+    <button class="btn-secondary" onclick="prevStep(6)">← Go back</button>
+    <p style="font-size:12px;color:var(--inkf);text-align:center;margin-top:14px">Policies are issued by NAICOM-licensed insurers. Cova acts as a licensed insurance broker. By continuing you agree to our terms of service.</p>
+  </div>
+
+  <!-- SUCCESS -->
+  <div class="success-screen" id="success">
+    <div class="success-circle">🚗</div>
+    <h2>Your vehicle is covered!</h2>
+    <p>Your motor policy is active from today. Your certificate of insurance will be emailed within 2 hours. Keep it in your vehicle at all times.</p>
+    <div class="policy-card">
+      <div class="policy-num">Policy #COV-MTR-2026-<span id="policy-num">00000</span></div>
+      <div class="policy-detail" id="pol-vehicle">Toyota Camry SE 2021</div>
+      <div class="policy-row"><span style="color:var(--inkl)">Cover type</span><span id="pol-cover" style="font-weight:500">Comprehensive</span></div>
+      <div class="policy-row"><span style="color:var(--inkl)">Insurer</span><span id="pol-insurer" style="font-weight:500">AXA Mansard</span></div>
+      <div class="policy-row"><span style="color:var(--inkl)">Expires</span><span style="font-weight:500" id="pol-expiry">—</span></div>
+      <div class="policy-row"><span style="color:var(--inkl)">Your Cova handler</span><span style="font-weight:500;color:var(--g)">Being assigned now</span></div>
+    </div>
+    <a class="whatsapp-btn" href="https://wa.me/2348000000000?text=Hi%20Cova!%20I%20just%20got%20my%20motor%20policy." target="_blank">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      Connect with your claims handler
+    </a>
+    <button class="btn-secondary" style="margin-top:12px" onclick="window.location.href='cova.html'">Back to home</button>
+  </div>
+
+</div>
+
+<script>
+let currentStep = 1;
+let selectedCover = 'comp';
+let selectedFreq = 'annual';
+let selectedInsurer = 'AXA Mansard';
+let vehicleValue = 0;
+let photosUploaded = [false,false,false,false,false,false];
+
+const coverRates = { third: 0.003, tpft: 0.008, comp: 0.04 };
+const freqMultiplier = { annual: 1, monthly: 1/12, quarterly: 1/4 };
+const coverNames = { third:'Third Party', tpft:'Third Party Fire & Theft', comp:'Comprehensive' };
+const coverInfo = {
+  third: 'Third party only is the legal minimum in Nigeria. It covers damage you cause to other vehicles and people — but not your own vehicle. Only recommended for vehicles under ₦1.5M in value.',
+  tpft: 'Third party, fire and theft adds protection if your vehicle is stolen or catches fire on top of standard third party cover. A solid middle ground for vehicles ₦2M–₦5M.',
+  comp: 'Comprehensive covers everything — your vehicle, third parties, theft, fire, flood, accidental damage. Required if your vehicle is financed. Recommended for all vehicles above ₦3M.'
+};
+
+function fmt(n){ return '₦' + Math.round(n).toLocaleString('en-NG'); }
+
+function updateMotorPremium(){
+  vehicleValue = parseFloat(document.getElementById('vvalue').value) || 0;
+  const rate = coverRates[selectedCover];
+  const annual = vehicleValue * rate;
+  const tp = vehicleValue * coverRates.third;
+  const tpft = vehicleValue * coverRates.tpft;
+  const comp = vehicleValue * coverRates.comp;
+  document.getElementById('tp-price').textContent = vehicleValue ? fmt(tp)+'/yr' : '~₦25,000/yr';
+  document.getElementById('tpft-price').textContent = vehicleValue ? fmt(tpft)+'/yr' : '~₦60,000/yr';
+  document.getElementById('comp-price').textContent = vehicleValue ? fmt(comp)+'/yr' : '~₦320,000/yr';
+  refreshCalc();
+}
+
+function refreshCalc(){
+  const rate = coverRates[selectedCover];
+  const annual = vehicleValue * rate;
+  const price = annual * freqMultiplier[selectedFreq];
+  document.getElementById('calc-vval').textContent = vehicleValue ? fmt(vehicleValue) : '—';
+  document.getElementById('calc-cover').textContent = coverNames[selectedCover];
+  document.getElementById('calc-rate').textContent = (rate * 100) + '%';
+  document.getElementById('calc-price').textContent = vehicleValue ? fmt(price) : '—';
+  const labels = { annual:'Annual premium', monthly:'Monthly premium', quarterly:'Quarterly premium' };
+  document.getElementById('calc-freq-label').textContent = labels[selectedFreq];
+  const usage = document.getElementById('usage');
+  if(usage) document.getElementById('calc-usage').textContent = usage.options[usage.selectedIndex]?.text || 'Private';
+  updateSummaryPrice();
+}
+
+function updateSummaryPrice(){
+  const rate = coverRates[selectedCover];
+  const annual = vehicleValue * rate;
+  const price = annual * freqMultiplier[selectedFreq];
+  const el = document.getElementById('sum-price');
+  if(el) el.textContent = vehicleValue ? fmt(price) : '—';
+}
+
+function selectCover(type, el){
+  selectedCover = type;
+  document.querySelectorAll('.cover-opt').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('cover-info-text').innerHTML = coverInfo[type];
+  document.getElementById('calc-cover').textContent = coverNames[type];
+  document.getElementById('sum-cover').textContent = coverNames[type];
+  document.getElementById('pol-cover').textContent = coverNames[type];
+  refreshCalc();
+}
+
+function setFreq(freq, el){
+  selectedFreq = freq;
+  document.querySelectorAll('.freq-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  refreshCalc();
+}
+
+function selectInsurer(el, name, rating){
+  selectedInsurer = name;
+  document.querySelectorAll('.insurer-opt').forEach(i => i.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('sum-insurer').textContent = name;
+  document.getElementById('pol-insurer').textContent = name;
+}
+
+function triggerVPhoto(slot){ document.querySelector('#vslot-' + slot + ' .photo-input').click(); }
+
+function handleVPhoto(input, slot){
+  if(input.files && input.files[0]){
+    const reader = new FileReader();
+    reader.onload = function(e){
+      const slotEl = document.getElementById('vslot-' + slot);
+      let prev = slotEl.querySelector('.photo-preview');
+      if(!prev){ prev = document.createElement('img'); prev.className = 'photo-preview'; slotEl.appendChild(prev); }
+      prev.src = e.target.result;
+      slotEl.classList.add('filled');
+      photosUploaded[slot-1] = true;
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
+let otpMethod = 'phone';
+function selectOtpMethod(method) {
+  otpMethod = method;
+  const tPhone = document.getElementById('tab-opt-phone');
+  const tEmail = document.getElementById('tab-opt-email');
+  if(method === 'phone') {
+    tPhone.style.background = 'var(--w)'; tPhone.style.color = 'var(--ink)'; tPhone.style.boxShadow = '0 2px 8px rgba(0,0,0,.05)';
+    tEmail.style.background = 'transparent'; tEmail.style.color = 'var(--inkl)'; tEmail.style.boxShadow = 'none';
+  } else {
+    tEmail.style.background = 'var(--w)'; tEmail.style.color = 'var(--ink)'; tEmail.style.boxShadow = '0 2px 8px rgba(0,0,0,.05)';
+    tPhone.style.background = 'transparent'; tPhone.style.color = 'var(--inkl)'; tPhone.style.boxShadow = 'none';
+  }
+}
+
+function toggleBusinessFields(){
+  const type = document.getElementById('account-type').value;
+  document.getElementById('business-fields').style.display = type === 'sme' ? 'block' : 'none';
+}
+
+function moveToNext(el, event) {
+  if (event.key === 'Backspace') {
+    if (el.previousElementSibling) el.previousElementSibling.focus();
+  } else if (el.value.length === 1) {
+    if (el.nextElementSibling) el.nextElementSibling.focus();
+  }
+}
+
+function validateStep(step){
+  if(step === 1){
+    let ok = true;
+    const type = document.getElementById('account-type').value;
+    const fields = [
+      ['fg-fn','fn',v=>v.trim().length>1],
+      ['fg-ln','ln',v=>v.trim().length>1],
+      ['fg-phone','phone',v=>v.replace(/\D/g,'').length>=10],
+      ['fg-email','email',v=>/\S+@\S+\.\S+/.test(v)]
+    ];
+    if(type === 'sme'){
+      fields.push(['fg-companyname','companyname', v => v.trim().length > 1]);
+    }
+    fields.forEach(([g,f,fn])=>{
+      const grp=document.getElementById(g);
+      if(!fn(document.getElementById(f).value)){grp.classList.add('error');ok=false;}
+      else grp.classList.remove('error');
+    });
+    return ok;
+  }
+  if(step === '1b'){
+    let otp = '';
+    document.querySelectorAll('#signup-otp-container input').forEach(i => otp += i.value);
+    if(otp.length < 6){ document.getElementById('fg-otp').classList.add('error'); return false; }
+    document.getElementById('fg-otp').classList.remove('error');
+    return true;
+  }
+  if(step === 2){
+    let ok = true;
+    [['fg-make','make',v=>v.trim().length>1],['fg-model','vmodel',v=>v.trim().length>1],
+     ['fg-year','year',v=>v!==''],['fg-color','color',v=>v.trim().length>1],
+     ['fg-plate','plate',v=>v.trim().length>4],['fg-chassis','chassis',v=>v.trim().length>5],
+     ['fg-engine','engine',v=>v.trim().length>3],
+     ['fg-vvalue','vvalue',v=>parseFloat(v)>=500000]
+    ].forEach(([g,f,fn])=>{
+      const grp=document.getElementById(g);
+      if(!fn(document.getElementById(f).value)){grp.classList.add('error');ok=false;}
+      else grp.classList.remove('error');
+    });
+    return ok;
+  }
+  if(step === 4){
+    const allDone = photosUploaded.every(Boolean);
+    document.getElementById('photo-error').style.display = allDone ? 'none' : 'block';
+    return allDone;
+  }
+  return true;
+}
+
+function populateSummary(){
+  const fn = document.getElementById('fn').value;
+  const ln = document.getElementById('ln').value;
+  const make = document.getElementById('make').value;
+  const model = document.getElementById('vmodel').value;
+  const year = document.getElementById('year').value;
+  const plate = document.getElementById('plate').value;
+  document.getElementById('sum-name').textContent = fn + ' ' + ln;
+  document.getElementById('sum-phone').textContent = document.getElementById('phone').value;
+  document.getElementById('sum-vehicle').textContent = `${year} ${make} ${model}`;
+  document.getElementById('sum-plate').textContent = plate;
+  document.getElementById('sum-vvalue').textContent = fmt(vehicleValue);
+  document.getElementById('pol-vehicle').textContent = `${make} ${model} ${year}`;
+  updateSummaryPrice();
+}
+
+function nextStep(from){
+  if(!validateStep(from)) return;
+  if(from === 1){
+    const dest = otpMethod === 'phone' ? document.getElementById('phone').value : document.getElementById('email').value;
+    document.getElementById('otp-destination').textContent = dest;
+    document.getElementById('step-1').classList.remove('active');
+    document.getElementById('step-1b').classList.add('active');
+    document.querySelector('#signup-otp-container input').focus();
+    return;
+  }
+  if(from === '1b'){
+    document.getElementById('step-1b').classList.remove('active');
+    document.getElementById('step-2').classList.add('active');
+    updateProgress(2);
+    return;
+  }
+  if(from === 5) populateSummary();
+  goToStep(from + 1);
+}
+function prevStep(current){ 
+  if(current === '1b') {
+    document.getElementById('step-1b').classList.remove('active');
+    document.getElementById('step-1').classList.add('active');
+    return;
+  }
+  if(current === 2) {
+    document.getElementById('step-2').classList.remove('active');
+    document.getElementById('step-1').classList.add('active');
+    updateProgress(1);
+    return;
+  }
+  goToStep(current - 1); 
+}
+
+function goToStep(n){
+  document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('step-' + n).classList.add('active');
+  updateProgress(n);
+  currentStep = n;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function updateProgress(n) {
+  for(let i=1;i<=6;i++){
+    const prog = document.getElementById('prog-'+i);
+    if(prog) {
+      prog.classList.remove('active','done');
+      if(i<n) prog.classList.add('done');
+      if(i===n) prog.classList.add('active');
+    }
+  }
+}
+
+function goBack(){
+  if(currentStep === '1b') prevStep('1b');
+  else if(currentStep > 1) prevStep(currentStep);
+  else window.history.back();
+}
+
+
+
+function submitPolicy(){
+  const emailEl = document.getElementById('email');
+  const phoneEl = document.getElementById('phone');
+  const amountEl = document.getElementById('sum-price');
+  
+  const email = emailEl ? emailEl.value : 'user@example.com';
+  const phone = phoneEl ? phoneEl.value : '08000000000';
+  let amountStr = '0';
+  if(amountEl) amountStr = amountEl.textContent.replace(/[^0-9]/g, '');
+  if(!amountStr) amountStr = '1000'; // fallback
+  
+  const amountKobo = parseInt(amountStr, 10) * 100;
+  
+  const pkMeta = document.getElementById('paystack-key');
+  const pk = pkMeta ? pkMeta.content : 'pk_test_mock_key_12345';
+  
+  // Use global PaystackPop or window.PaystackPop
+  const popup = new PaystackPop();
+  const config = {
+    key: pk,
+    email: email,
+    amount: amountKobo,
+    currency: 'NGN',
+    ref: 'COVA-MOTOR-' + Date.now(),
+    metadata: {
+      custom_fields: [
+        { display_name: "Product Type", variable_name: "product_type", value: "MOTOR" },
+        { display_name: "Customer Phone", variable_name: "customer_phone", value: phone }
+      ]
+    },
+    onSuccess: function(response) {
+      localStorage.setItem('cova_last_ref', response.reference);
+      document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+      const successEl = document.getElementById('success');
+      if(successEl) successEl.classList.add('active');
+      window.scrollTo({top:0, behavior:'smooth'});
+    },
+    onCancel: function() {
+      const t = document.createElement('div');
+      t.textContent = 'Payment cancelled';
+      t.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--crd);color:white;padding:12px 24px;border-radius:8px;z-index:9999;font-weight:600;';
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 3000);
+    }
+  };
+  
+  config.plan = 'PLN_mock123';
+  
+  popup.setup(config);
+  popup.openIframe();
+}
+
+async function submitMotorPolicy() {
+  // Get form data
+  const vehicleModel = document.getElementById('vehicle-model').value;
+  const vehicleValue = parseFloat(document.getElementById('vehicle-value').value);
+  const coverType = document.getElementById('cover-type').value;
+  const plateNumber = document.getElementById('plate-number').value;
+  
+  // Validation
+  if (!vehicleModel || !vehicleValue || !coverType || !plateNumber) {
+    alert('Please fill in all fields');
+    return;
+  }
+  
+  // Prepare data for backend
+  const policyData = {
+    product_type: 'motor',
+    cover_type: coverType,
+    insurer: 'Leadway', // or dynamic based on form
+    sum_insured: vehicleValue,
+    premium_amount: calculateMotorPremium(vehicleValue, coverType),
+    premium_frequency: 'yearly',
+    start_date: new Date().toISOString().split('T')[0],
+    end_date: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    metadata: {
+      vehicle_model: vehicleModel,
+      plate_number: plateNumber,
+      vehicle_value: vehicleValue,
+    },
+  };
+  
+  // Call API
+  const result = await createPolicy(policyData);
+  
+  if (result.ok) {
+    const policyId = result.data.policy.id;
+    alert('Policy created! Proceeding to payment...');
+    // Redirect to payment
+    window.location.href = `cova-claim.html?policy_id=${policyId}&amount=${policyData.premium_amount}`;
+  } else {
+    alert('Error creating policy: ' + result.data.error.message);
+  }
+}
+
+function calculateMotorPremium(vehicleValue, coverType) {
+  if (coverType === 'third-party') {
+    return vehicleValue * 0.02; // 2% for third party
+  } else if (coverType === 'comprehensive') {
+    return vehicleValue * 0.05; // 5% for comprehensive
+  }
+  return 0;
+}
+
+</script>
+  <script src="https://cdn.jsdelivr.net/npm/@paystack/inline-js/dist/inline.min.js">
+function submitPolicy(){
+  const emailEl = document.getElementById('email');
+  const phoneEl = document.getElementById('phone');
+  const amountEl = document.getElementById('sum-price');
+  
+  const email = emailEl ? emailEl.value : 'user@example.com';
+  const phone = phoneEl ? phoneEl.value : '08000000000';
+  let amountStr = '0';
+  if(amountEl) amountStr = amountEl.textContent.replace(/[^0-9]/g, '');
+  if(!amountStr) amountStr = '1000'; // fallback
+  
+  const amountKobo = parseInt(amountStr, 10) * 100;
+  
+  const pkMeta = document.getElementById('paystack-key');
+  const pk = pkMeta ? pkMeta.content : 'pk_test_mock_key_12345';
+  
+  // Use global PaystackPop or window.PaystackPop
+  const popup = new PaystackPop();
+  const config = {
+    key: pk,
+    email: email,
+    amount: amountKobo,
+    currency: 'NGN',
+    ref: 'COVA-MOTOR-' + Date.now(),
+    metadata: {
+      custom_fields: [
+        { display_name: "Product Type", variable_name: "product_type", value: "MOTOR" },
+        { display_name: "Customer Phone", variable_name: "customer_phone", value: phone }
+      ]
+    },
+    onSuccess: function(response) {
+      localStorage.setItem('cova_last_ref', response.reference);
+      document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+      const successEl = document.getElementById('success');
+      if(successEl) successEl.classList.add('active');
+      window.scrollTo({top:0, behavior:'smooth'});
+    },
+    onCancel: function() {
+      const t = document.createElement('div');
+      t.textContent = 'Payment cancelled';
+      t.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--crd);color:white;padding:12px 24px;border-radius:8px;z-index:9999;font-weight:600;';
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 3000);
+    }
+  };
+  
+  config.plan = 'PLN_mock123';
+  
+  popup.setup(config);
+  popup.openIframe();
+}
+
+</script>
+</body>
+</html>

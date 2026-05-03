@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cova — Renew your policy</title>
+<script src="api-client.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --g:#0A5C45;--gm:#137A5C;--gl:#1D9E75;--gp:#E6F5F0;--gpp:#d0ede4;
+  --cream:#F7F4EE;--crd:#E8E4DB;--crd2:#D8D3C8;
+  --ink:#0F1A14;--inkm:#2D3E35;--inkl:#5A6E63;--inkf:#9AADA3;
+  --w:#fff;--r:#C0392B;--am:#D4860A;--amp:#FEF3E2;
+  --fd:'Syne',sans-serif;--fb:'DM Sans',sans-serif;
+  --rad:18px;--radsm:10px;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--fb);background:linear-gradient(180deg, var(--cream) 0%, #ECF8F3 100%);color:var(--ink);min-height:100vh}
+a{text-decoration:none;color:inherit}
+nav{display:flex;align-items:center;justify-content:space-between;padding:26px 5vw;max-width:1200px;margin:0 auto}
+.logo{font-family:var(--fd);font-size:22px;font-weight:800;color:var(--g)}
+.logo span{color:var(--gl)}
+.nav-cta{font-family:var(--fd);font-size:14px;font-weight:700;color:var(--w);background:var(--g);padding:12px 20px;border-radius:999px;transition:all .2s}
+.nav-cta:hover{background:var(--gm)}
+.main-wrap{max-width:1160px;margin:0 auto;padding:24px 5vw 60px}
+
+/* Urgency colours */
+.renewal-banner.urgent {
+  background: rgba(192, 57, 43, 0.1);
+  border: 1px solid rgba(192, 57, 43, 0.2);
+}
+.renewal-banner.urgent .banner-title { color: var(--r); }
+.renewal-banner.urgent .banner-days { color: var(--r); }
+
+.renewal-banner.warning {
+  background: rgba(212, 134, 10, 0.1);
+  border: 1px solid rgba(212, 134, 10, 0.2);
+}
+.renewal-banner.warning .banner-title { color: var(--am); }
+.renewal-banner.warning .banner-days { color: var(--am); }
+
+.renewal-banner.normal {
+  background: var(--gpp);
+  border: 1px solid var(--crd);
+}
+
+.success-overlay{position:fixed;inset:0;background:rgba(15,26,20,.5);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:2000;padding:24px}
+.success-overlay.open{display:flex}
+.success-box{background:var(--w);border-radius:32px;padding:48px;max-width:520px;width:100%;text-align:center;box-shadow:0 40px 80px rgba(10,92,69,.2)}
+.success-icon{font-size:60px;margin-bottom:20px}
+.success-title{font-family:var(--fd);font-size:28px;font-weight:800;color:var(--ink);margin-bottom:12px}
+.success-copy{font-size:15px;color:var(--inkl);line-height:1.75;margin-bottom:24px}
+.success-email{font-size:14px;color:var(--inkf);margin-bottom:24px}
+.renewal-banner{background:var(--gpp);border:1px solid rgba(10,92,69,.2);border-radius:24px;padding:20px 24px;margin-bottom:28px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.banner-text{display:flex;flex-direction:column;gap:6px}
+.banner-title{font-weight:700;color:var(--g)}
+.banner-copy{font-size:14px;color:var(--inkl)}
+.banner-days{font-family:var(--fd);font-size:28px;font-weight:800;color:var(--g)}
+.card{background:var(--w);border:1px solid var(--crd);border-radius:28px;padding:28px;box-shadow:0 24px 70px rgba(10,92,69,.08);margin-bottom:24px}
+.card h2{font-family:var(--fd);font-size:20px;font-weight:800;color:var(--ink);margin-bottom:20px}
+.summary-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.summary-item{background:var(--gp);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:8px}
+.summary-label{font-size:12px;font-weight:700;color:var(--inkl);text-transform:uppercase;letter-spacing:0.1em}
+.summary-value{font-size:18px;font-weight:800;color:var(--ink)}
+.payment-toggle{display:flex;gap:12px;margin-bottom:24px}
+.toggle-btn{flex:1;padding:16px;border:2px solid var(--crd);background:var(--w);border-radius:16px;cursor:pointer;font-weight:700;transition:all .2s}
+.toggle-btn.active{border-color:var(--gl);background:var(--gp);color:var(--g)}
+.breakdown-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--crd)}
+.breakdown-row:last-child{border-bottom:none}
+.breakdown-label{font-size:14px;color:var(--inkl)}
+.breakdown-value{font-size:15px;font-weight:700;color:var(--ink)}
+.breakdown-discount{color:var(--g)}
+.breakdown-total{display:flex;align-items:center;justify-content:space-between;padding:20px;border-radius:18px;background:var(--gp);margin-top:14px}
+.breakdown-total-label{font-family:var(--fd);font-size:16px;font-weight:700;color:var(--inkm)}
+.breakdown-total-value{font-family:var(--fd);font-size:28px;font-weight:800;color:var(--g)}
+.badge-loyalty{display:inline-flex;align-items:center;gap:6px;background:var(--gpp);color:var(--g);padding:8px 12px;border-radius:999px;font-size:12px;font-weight:700}
+.actions{display:flex;flex-direction:column;gap:14px}
+.btn-primary{display:flex;align-items:center;justify-content:center;padding:20px 24px;border-radius:20px;background:var(--g);color:var(--w);font-family:var(--fd);font-size:17px;font-weight:700;border:none;cursor:pointer;transition:all .2s;box-shadow:0 8px 20px rgba(10,92,69,.12)}
+.btn-primary:hover{background:var(--gm);transform:translateY(-2px)}
+.btn-secondary{display:flex;align-items:center;justify-content:center;padding:14px 18px;border-radius:16px;border:2px solid var(--g);background:transparent;color:var(--g);font-weight:700;cursor:pointer;transition:all .2s}
+.btn-secondary:hover{background:var(--gp)}
+.policy-ref{font-size:13px;color:var(--inkf);margin-top:12px;text-align:center}
+.new-dates{background:var(--gp);border-radius:18px;padding:18px;display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+.new-date-item{display:flex;flex-direction:column;gap:6px}
+.new-date-label{font-size:12px;font-weight:700;color:var(--inkl);text-transform:uppercase;letter-spacing:0.1em}
+.new-date-value{font-size:16px;font-weight:700;color:var(--ink)}
+
+/* Product selector */
+.product-selector {
+  margin-bottom: 24px;
+}
+.product-selector select {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1.5px solid var(--crd);
+  border-radius: 16px;
+  background: var(--gp);
+  color: var(--ink);
+  outline: none;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Links */
+.link-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+.link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 18px;
+  border-radius: 16px;
+  background: var(--gp);
+  border: 1px solid var(--crd);
+  color: var(--inkm);
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.link-btn:hover {
+  background: var(--gpp);
+  border-color: var(--gl);
+  color: var(--g);
+}
+
+@media(max-width:900px){.summary-grid{grid-template-columns:1fr}.renewal-banner{flex-direction:column;align-items:flex-start}}
+@media(max-width:680px){
+  nav{flex-direction:column;align-items:flex-start;gap:16px}
+  .card{padding:24px}
+  .success-box{padding:32px}
+  .banner-days{font-size:24px}
+  .payment-toggle{flex-direction:column}
+}
+@media(max-width:540px){
+  .main-wrap{padding:20px 5vw 50px}
+  .summary-grid{grid-template-columns:1fr}
+  .link-row{flex-direction:column}
+}
+</style>
+</head>
+<body>
+<nav>
+  <a href="cova-dashboard.html" class="logo">Cov<span>a</span></a>
+  <a href="cova-policy.html" class="nav-cta">← Back to policy</a>
+</nav>
+<main class="main-wrap">
+  <div class="renewal-banner" id="renewalBanner">
+    <div class="banner-text">
+      <span class="banner-title">Your policy renews in</span>
+      <span class="banner-copy">Action required by <span id="renewalDate">29 Feb 2027</span> to continue your cover without interruption.</span>
+    </div>
+    <div class="banner-days" id="daysRemaining">28 days</div>
+  </div>
+
+  <div class="card">
+    <h2>Policy details</h2>
+    <div class="product-selector">
+      <select id="productSelect" onchange="updateProduct()">
+        <option value="device">📱 Electronic Equipment - iPhone 17 Pro Max</option>
+        <option value="motor" selected>🚗 Motor Insurance - Toyota Camry 2020</option>
+        <option value="life">❤️ Life Insurance - Term Life</option>
+        <option value="health">🏥 Health Insurance - Gold Plan</option>
+        <option value="travel">✈️ Travel Insurance - Dubai Trip</option>
+        <option value="property">🏠 Property Insurance - Victoria Island</option>
+        <option value="investment">📈 Investment Plan - Education Fund</option>
+        <option value="group">👥 Group Insurance - Bright Supermarkets</option>
+        <option value="fire">🔥 Fire Insurance - Warehouse</option>
+      </select>
+    </div>
+    
+    <h2>Current policy summary</h2>
+    <div class="summary-grid" id="summaryGrid">
+      <!-- Summary items populated by JavaScript -->
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Renewal options</h2>
+    
+    <div class="payment-toggle">
+      <button class="toggle-btn active" id="annualBtn" onclick="selectFrequency('annual')">Annual payment <span style="font-size:12px;color:var(--g);"> (Save 10%)</span></button>
+      <button class="toggle-btn" id="monthlyBtn" onclick="selectFrequency('monthly')">Monthly installments</button>
+    </div>
+
+    <div class="breakdown-row">
+      <span class="breakdown-label">Current premium (Year <span id="policyYear">2</span>)</span>
+      <span class="breakdown-value" id="currentPremium">₦1,740,000</span>
+    </div>
+    <div class="breakdown-row">
+      <span class="breakdown-label">Loyalty discount <span id="loyaltyBadge" class="badge-loyalty">Year 2+</span></span>
+      <span class="breakdown-value breakdown-discount" id="loyaltyDiscount">−₦87,000 (5%)</span>
+    </div>
+    <div class="breakdown-row">
+      <span class="breakdown-label">New annual premium</span>
+      <span class="breakdown-value" id="newAnnualPremium">₦1,653,000</span>
+    </div>
+    <div class="breakdown-row">
+      <span class="breakdown-label">New monthly premium</span>
+      <span class="breakdown-value" id="newMonthlyPremium">₦137,750/month</span>
+    </div>
+
+    <div class="breakdown-total">
+      <span class="breakdown-total-label">Total to pay</span>
+      <span class="breakdown-total-value" id="totalAmount">₦1,653,000</span>
+    </div>
+
+    <div class="actions">
+      <button class="btn-primary" onclick="processPayment()">Pay with Paystack</button>
+      <button class="btn-secondary" onclick="window.location.href='cova-policy.html'">Review my cover</button>
+    </div>
+    
+    <p class="policy-ref">Policy #<span id="policyNumber">COVA-MT-1248</span> | Renews <span id="newStartDate">1 Mar 2027</span></p>
+  </div>
+  
+  <div class="link-row">
+    <a href="cova-policy.html?type=amend" class="link-btn">Make changes before renewing →</a>
+  </div>
+</main>
+
+<div class="success-overlay" id="successOverlay">
+  <div class="success-box">
+    <div class="success-icon">✓</div>
+    <h2 class="success-title">Renewal confirmed!</h2>
+    <p class="success-copy">Your policy has been renewed successfully. Your updated cover is now active.</p>
+    <p class="success-email">A confirmation email has been sent to <strong>adaeze@brightsupermarkets.com</strong>.</p>
+    <div class="new-dates">
+      <div class="new-date-item">
+        <span class="new-date-label">New start date</span>
+        <span class="new-date-value" id="newStartSuccess">1 Mar 2027</span>
+      </div>
+      <div class="new-date-item">
+        <span class="new-date-label">New end date</span>
+        <span class="new-date-value" id="newEndSuccess">28 Feb 2028</span>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="closeSuccess()">Back to dashboard</button>
+  </div>
+</div>
+
+<script>
+// Product configurations
+const PRODUCT_CONFIG = {
+  device: {
+    name: 'Electronic Equipment',
+    icon: '📱',
+    policyNumber: 'COVA-EP-9357',
+    currentPremium: 1740000,
+    currentYear: 2,
+    renewalDate: '29 Feb 2027',
+    newStartDate: '1 Mar 2027',
+    newEndDate: '28 Feb 2028',
+    summaryFields: [
+      { label: 'Device', value: 'iPhone 17 Pro Max' },
+      { label: 'Cover type', value: 'Electronic all-risk' },
+      { label: 'Sum insured', value: '₦1,450,000' },
+      { label: 'Expires', value: '29 Feb 2027' }
+    ]
+  },
+  motor: {
+    name: 'Motor Insurance',
+    icon: '🚗',
+    policyNumber: 'COVA-MT-1248',
+    currentPremium: 320000,
+    currentYear: 1,
+    renewalDate: '8 May 2026',
+    newStartDate: '9 May 2026',
+    newEndDate: '8 May 2027',
+    summaryFields: [
+      { label: 'Vehicle', value: 'Toyota Camry 2020' },
+      { label: 'Plate number', value: 'ABC 123 LA' },
+      { label: 'Cover type', value: 'Comprehensive' },
+      { label: 'Expires', value: '8 May 2026' }
+    ]
+  },
+  life: {
+    name: 'Life Insurance',
+    icon: '❤️',
+    policyNumber: 'COVA-LF-3842',
+    currentPremium: 180000,
+    currentYear: 1,
+    renewalDate: '15 Jan 2026',
+    newStartDate: '16 Jan 2026',
+    newEndDate: '15 Jan 2027',
+    summaryFields: [
+      { label: 'Plan type', value: 'Term Life' },
+      { label: 'Sum assured', value: '₦50,000,000' },
+      { label: 'Policy term', value: '20 years' },
+      { label: 'Expires', value: '15 Jan 2026' }
+    ]
+  },
+  health: {
+    name: 'Health Insurance',
+    icon: '🏥',
+    policyNumber: 'COVA-HT-7291',
+    currentPremium: 95004,
+    currentYear: 1,
+    renewalDate: '31 Jan 2026',
+    newStartDate: '1 Feb 2026',
+    newEndDate: '31 Jan 2027',
+    summaryFields: [
+      { label: 'Plan tier', value: 'Gold' },
+      { label: 'HMO', value: 'AIICO Health' },
+      { label: 'Enrolled members', value: '4 (1 primary + 3)' },
+      { label: 'Expires', value: '31 Jan 2026' }
+    ]
+  },
+  travel: {
+    name: 'Travel Insurance',
+    icon: '✈️',
+    policyNumber: 'COVA-TR-2847',
+    currentPremium: 15000,
+    currentYear: 0,
+    renewalDate: '22 May 2026',
+    newStartDate: '23 May 2026',
+    newEndDate: '22 May 2027',
+    summaryFields: [
+      { label: 'Destination', value: 'Dubai, UAE' },
+      { label: 'Trip dates', value: '15–22 May 2026' },
+      { label: 'Travellers', value: '2 adults' },
+      { label: 'Expires', value: '22 May 2026' }
+    ]
+  },
+  property: {
+    name: 'Property Insurance',
+    icon: '🏠',
+    policyNumber: 'COVA-PR-8472',
+    currentPremium: 150000,
+    currentYear: 1,
+    renewalDate: '10 Mar 2026',
+    newStartDate: '11 Mar 2026',
+    newEndDate: '10 Mar 2027',
+    summaryFields: [
+      { label: 'Address', value: '42 Adetokunbo Ademola St, VI' },
+      { label: 'Building value', value: '₦85,000,000' },
+      { label: 'Contents value', value: '₦15,000,000' },
+      { label: 'Expires', value: '10 Mar 2026' }
+    ]
+  },
+  investment: {
+    name: 'Investment Plan',
+    icon: '📈',
+    policyNumber: 'COVA-IN-5928',
+    currentPremium: 100000,
+    currentYear: 1,
+    renewalDate: '15 Aug 2026',
+    newStartDate: '16 Aug 2026',
+    newEndDate: '15 Aug 2027',
+    summaryFields: [
+      { label: 'Plan type', value: 'Education Fund' },
+      { label: 'Monthly contribution', value: '₦50,000' },
+      { label: 'Total contributed', value: '₦2,400,000' },
+      { label: 'Maturity date', value: '15 Aug 2035' }
+    ]
+  },
+  group: {
+    name: 'Group Insurance',
+    icon: '👥',
+    policyNumber: 'COVA-GR-3847',
+    currentPremium: 8200000,
+    currentYear: 1,
+    renewalDate: '31 Dec 2025',
+    newStartDate: '1 Jan 2026',
+    newEndDate: '31 Dec 2026',
+    summaryFields: [
+      { label: 'Company', value: 'Bright Supermarkets Ltd' },
+      { label: 'Enrolled staff', value: '48 employees' },
+      { label: 'Cover type', value: 'Group Life + GPA + Workmen\'s' },
+      { label: 'Expires', value: '31 Dec 2025' }
+    ]
+  },
+  fire: {
+    name: 'Fire Insurance',
+    icon: '🔥',
+    policyNumber: 'COVA-FR-9284',
+    currentPremium: 4200000,
+    currentYear: 1,
+    renewalDate: '15 Feb 2026',
+    newStartDate: '16 Feb 2026',
+    newEndDate: '15 Feb 2027',
+    summaryFields: [
+      { label: 'Company', value: 'Bright Supermarkets Ltd' },
+      { label: 'Property type', value: 'Warehouse' },
+      { label: 'Building value', value: '₦150,000,000' },
+      { label: 'Expires', value: '15 Feb 2026' }
+    ]
+  }
+};
+
+let currentProduct = 'motor';
+let selectedFrequency = 'annual';
+
+function updateProduct() {
+  currentProduct = document.getElementById('productSelect').value;
+  const config = PRODUCT_CONFIG[currentProduct];
+  if (!config) return;
+  
+  // Update summary fields
+  const summaryGrid = document.getElementById('summaryGrid');
+  summaryGrid.innerHTML = config.summaryFields.map(field => `
+    <div class="summary-item">
+      <span class="summary-label">${field.label}</span>
+      <span class="summary-value">${field.value}</span>
+    </div>
+  `).join('');
+  
+  // Update policy details
+  document.getElementById('policyNumber').textContent = config.policyNumber;
+  document.getElementById('renewalDate').textContent = config.renewalDate;
+  document.getElementById('newStartDate').textContent = config.newStartDate;
+  document.getElementById('newStartSuccess').textContent = config.newStartDate;
+  document.getElementById('newEndSuccess').textContent = config.newEndDate;
+  
+  // Update premiums
+  const discount = config.currentYear >= 2 ? 0.05 : (config.currentYear >= 3 ? 0.10 : 0);
+  const loyaltyYears = config.currentYear >= 3 ? 'Year 3+' : (config.currentYear >= 2 ? 'Year 2+' : 'Year 1');
+  
+  const discountedPremium = Math.round(config.currentPremium * (1 - discount));
+  
+  document.getElementById('currentPremium').textContent = '₦' + config.currentPremium.toLocaleString();
+  document.getElementById('policyYear').textContent = config.currentYear;
+  
+  if (discount > 0) {
+    document.getElementById('loyaltyDiscount').textContent = '−₦' + (config.currentPremium - discountedPremium).toLocaleString() + ` (${Math.round(discount * 100)}%)`;
+    document.getElementById('loyaltyBadge').textContent = loyaltyYears;
+    document.getElementById('loyaltyBadge').style.display = 'inline-flex';
+  } else {
+    document.getElementById('loyaltyDiscount').textContent = '₦0 (0%)';
+    document.getElementById('loyaltyBadge').textContent = '';
+    document.getElementById('loyaltyBadge').style.display = 'none';
+  }
+  
+  // Update amounts based on frequency
+  updateAmounts(discountedPremium);
+  
+  // Update renewal banner urgency
+  updateBannerUrgency(config.renewalDate);
+}
+
+function updateAmounts(discountedPremium) {
+  if (selectedFrequency === 'annual') {
+    document.getElementById('newAnnualPremium').textContent = '₦' + discountedPremium.toLocaleString();
+    document.getElementById('newMonthlyPremium').textContent = '₦' + Math.round(discountedPremium / 12).toLocaleString() + '/month';
+    document.getElementById('totalAmount').textContent = '₦' + discountedPremium.toLocaleString();
+  } else {
+    const annualWithMonthly = Math.round(discountedPremium * 1.1); // 10% more for monthly
+    document.getElementById('newAnnualPremium').textContent = '₦' + annualWithMonthly.toLocaleString();
+    document.getElementById('newMonthlyPremium').textContent = '₦' + Math.round(annualWithMonthly / 12).toLocaleString() + '/month';
+    document.getElementById('totalAmount').textContent = '₦' + annualWithMonthly.toLocaleString();
+  }
+}
+
+function selectFrequency(freq) {
+  selectedFrequency = freq;
+  const annualBtn = document.getElementById('annualBtn');
+  const monthlyBtn = document.getElementById('monthlyBtn');
+  
+  if (freq === 'annual') {
+    annualBtn.classList.add('active');
+    monthlyBtn.classList.remove('active');
+  } else {
+    monthlyBtn.classList.add('active');
+    annualBtn.classList.remove('active');
+  }
+  
+  // Recalculate amounts
+  const config = PRODUCT_CONFIG[currentProduct];
+  if (config) {
+    const discount = config.currentYear >= 2 ? 0.05 : (config.currentYear >= 3 ? 0.10 : 0);
+    const discountedPremium = Math.round(config.currentPremium * (1 - discount));
+    updateAmounts(discountedPremium);
+  }
+}
+
+function updateBannerUrgency(renewalDate) {
+  const banner = document.getElementById('renewalBanner');
+  const days = calculateDaysRemaining(renewalDate);
+  document.getElementById('daysRemaining').textContent = days + ' days';
+  
+  // Remove all urgency classes
+  banner.classList.remove('urgent', 'warning', 'normal');
+  
+  if (days <= 7) {
+    banner.classList.add('urgent');
+  } else if (days <= 30) {
+    banner.classList.add('warning');
+  } else {
+    banner.classList.add('normal');
+  }
+}
+
+function calculateDaysRemaining(renewalDate) {
+  const today = new Date();
+  const renewal = new Date(renewalDate);
+  const diffTime = renewal - today;
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  return Math.max(0, diffDays);
+}
+
+async function processPayment() {
+  // Get policy ID from URL or use current policy number
+  const urlParams = new URLSearchParams(window.location.search);
+  const policyId = urlParams.get('policy_id') || PRODUCT_CONFIG[currentProduct].policyNumber;
+  
+  // Calculate amount based on selected frequency
+  const config = PRODUCT_CONFIG[currentProduct];
+  const discount = config.currentYear >= 2 ? 0.05 : (config.currentYear >= 3 ? 0.10 : 0);
+  const discountedPremium = Math.round(config.currentPremium * (1 - discount));
+  
+  let amount;
+  if (selectedFrequency === 'annual') {
+    amount = discountedPremium;
+  } else {
+    amount = Math.round(discountedPremium * 1.1); // 10% more for monthly
+  }
+  
+  // First, renew the policy on the backend
+  const renewalResult = await renewPolicy(policyId);
+  
+  if (!renewalResult.ok) {
+    alert('Policy renewal failed: ' + renewalResult.data.error.message);
+    return;
+  }
+  
+  // Get user email from localStorage
+  const user = JSON.parse(localStorage.getItem('user'));
+  const email = user?.email || 'adaeze@brightsupermarkets.com';
+  
+  // Initialize payment with Paystack
+  const paymentResult = await initializePayment(policyId, amount, email);
+  
+  if (paymentResult.ok) {
+    // Redirect to Paystack payment gateway
+    window.location.href = paymentResult.data.authorizationUrl;
+  } else {
+    alert('Payment initialization failed: ' + paymentResult.data.error.message);
+  }
+}
+
+function closeSuccess() {
+  document.getElementById('successOverlay').classList.remove('open');
+  // Redirect to policy page to view renewed policy
+  const policyId = PRODUCT_CONFIG[currentProduct].policyNumber;
+  window.location.href = `cova-policy.html?id=${policyId}`;
+}
+
+// Get product type from URL or default to motor
+function getProductType() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const type = urlParams.get('type');
+  return type && PRODUCT_CONFIG[type] ? type : 'motor';
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+  // Check if returning from successful Paystack payment
+  const urlParams = new URLSearchParams(window.location.search);
+  const paymentStatus = urlParams.get('payment');
+  
+  if (paymentStatus === 'success') {
+    // Show success overlay
+    showSuccessOverlay();
+  }
+  
+  currentProduct = getProductType();
+  document.getElementById('productSelect').value = currentProduct;
+  
+  // Select annual by default
+  selectFrequency('annual');
+  
+  // Update all displays
+  updateProduct();
+});
+
+function showSuccessOverlay() {
+  const config = PRODUCT_CONFIG[currentProduct];
+  
+  // Update success overlay with policy dates
+  document.getElementById('newStartSuccess').textContent = config.newStartDate;
+  document.getElementById('newEndSuccess').textContent = config.newEndDate;
+  
+  document.getElementById('successOverlay').classList.add('open');
+}
+</script>
+</body>
+</html>

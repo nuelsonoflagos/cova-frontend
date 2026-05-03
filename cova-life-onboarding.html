@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cova Life Insurance Onboarding</title>
+<script src="api-client.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--g:#0A5C45;--gm:#137A5C;--gl:#1D9E75;--gp:#E6F5F0;--gpp:#d0ede4;--cream:#F7F4EE;--crd:#E8E4DB;--ink:#0F1A14;--inkm:#2D3E35;--inkl:#5A6E63;--inkf:#9AADA3;--w:#fff;--r:#C0392B;--rp:#FDECEA;--am:#D4860A;--amp:#FEF3E2;--fd:'Syne',sans-serif;--fb:'DM Sans',sans-serif;--rad:16px;--rads:10px;--radsm:8px;--shadow:0 2px 12px rgba(10,92,69,0.08)}
+html{scroll-behavior:smooth}
+body{font-family:var(--fb);background:var(--cream);color:var(--ink);line-height:1.6;min-height:100vh}
+nav{padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between;background:var(--w);border-bottom:1px solid var(--crd)}
+.logo{font-family:var(--fd);font-size:20px;font-weight:800;color:var(--g)}
+.logo span{color:var(--gl)}
+.nav-back{font-size:13px;color:var(--inkl);text-decoration:none;display:flex;align-items:center;gap:6px;cursor:pointer}
+.nav-back:hover{color:var(--g)}
+.progress-bar{background:var(--w);border-bottom:1px solid var(--crd);padding:16px 24px}
+.progress-steps{display:flex;align-items:center;gap:0;max-width:600px;margin:0 auto}
+.prog-step{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;position:relative}
+.prog-step:not(:last-child)::after{content:'';position:absolute;top:14px;left:50%;width:100%;height:2px;background:var(--crd);z-index:0}
+.prog-step.done:not(:last-child)::after{background:var(--gl)}
+.prog-dot{width:28px;height:28px;border-radius:50%;border:2px solid var(--crd);background:var(--w);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--inkf);z-index:1;position:relative;transition:all .3s}
+.prog-step.done .prog-dot{background:var(--gl);border-color:var(--gl);color:var(--w)}
+.prog-step.active .prog-dot{background:var(--g);border-color:var(--g);color:var(--w)}
+.prog-label{font-size:11px;color:var(--inkf);font-weight:400;text-align:center;white-space:nowrap}
+.prog-step.active .prog-label{color:var(--g);font-weight:500}
+.prog-step.done .prog-label{color:var(--gl)}
+.main{max-width:620px;margin:0 auto;padding:32px 24px 80px}
+.step-panel{display:none}
+.step-panel.active{display:block;animation:fadeUp .35s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.step-title{font-family:var(--fd);font-size:26px;font-weight:800;color:var(--ink);letter-spacing:-0.5px;margin-bottom:6px}
+.step-sub{font-size:15px;color:var(--inkl);margin-bottom:28px;font-weight:300;line-height:1.6}
+.form-group{margin-bottom:20px}
+.form-group label{display:block;font-size:13px;font-weight:500;color:var(--inkm);margin-bottom:7px}
+.form-group input,.form-group select{width:100%;padding:14px 16px;border:1.5px solid var(--crd);border-radius:var(--radsm);font-family:var(--fb);font-size:15px;color:var(--ink);background:var(--w);outline:none;transition:border-color .2s,box-shadow .2s}
+.form-group input:focus,.form-group select:focus{border-color:var(--gl);box-shadow:0 0 0 3px rgba(29,158,117,0.1)}
+.form-group input::placeholder{color:var(--inkf)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.card-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:20px}
+.plan-card{border:2px solid var(--crd);border-radius:var(--rad);padding:22px;cursor:pointer;transition:all .2s;background:var(--w);position:relative}
+.plan-card:hover{border-color:var(--gl)}
+.plan-card.selected{border-color:var(--gl);background:var(--gp);box-shadow:0 8px 26px rgba(10,92,69,0.08)}
+.plan-card h3{font-family:var(--fd);font-size:16px;font-weight:700;margin-bottom:8px}
+.plan-card p{font-size:14px;color:var(--inkl);line-height:1.6}
+.plan-radio{position:absolute;top:18px;right:18px;width:18px;height:18px;border-radius:50%;border:2px solid var(--crd);background:var(--w);display:flex;align-items:center;justify-content:center;transition:all .2s}
+.plan-card.selected .plan-radio{border-color:var(--gl);background:var(--gl)}
+.plan-radio::after{content:'';width:8px;height:8px;border-radius:50%;background:var(--w);opacity:0;transition:opacity .2s}
+.plan-card.selected .plan-radio::after{opacity:1}
+.range-group{display:grid;gap:10px;margin-bottom:20px}
+.range-value{font-size:14px;font-weight:700;color:var(--ink)}
+.freq-tabs{display:flex;background:var(--crd);border-radius:var(--radsm);padding:3px;gap:3px;margin-bottom:20px}
+.freq-tab{flex:1;padding:10px;text-align:center;border-radius:6px;font-size:13px;font-weight:500;color:var(--inkl);cursor:pointer;transition:all .2s}
+.freq-tab.active{background:var(--w);color:var(--g);box-shadow:var(--shadow)}
+.toggle-group{display:grid;gap:12px;margin-bottom:20px}
+.toggle-card{border:1.5px solid var(--crd);border-radius:18px;padding:16px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:all .2s;background:var(--w)}
+.toggle-card.selected{border-color:var(--gl);background:var(--gp)}
+.toggle-card span{font-size:14px;font-weight:600;color:var(--ink)}
+.toggle-card small{font-size:12px;color:var(--inkl)}
+.alert-box{background:var(--amp);border-radius:var(--radsm);padding:16px;border:1px solid rgba(212,134,10,.3);color:var(--am);margin-bottom:20px}
+.summary-card{background:var(--w);border:1px solid var(--crd);border-radius:var(--rad);padding:24px;margin-bottom:20px}
+.summary-title{font-family:var(--fd);font-size:16px;font-weight:700;color:var(--ink);margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--crd)}
+.summary-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--crd);font-size:14px}
+.summary-row:last-child{border-bottom:none}
+.summary-total{display:flex;justify-content:space-between;align-items:center;padding:14px 0 0;margin-top:4px}
+.summary-total-label{font-family:var(--fd);font-size:16px;font-weight:700;color:var(--ink)}
+.summary-total-price{font-family:var(--fd);font-size:24px;font-weight:800;color:var(--g)}
+.btn-primary{width:100%;padding:17px;background:var(--g);color:var(--w);border:none;border-radius:var(--radsm);font-family:var(--fd);font-size:16px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-primary:hover{background:var(--gm);transform:translateY(-1px)}
+.btn-secondary{width:100%;padding:14px;background:transparent;color:var(--g);border:2px solid rgba(10,92,69,0.2);border-radius:var(--radsm);font-family:var(--fd);font-size:15px;font-weight:600;cursor:pointer;transition:all .2s;margin-top:10px}
+.btn-secondary:hover{border-color:var(--g);background:var(--gp)}
+.success-screen{text-align:center;padding:40px 0;display:none}
+.success-screen.active{display:block;animation:fadeUp .4s ease both}
+.success-circle{width:80px;height:80px;background:var(--gp);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:36px;margin:0 auto 20px}
+.success-screen h2{font-family:var(--fd);font-size:28px;font-weight:800;color:var(--ink);margin-bottom:10px;letter-spacing:-0.5px}
+.success-screen p{font-size:15px;color:var(--inkl);max-width:420px;margin:0 auto 28px;line-height:1.65}
+.field-error{font-size:12px;color:var(--r);margin-top:4px;display:none}
+.form-group.error input,.form-group.error select{border-color:var(--r)}
+.form-group.error .field-error{display:block}
+@media(max-width:520px){.form-row{grid-template-columns:1fr}.card-grid{grid-template-columns:1fr}.progress-steps{flex-direction:column;align-items:flex-start}.prog-step:not(:last-child)::after{display:none}}
+</style>
+  <meta id="paystack-key" content="pk_test_mock_key_12345">
+</head>
+<body>
+<nav><div class="logo">Cov<span>a</span></div><a class="nav-back" onclick="goBack()">← Back</a></nav>
+<div class="progress-bar"><div class="progress-steps"><div class="prog-step active" id="prog-1"><div class="prog-dot">1</div><div class="prog-label">Plan type</div></div><div class="prog-step" id="prog-2"><div class="prog-dot">2</div><div class="prog-label">Personal details</div></div><div class="prog-step" id="prog-3"><div class="prog-dot">3</div><div class="prog-label">Cover details</div></div><div class="prog-step" id="prog-4"><div class="prog-dot">4</div><div class="prog-label">Health declaration</div></div><div class="prog-step" id="prog-5"><div class="prog-dot">5</div><div class="prog-label">Summary</div></div></div></div>
+<div class="main">
+  <div class="step-panel active" id="step-1">
+    <div class="step-title">Choose your life plan</div>
+    <div class="step-sub">Select the policy that matches your goal and premium preference.</div>
+    <div class="card-grid">
+      <div class="plan-card selected" id="plan-life-savings" onclick="selectPlan('Life Savings')"><div class="plan-radio"></div><h3>Life Savings</h3><p>Long-term savings with life cover for future stability.</p></div>
+      <div class="plan-card" id="plan-instant-life" onclick="selectPlan('Instant Life')"><div class="plan-radio"></div><h3>Instant Life</h3><p>Quick cover with minimal paperwork and fast activation.</p></div>
+      <div class="plan-card" id="plan-education" onclick="selectPlan('Education Plan')"><div class="plan-radio"></div><h3>Education Plan</h3><p>Savings tied to your child's school milestones.</p></div>
+      <div class="plan-card" id="plan-smartlife" onclick="selectPlan('SmartLife')"><div class="plan-radio"></div><h3>SmartLife</h3><p>Flexible premium, investment-linked life protection.</p></div>
+    </div>
+    <button class="btn-primary" onclick="nextStep(1)">Continue →</button>
+  </div>
+  <div class="step-panel" id="step-2">
+    <div class="step-title">Tell us about you</div>
+    <div class="step-sub">This information helps us personalise your life cover.</div>
+    <div class="form-group"><label>Full name</label><input type="text" id="life-name" placeholder="Chinedu Okonkwo"><div class="field-error">Enter your name</div></div>
+    <div class="form-row"><div class="form-group"><label>Date of birth</label><input type="date" id="life-dob"></div><div class="form-group"><label>Gender</label><select id="life-gender"><option value="">Select</option><option>Male</option><option>Female</option><option>Prefer not to say</option></select></div></div>
+    <div class="form-row"><div class="form-group"><label>Phone</label><input type="tel" id="life-phone" placeholder="08012345678"></div><div class="form-group"><label>Email</label><input type="email" id="life-email" placeholder="name@example.com"></div></div>
+    <div class="form-row"><div class="form-group"><label>Occupation</label><input type="text" id="life-occupation" placeholder="Marketing manager"></div><div class="form-group"><label>State</label><select id="life-state"><option value="">Select state</option><option>Abuja</option><option>Lagos</option><option>Rivers</option><option>Enugu</option><option>Oyo</option><option>Others</option></select></div></div>
+    
+    <div class="form-group" style="margin-top:15px">
+      <label>Are you insuring for yourself or your business?</label>
+      <select id="account-type" onchange="toggleBusinessFields()">
+        <option value="personal">Myself — personal</option>
+        <option value="business">My business — company</option>
+      </select>
+    </div>
+    <div id="business-fields" style="display:none">
+      <div class="form-group" id="fg-companyname"><label>Company name</label><input type="text" id="companyname" placeholder="e.g. Cova Tech Ltd"></div>
+      <div class="form-group" id="fg-rcnumber"><label>RC Number (Optional)</label><input type="text" id="rcnumber" placeholder="e.g. RC 123456"></div>
+    </div>
+
+    <div class="form-group">
+      <label>Where should we send your verification code?</label>
+      <div class="login-tabs" style="display:flex;gap:8px;background:var(--gp);padding:6px;border-radius:12px;margin-bottom:10px">
+        <div class="login-tab active" id="tab-opt-phone" onclick="selectOtpMethod('phone')" style="flex:1;text-align:center;padding:10px;font-size:13px;font-weight:600;cursor:pointer;border-radius:8px;background:var(--w);box-shadow:0 2px 8px rgba(0,0,0,.05)">WhatsApp</div>
+        <div class="login-tab" id="tab-opt-email" onclick="selectOtpMethod('email')" style="flex:1;text-align:center;padding:10px;font-size:13px;font-weight:600;cursor:pointer;border-radius:8px;color:var(--inkl)">Email</div>
+      </div>
+    </div>
+    
+<button class="btn-primary" onclick="nextStep(2)">Continue →</button><button class="btn-secondary" onclick="prevStep(2)">← Go back</button>
+  </div>
+  
+  <!-- STEP 2b: OTP Verification -->
+  <div class="step-panel" id="step-2b">
+    <div class="step-title">Verify your contact</div>
+    <div class="step-sub">We've sent a 6-digit code to <strong id="otp-destination"></strong>.</div>
+    <div class="form-group" id="fg-otp">
+      <div style="display:flex;gap:10px;justify-content:space-between;margin:20px 0" class="otp-inputs" id="signup-otp-container">
+        <input type="text" maxlength="1" style="width:45px;height:50px;text-align:center;font-size:20px;font-weight:700;border-radius:12px;border:1.5px solid var(--crd);background:var(--gp)" onkeyup="moveToNext(this, event)">
+        <input type="text" maxlength="1" style="width:45px;height:50px;text-align:center;font-size:20px;font-weight:700;border-radius:12px;border:1.5px solid var(--crd);background:var(--gp)" onkeyup="moveToNext(this, event)">
+        <input type="text" maxlength="1" style="width:45px;height:50px;text-align:center;font-size:20px;font-weight:700;border-radius:12px;border:1.5px solid var(--crd);background:var(--gp)" onkeyup="moveToNext(this, event)">
+        <input type="text" maxlength="1" style="width:45px;height:50px;text-align:center;font-size:20px;font-weight:700;border-radius:12px;border:1.5px solid var(--crd);background:var(--gp)" onkeyup="moveToNext(this, event)">
+        <input type="text" maxlength="1" style="width:45px;height:50px;text-align:center;font-size:20px;font-weight:700;border-radius:12px;border:1.5px solid var(--crd);background:var(--gp)" onkeyup="moveToNext(this, event)">
+        <input type="text" maxlength="1" style="width:45px;height:50px;text-align:center;font-size:20px;font-weight:700;border-radius:12px;border:1.5px solid var(--crd);background:var(--gp)" onkeyup="moveToNext(this, event)">
+      </div>
+      <div class="field-error">Please enter the 6-digit code</div>
+    </div>
+    <button class="btn-primary" onclick="nextStep('2b')">Verify & Continue →</button>
+    <button class="btn-secondary" onclick="prevStep('2b')">← Go back</button>
+  </div>
+
+  <div class="step-panel" id="step-3">
+    <div class="step-title">Cover details</div>
+    <div class="step-sub">Choose how much protection you want and how often you pay.</div>
+    <div class="range-group"><label>Sum assured</label><div class="range-value" id="life-sum-label">₦5,000,000</div><input type="range" id="life-sum" min="500000" max="50000000" step="500000" value="5000000" oninput="updateLifeEstimate()"></div>
+    <div class="form-row"><div class="form-group"><label>Premium term</label><select id="life-term" onchange="updateLifeEstimate()"><option value="10">10 years</option><option value="15">15 years</option><option value="20">20 years</option><option value="25">25 years</option></select></div><div class="form-group"><label>Payment frequency</label><select id="life-frequency" onchange="updateLifeEstimate()"><option value="monthly">Monthly</option><option value="quarterly">Quarterly</option><option value="annual">Annual</option></select></div></div>
+    <div class="form-row"><div class="form-group"><label>Beneficiary name</label><input type="text" id="life-beneficiary" placeholder="Emeka Okonkwo"></div><div class="form-group"><label>Relationship</label><input type="text" id="life-relationship" placeholder="Spouse"></div></div>
+    <div class="summary-card"><div class="summary-title">Premium estimate</div><div class="summary-row"><span>Annual premium</span><span class="summary-value" id="life-annual">₦25,000</span></div><div class="summary-row"><span>Monthly equivalent</span><span class="summary-value" id="life-monthly">₦2,083</span></div></div>
+    <button class="btn-primary" onclick="nextStep(3)">Continue →</button><button class="btn-secondary" onclick="prevStep(3)">← Go back</button>
+  </div>
+  <div class="step-panel" id="step-4">
+    <div class="step-title">Health declaration</div>
+    <div class="step-sub">Tell us whether any of these apply so we can provide the right underwriting path.</div>
+    <div class="toggle-group"><div class="toggle-card" id="q-1" onclick="toggleYesNo(1)"><div><span>Heart conditions</span><small>Have you ever been diagnosed with a heart condition?</small></div><div class="toggle-value">No</div></div><div class="toggle-card" id="q-2" onclick="toggleYesNo(2)"><div><span>Diabetes</span><small>Do you have diabetes?</small></div><div class="toggle-value">No</div></div><div class="toggle-card" id="q-3" onclick="toggleYesNo(3)"><div><span>Cancer history</span><small>Have you been treated for cancer?</small></div><div class="toggle-value">No</div></div><div class="toggle-card" id="q-4" onclick="toggleYesNo(4)"><div><span>Smoker</span><small>Do you smoke regularly?</small></div><div class="toggle-value">No</div></div><div class="toggle-card" id="q-5" onclick="toggleYesNo(5)"><div><span>Recent surgery</span><small>Major surgery in the last 5 years?</small></div><div class="toggle-value">No</div></div></div>
+    <div class="alert-box" id="medical-alert" style="display:none">Yes answers may require medical underwriting and a quick health assessment before your policy is approved.</div>
+    <button class="btn-primary" onclick="nextStep(4)">Continue →</button><button class="btn-secondary" onclick="prevStep(4)">← Go back</button>
+  </div>
+  <div class="step-panel" id="step-5">
+    <div class="step-title">Review & pay</div>
+    <div class="step-sub">Confirm your life cover details and complete payment to activate your policy.</div>
+    <div class="summary-card"><div class="summary-title">Life plan summary</div><div class="summary-row"><span>Plan</span><span class="summary-value" id="sum-plan">Life Savings</span></div><div class="summary-row"><span>Policyholder</span><span class="summary-value" id="sum-name">—</span></div><div class="summary-row"><span>Sum assured</span><span class="summary-value" id="sum-assured">₦5,000,000</span></div><div class="summary-row"><span>Term</span><span class="summary-value" id="sum-term">10 years</span></div><div class="summary-row"><span>Payment</span><span class="summary-value" id="sum-frequency">Monthly</span></div><div class="summary-row"><span>Beneficiary</span><span class="summary-value" id="sum-beneficiary">—</span></div><div class="summary-total"><span class="summary-total-label">Estimated annual premium</span><span class="summary-total-price" id="sum-premium">₦25,000</span></div></div>
+    <button class="btn-primary" onclick="submitForm()">Pay securely with Paystack →</button><button class="btn-secondary" onclick="prevStep(5)">← Go back</button>
+  </div>
+  <div class="success-screen" id="success"><div class="success-circle">✅</div><h2>Life cover confirmed</h2><p>Your application is submitted. We will send policy details to your email and WhatsApp once underwriting is complete.</p><div class="summary-card"><div class="summary-title">Your plan</div><div class="summary-row"><span>Policy number</span><span class="summary-value" id="policy-number">COV-LIFE-00000</span></div><div class="summary-row"><span>Plan type</span><span class="summary-value" id="policy-plan">Life Savings</span></div><div class="summary-row"><span>Status</span><span class="summary-value">Submitted for approval</span></div></div></div>
+</div>
+<script>
+let currentStep=1;let selectedPlan='Life Savings';let yesAnswers=[false,false,false,false,false];
+function goBack(){if(currentStep>1)prevStep(currentStep);else window.history.back();}
+function selectPlan(plan){selectedPlan=plan;document.querySelectorAll('.plan-card').forEach(card=>card.classList.remove('selected'));document.getElementById('plan-'+plan.toLowerCase().replace(/ /g,'-')).classList.add('selected');}
+function updateLifeEstimate(){const sum=+document.getElementById('life-sum').value;document.getElementById('life-sum-label').textContent='₦'+sum.toLocaleString('en-NG');const annual=Math.round(sum*0.005);const monthly=Math.round(annual/12);document.getElementById('life-annual').textContent='₦'+annual.toLocaleString('en-NG');document.getElementById('life-monthly').textContent='₦'+monthly.toLocaleString('en-NG');document.getElementById('sum-premium').textContent='₦'+annual.toLocaleString('en-NG');}
+function toggleYesNo(index){yesAnswers[index-1]=!yesAnswers[index-1];const card=document.getElementById('q-'+index);card.classList.toggle('selected',yesAnswers[index-1]);card.querySelector('.toggle-value').textContent=yesAnswers[index-1]?'Yes':'No';document.getElementById('medical-alert').style.display=yesAnswers.includes(true)?'block':'none';}
+function validateStep(step){if(step===2){let ok=true;[['life-name','Enter your name'],['life-dob','Enter your date of birth'],['life-gender','Select gender'],['life-phone','Enter your phone'],['life-email','Enter email'],['life-occupation','Enter occupation'],['life-state','Select state']].forEach(([id])=>{const el=document.getElementById(id);const grp=el.closest('.form-group');if(!el.value.trim()){grp.classList.add('error');ok=false;}else grp.classList.remove('error');});return ok;}return true;}
+function origNextStep(from){if(!validateStep(from))return; if(from===3){document.getElementById('sum-plan').textContent=selectedPlan;document.getElementById('sum-name').textContent=document.getElementById('life-name').value;document.getElementById('sum-assured').textContent='₦'+(+document.getElementById('life-sum').value).toLocaleString('en-NG');document.getElementById('sum-term').textContent=document.getElementById('life-term').value+' years';document.getElementById('sum-frequency').textContent=document.getElementById('life-frequency').value.charAt(0).toUpperCase()+document.getElementById('life-frequency').value.slice(1);document.getElementById('sum-beneficiary').textContent=document.getElementById('life-beneficiary').value||'—';document.getElementById('sum-premium').textContent=document.getElementById('life-annual').textContent;}goToStep(from+1);}
+
+function nextStep(from){
+  if(from === 2){
+    // Before moving to OTP, validate contact step
+    // The original nextStep also validates, so let's just use it to validate but NOT route
+    // Wait, original nextStep routes immediately if validation passes.
+    // Instead of calling origNextStep, let's just do validateStep.
+    if(!validateStep(from)) return;
+    
+    const dest = otpMethod === 'phone' ? document.getElementById('life-phone').value : document.getElementById('life-email').value;
+    const dEl = document.getElementById('otp-destination');
+    if(dEl) dEl.textContent = dest;
+    document.getElementById('step-2').classList.remove('active');
+    document.getElementById('step-2b').classList.add('active');
+    const firstOtp = document.querySelector('#signup-otp-container input');
+    if(firstOtp) firstOtp.focus();
+    return;
+  }
+  if(from === '2b'){
+    if(!validateOTP()) return;
+    document.getElementById('step-2b').classList.remove('active');
+    // Now trigger the original nextStep logic for leaving 2
+    // Since origNextStep expects 'from', and it will route to 3
+    // We just call origNextStep(2) and it will do the summary updates and routing!
+    origNextStep(2);
+    return;
+  }
+  origNextStep(from);
+}
+
+
+
+function prevStep(cur){
+  if(cur === '2b') {
+    document.getElementById('step-2b').classList.remove('active');
+    document.getElementById('step-2').classList.add('active');
+    return;
+  }
+  if(cur === 3) {
+    document.getElementById('step-3').classList.remove('active');
+    document.getElementById('step-2b').classList.add('active');
+    return;
+  }
+goToStep(cur-1);}function goToStep(n){document.querySelectorAll('.step-panel').forEach(p=>p.classList.remove('active'));document.getElementById('step-'+n).classList.add('active');for(let i=1;i<=5;i++){const prog=document.getElementById('prog-'+i);prog.classList.remove('active','done');if(i<n)prog.classList.add('done');if(i===n)prog.classList.add('active')}currentStep=n;window.scrollTo({top:0,behavior:'smooth'});}
+
+let otpMethod = 'phone';
+function selectOtpMethod(method) {
+  otpMethod = method;
+  const tPhone = document.getElementById('tab-opt-phone');
+  const tEmail = document.getElementById('tab-opt-email');
+  if(method === 'phone') {
+    if(tPhone) { tPhone.style.background = 'var(--w)'; tPhone.style.color = 'var(--ink)'; tPhone.style.boxShadow = '0 2px 8px rgba(0,0,0,.05)'; }
+    if(tEmail) { tEmail.style.background = 'transparent'; tEmail.style.color = 'var(--inkl)'; tEmail.style.boxShadow = 'none'; }
+  } else {
+    if(tEmail) { tEmail.style.background = 'var(--w)'; tEmail.style.color = 'var(--ink)'; tEmail.style.boxShadow = '0 2px 8px rgba(0,0,0,.05)'; }
+    if(tPhone) { tPhone.style.background = 'transparent'; tPhone.style.color = 'var(--inkl)'; tPhone.style.boxShadow = 'none'; }
+  }
+}
+function toggleBusinessFields(){
+  const type = document.getElementById('account-type');
+  const bf = document.getElementById('business-fields');
+  if(type && bf) bf.style.display = type.value === 'business' ? 'block' : 'none';
+}
+function moveToNext(el, event) {
+  if (event.key === 'Backspace') {
+    if (el.previousElementSibling) el.previousElementSibling.focus();
+  } else if (el.value.length === 1) {
+    if (el.nextElementSibling) el.nextElementSibling.focus();
+  }
+}
+function validateOTP(){
+  let otp = '';
+  document.querySelectorAll('#signup-otp-container input').forEach(i => otp += i.value);
+  const grp = document.getElementById('fg-otp');
+  if(otp.length < 6){ if(grp) grp.classList.add('error'); return false; }
+  if(grp) grp.classList.remove('error');
+  return true;
+}
+
+
+function submitForm(){
+  const emailEl = document.getElementById('life-email');
+  const phoneEl = document.getElementById('life-phone');
+  const amountEl = document.getElementById('sum-premium');
+  
+  const email = emailEl ? emailEl.value : 'user@example.com';
+  const phone = phoneEl ? phoneEl.value : '08000000000';
+  let amountStr = '0';
+  if(amountEl) amountStr = amountEl.textContent.replace(/[^0-9]/g, '');
+  if(!amountStr) amountStr = '1000'; // fallback
+  
+  const amountKobo = parseInt(amountStr, 10) * 100;
+  
+  const pkMeta = document.getElementById('paystack-key');
+  const pk = pkMeta ? pkMeta.content : 'pk_test_mock_key_12345';
+  
+  // Use global PaystackPop or window.PaystackPop
+  const popup = new PaystackPop();
+  const config = {
+    key: pk,
+    email: email,
+    amount: amountKobo,
+    currency: 'NGN',
+    ref: 'COVA-LIFE-' + Date.now(),
+    metadata: {
+      custom_fields: [
+        { display_name: "Product Type", variable_name: "product_type", value: "LIFE" },
+        { display_name: "Customer Phone", variable_name: "customer_phone", value: phone }
+      ]
+    },
+    onSuccess: function(response) {
+      localStorage.setItem('cova_last_ref', response.reference);
+      document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+      const successEl = document.getElementById('success');
+      if(successEl) successEl.classList.add('active');
+      window.scrollTo({top:0, behavior:'smooth'});
+    },
+    onCancel: function() {
+      const t = document.createElement('div');
+      t.textContent = 'Payment cancelled';
+      t.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--crd);color:white;padding:12px 24px;border-radius:8px;z-index:9999;font-weight:600;';
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 3000);
+    }
+  };
+  
+  config.plan = 'PLN_mock123';
+  
+  popup.setup(config);
+  popup.openIframe();
+}
+
+async function submitLifePolicy() {
+  // Get form data
+  const coverageAmount = parseFloat(document.getElementById('coverage-amount').value);
+  const term = document.getElementById('term').value;
+  const beneficiaryName = document.getElementById('beneficiary-name').value;
+  
+  // Validation
+  if (!coverageAmount || !term || !beneficiaryName) {
+    alert('Please fill in all fields');
+    return;
+  }
+  
+  // Prepare data for backend
+  const policyData = {
+    product_type: 'life',
+    cover_type: term,
+    insurer: 'AIICO',
+    sum_insured: coverageAmount,
+    premium_amount: calculateLifePremium(coverageAmount, term),
+    premium_frequency: 'yearly',
+    start_date: new Date().toISOString().split('T')[0],
+    end_date: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    metadata: {
+      coverage_amount: coverageAmount,
+      term_years: term,
+      beneficiary_name: beneficiaryName,
+    },
+  };
+  
+  // Call API
+  const result = await createPolicy(policyData);
+  
+  if (result.ok) {
+    const policyId = result.data.policy.id;
+    alert('Policy created! Proceeding to payment...');
+    // Redirect to payment
+    window.location.href = `cova-claim.html?policy_id=${policyId}&amount=${policyData.premium_amount}`;
+  } else {
+    alert('Error creating policy: ' + result.data.error.message);
+  }
+}
+
+function calculateLifePremium(coverageAmount, term) {
+  // Example calculation: 1% of coverage per year
+  return coverageAmount * 0.01 * parseInt(term);
+}
+
+</script>
+  <script src="https://cdn.jsdelivr.net/npm/@paystack/inline-js/dist/inline.min.js">
+function submitForm(){
+  const emailEl = document.getElementById('life-email');
+  const phoneEl = document.getElementById('life-phone');
+  const amountEl = document.getElementById('sum-premium');
+  
+  const email = emailEl ? emailEl.value : 'user@example.com';
+  const phone = phoneEl ? phoneEl.value : '08000000000';
+  let amountStr = '0';
+  if(amountEl) amountStr = amountEl.textContent.replace(/[^0-9]/g, '');
+  if(!amountStr) amountStr = '1000'; // fallback
+  
+  const amountKobo = parseInt(amountStr, 10) * 100;
+  
+  const pkMeta = document.getElementById('paystack-key');
+  const pk = pkMeta ? pkMeta.content : 'pk_test_mock_key_12345';
+  
+  // Use global PaystackPop or window.PaystackPop
+  const popup = new PaystackPop();
+  const config = {
+    key: pk,
+    email: email,
+    amount: amountKobo,
+    currency: 'NGN',
+    ref: 'COVA-LIFE-' + Date.now(),
+    metadata: {
+      custom_fields: [
+        { display_name: "Product Type", variable_name: "product_type", value: "LIFE" },
+        { display_name: "Customer Phone", variable_name: "customer_phone", value: phone }
+      ]
+    },
+    onSuccess: function(response) {
+      localStorage.setItem('cova_last_ref', response.reference);
+      document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+      const successEl = document.getElementById('success');
+      if(successEl) successEl.classList.add('active');
+      window.scrollTo({top:0, behavior:'smooth'});
+    },
+    onCancel: function() {
+      const t = document.createElement('div');
+      t.textContent = 'Payment cancelled';
+      t.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--crd);color:white;padding:12px 24px;border-radius:8px;z-index:9999;font-weight:600;';
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 3000);
+    }
+  };
+  
+  config.plan = 'PLN_mock123';
+  
+  popup.setup(config);
+  popup.openIframe();
+}
+
+</script>
+</body>
+</html>

@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cova Property Insurance Onboarding</title>
+<script src="api-client.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--g:#0A5C45;--gm:#137A5C;--gl:#1D9E75;--gp:#E6F5F0;--gpp:#d0ede4;--cream:#F7F4EE;--crd:#E8E4DB;--ink:#0F1A14;--inkm:#2D3E35;--inkl:#5A6E63;--inkf:#9AADA3;--w:#fff;--r:#C0392B;--rp:#FDECEA;--am:#D4860A;--amp:#FEF3E2;--fd:'Syne',sans-serif;--fb:'DM Sans',sans-serif;--rad:16px;--rads:10px;--radsm:8px;--shadow:0 2px 12px rgba(10,92,69,0.08)}
+html{scroll-behavior:smooth}
+body{font-family:var(--fb);background:var(--cream);color:var(--ink);line-height:1.6;min-height:100vh}
+nav{padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between;background:var(--w);border-bottom:1px solid var(--crd)}
+.logo{font-family:var(--fd);font-size:20px;font-weight:800;color:var(--g)}
+.logo span{color:var(--gl)}
+.nav-back{font-size:13px;color:var(--inkl);text-decoration:none;display:flex;align-items:center;gap:6px;cursor:pointer}
+.nav-back:hover{color:var(--g)}
+.progress-bar{background:var(--w);border-bottom:1px solid var(--crd);padding:16px 24px}
+.progress-steps{display:flex;align-items:center;gap:0;max-width:600px;margin:0 auto}
+.prog-step{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;position:relative}
+.prog-step:not(:last-child)::after{content:'';position:absolute;top:14px;left:50%;width:100%;height:2px;background:var(--crd);z-index:0}
+.prog-step.done:not(:last-child)::after{background:var(--gl)}
+.prog-dot{width:28px;height:28px;border-radius:50%;border:2px solid var(--crd);background:var(--w);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--inkf);z-index:1;position:relative;transition:all .3s}
+.prog-step.done .prog-dot{background:var(--gl);border-color:var(--gl);color:var(--w)}
+.prog-step.active .prog-dot{background:var(--g);border-color:var(--g);color:var(--w)}
+.prog-label{font-size:11px;color:var(--inkf);font-weight:400;text-align:center;white-space:nowrap}
+.prog-step.active .prog-label{color:var(--g);font-weight:500}
+.prog-step.done .prog-label{color:var(--gl)}
+.main{max-width:620px;margin:0 auto;padding:32px 24px 80px}
+.step-panel{display:none}
+.step-panel.active{display:block;animation:fadeUp .35s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.step-title{font-family:var(--fd);font-size:26px;font-weight:800;color:var(--ink);letter-spacing:-0.5px;margin-bottom:6px}
+.step-sub{font-size:15px;color:var(--inkl);margin-bottom:28px;font-weight:300;line-height:1.6}
+.form-group{margin-bottom:20px}
+.form-group label{display:block;font-size:13px;font-weight:500;color:var(--inkm);margin-bottom:7px}
+.form-group input,.form-group select{width:100%;padding:14px 16px;border:1.5px solid var(--crd);border-radius:var(--radsm);font-family:var(--fb);font-size:15px;color:var(--ink);background:var(--w);outline:none;transition:border-color .2s,box-shadow .2s}
+.form-group input:focus,.form-group select:focus{border-color:var(--gl);box-shadow:0 0 0 3px rgba(29,158,117,0.1)}
+.form-group input::placeholder{color:var(--inkf)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.card-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:20px}
+.plan-card{border:2px solid var(--crd);border-radius:var(--rad);padding:22px;cursor:pointer;transition:all .2s;background:var(--w);position:relative}
+.plan-card:hover{border-color:var(--gl)}
+.plan-card.selected{border-color:var(--gl);background:var(--gp);box-shadow:0 8px 26px rgba(10,92,69,0.08)}
+.plan-card h3{font-family:var(--fd);font-size:16px;font-weight:700;margin-bottom:8px}
+.plan-card p{font-size:14px;color:var(--inkl);line-height:1.6}
+.plan-radio{position:absolute;top:18px;right:18px;width:18px;height:18px;border-radius:50%;border:2px solid var(--crd);background:var(--w);display:flex;align-items:center;justify-content:center;transition:all .2s}
+.plan-card.selected .plan-radio{border-color:var(--gl);background:var(--gl)}
+.plan-radio::after{content:'';width:8px;height:8px;border-radius:50%;background:var(--w);opacity:0;transition:opacity .2s}
+.plan-card.selected .plan-radio::after{opacity:1}
+.range-group{display:grid;gap:10px;margin-bottom:20px}
+.range-value{font-size:14px;font-weight:700;color:var(--ink)}
+.toggle-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+.toggle-switch{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border:1.5px solid var(--crd);border-radius:18px;background:var(--w);cursor:pointer}
+.toggle-switch.selected{border-color:var(--gl);background:var(--gp)}
+.toggle-switch span{font-size:14px;font-weight:600;color:var(--ink)}
+.photo-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:20px}
+.photo-slot{border:2px dashed var(--crd);border-radius:var(--radsm);aspect-ratio:4/3;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;cursor:pointer;transition:all .2s;background:var(--w);position:relative;overflow:hidden}
+.photo-slot:hover{border-color:var(--gl)}
+.photo-slot.filled{border-style:solid;border-color:var(--gl);background:var(--gp)}
+.photo-slot-icon{font-size:24px;color:var(--inkf)}
+.photo-slot-label{font-size:12px;color:var(--inkf);text-align:center;padding:0 8px}
+.photo-check{position:absolute;top:8px;right:8px;width:20px;height:20px;background:var(--gl);border-radius:50%;display:none;align-items:center;justify-content:center;color:white;font-size:11px}
+.photo-slot.filled .photo-check{display:flex}
+.photo-input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.photo-preview{position:absolute;inset:0;object-fit:cover;border-radius:6px}
+.summary-card{background:var(--w);border:1px solid var(--crd);border-radius:var(--rad);padding:24px;margin-bottom:20px}
+.summary-title{font-family:var(--fd);font-size:16px;font-weight:700;color:var(--ink);margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--crd)}
+.summary-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--crd);font-size:14px}
+.summary-row:last-child{border-bottom:none}
+.summary-total{display:flex;justify-content:space-between;align-items:center;padding:14px 0 0;margin-top:4px}
+.summary-total-label{font-family:var(--fd);font-size:16px;font-weight:700;color:var(--ink)}
+.summary-total-price{font-family:var(--fd);font-size:24px;font-weight:800;color:var(--g)}
+.btn-primary{width:100%;padding:17px;background:var(--g);color:var(--w);border:none;border-radius:var(--radsm);font-family:var(--fd);font-size:16px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-primary:hover{background:var(--gm);transform:translateY(-1px)}
+.btn-secondary{width:100%;padding:14px;background:transparent;color:var(--g);border:2px solid rgba(10,92,69,0.2);border-radius:var(--radsm);font-family:var(--fd);font-size:15px;font-weight:600;cursor:pointer;transition:all .2s;margin-top:10px}
+.btn-secondary:hover{border-color:var(--g);background:var(--gp)}
+.success-screen{text-align:center;padding:40px 0;display:none}
+.success-screen.active{display:block;animation:fadeUp .4s ease both}
+.success-circle{width:80px;height:80px;background:var(--gp);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:36px;margin:0 auto 20px}
+.success-screen h2{font-family:var(--fd);font-size:28px;font-weight:800;color:var(--ink);margin-bottom:10px;letter-spacing:-0.5px}
+.success-screen p{font-size:15px;color:var(--inkl);max-width:420px;margin:0 auto 28px;line-height:1.65}
+.alert-box{background:var(--amp);border-radius:var(--radsm);padding:16px;border:1px solid rgba(212,134,10,.3);color:var(--am);margin-bottom:20px}
+.field-error{font-size:12px;color:var(--r);margin-top:4px;display:none}
+.form-group.error input,.form-group.error select{border-color:var(--r)}
+.form-group.error .field-error{display:block}
+@media(max-width:520px){.form-row{grid-template-columns:1fr}.card-grid{grid-template-columns:1fr}.toggle-row{grid-template-columns:1fr}.photo-grid{grid-template-columns:1fr}.progress-steps{flex-direction:column;align-items:flex-start}.prog-step:not(:last-child)::after{display:none}}
+</style>
+  <meta id="paystack-key" content="pk_test_mock_key_12345">
+</head>
+<body>
+<nav><div class="logo">Cov<span>a</span></div><a class="nav-back" onclick="goBack()">← Back</a></nav>
+<div class="progress-bar"><div class="progress-steps"><div class="prog-step active" id="prog-1"><div class="prog-dot">1</div><div class="prog-label">Property type</div></div><div class="prog-step" id="prog-2"><div class="prog-dot">2</div><div class="prog-label">Property details</div></div><div class="prog-step" id="prog-3"><div class="prog-dot">3</div><div class="prog-label">Cover</div></div><div class="prog-step" id="prog-4"><div class="prog-dot">4</div><div class="prog-label">Photos</div></div><div class="prog-step" id="prog-5"><div class="prog-dot">5</div><div class="prog-label">Summary</div></div></div></div>
+<div class="main">
+  <div class="step-panel active" id="step-1"><div class="step-title">Select your property type</div><div class="step-sub">Choose the cover that fits your home or business property.</div><div class="card-grid"><div class="plan-card selected" id="prop-owner" onclick="selectProperty('Home owner-occupier')"><div class="plan-radio"></div><h3>Home owner-occupier</h3><p>Cover your own home and the structures inside it.</p></div><div class="plan-card" id="prop-tenant" onclick="selectProperty('Rented home tenant contents')"><div class="plan-radio"></div><h3>Rented home tenant contents</h3><p>Protect your belongings and personal effects in rented accommodation.</p></div><div class="plan-card" id="prop-landlord" onclick="selectProperty('Landlord building + liability')"><div class="plan-radio"></div><h3>Landlord building + liability</h3><p>Protect your rental property and liability to tenants.</p></div><div class="plan-card" id="prop-office" onclick="selectProperty('Office/Commercial')"><div class="plan-radio"></div><h3>Office/Commercial</h3><p>Cover offices, shops and commercial premises.</p></div></div><button class="btn-primary" onclick="nextStep(1)">Continue →</button></div>
+  
+  <!-- STEP 1a: Contact Info -->
+  <div class="step-panel" id="step-1a">
+    <div class="step-title">Your Details</div>
+    <div class="step-sub">Provide your contact info to secure your quote.</div>
+    <div class="form-row">
+      <div class="form-group" id="fg-fn"><label>First name</label><input type="text" id="fn" placeholder="Emeka"><div class="field-error">Required</div></div>
+      <div class="form-group" id="fg-ln"><label>Last name</label><input type="text" id="ln" placeholder="Adekunle"><div class="field-error">Required</div></div>
+    </div>
+    <div class="form-group" id="fg-phone"><label>WhatsApp number</label><input type="tel" id="phone" placeholder="080 xxxx xxxx"><div class="field-error">Enter a valid Nigerian number</div></div>
+    <div class="form-group" id="fg-email"><label>Email address</label><input type="email" id="email" placeholder="emeka@business.com"><div class="field-error">Enter a valid email</div></div>
+    
+    <div class="form-group">
+      <label>Are you insuring for yourself or your business?</label>
+      <select id="account-type" onchange="toggleBusinessFields()">
+        <option value="personal">Myself — personal</option>
+        <option value="business">My business — company</option>
+      </select>
+    </div>
+    <div id="business-fields" style="display:none">
+      <div class="form-group" id="fg-companyname"><label>Company name</label><input type="text" id="companyname" placeholder="e.g. Cova Tech Ltd"></div>
+      <div class="form-group" id="fg-rcnumber"><label>RC Number (Optional)</label><input type="text" id="rcnumber" placeholder="e.g. RC 123456"></div>
+    </div>
+
+    <div class="form-group">
+      <label>Where should we send your verification code?</label>
+      <div class="login-tabs" style="display:flex;gap:8px;background:var(--gp);padding:6px;border-radius:12px;margin-bottom:10px">
+        <div class="login-tab active" id="tab-opt-phone" onclick="selectOtpMethod('phone')" style="flex:1;text-align:center;padding:10px;font-size:13px;font-weight:600;cursor:pointer;border-radius:8px;background:var(--w);box-shadow:0 2px 8px rgba(0,0,0,.05)">WhatsApp</div>
+        <div class="login-tab" id="tab-opt-email" onclick="selectOtpMethod('email')" style="flex:1;text-align:center;padding:10px;font-size:13px;font-weight:600;cursor:pointer;border-radius:8px;color:var(--inkl)">Email</div>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="nextStep('1a')">Continue →</button>
+    <button class="btn-secondary" onclick="prevStep('1a')">← Go back</button>
+  </div>
+
+  <!-- STEP 1b: OTP Verification -->
+  <div class="step-panel" id="step-1b">
+    <div class="step-title">Verify your contact</div>
+    <div class="step-sub">We've sent a 6-digit code to <strong id="otp-destination"></strong>.</div>
+    <div class="form-group" id="fg-otp">
+      <div style="display:flex;gap:10px;justify-content:space-between;margin:20px 0" class="otp-inputs" id="signup-otp-container">
+        <input type="text" maxlength="1" style="width:45px;height:50px;text-align:center;font-size:20px;font-weight:700;border-radius:12px;border:1.5px solid var(--crd);background:var(--gp)" onkeyup="moveToNext(this, event)">
+        <input type="text" maxlength="1" style="width:45px;height:50px;text-align:center;font-size:20px;font-weight:700;border-radius:12px;border:1.5px solid var(--crd);background:var(--gp)" onkeyup="moveToNext(this, event)">
+        <input type="text" maxlength="1" style="width:45px;height:50px;text-align:center;font-size:20px;font-weight:700;border-radius:12px;border:1.5px solid var(--crd);background:var(--gp)" onkeyup="moveToNext(this, event)">
+        <input type="text" maxlength="1" style="width:45px;height:50px;text-align:center;font-size:20px;font-weight:700;border-radius:12px;border:1.5px solid var(--crd);background:var(--gp)" onkeyup="moveToNext(this, event)">
+        <input type="text" maxlength="1" style="width:45px;height:50px;text-align:center;font-size:20px;font-weight:700;border-radius:12px;border:1.5px solid var(--crd);background:var(--gp)" onkeyup="moveToNext(this, event)">
+        <input type="text" maxlength="1" style="width:45px;height:50px;text-align:center;font-size:20px;font-weight:700;border-radius:12px;border:1.5px solid var(--crd);background:var(--gp)" onkeyup="moveToNext(this, event)">
+      </div>
+      <div class="field-error">Please enter the 6-digit code</div>
+    </div>
+    <button class="btn-primary" onclick="nextStep('1b')">Verify & Continue →</button>
+    <button class="btn-secondary" onclick="prevStep('1b')">← Go back</button>
+  </div>
+
+  <div class="step-panel" id="step-2"><div class="step-title">Property details</div><div class="step-sub">Give us the key details about your property.</div><div class="form-group"><label>Address</label><input type="text" id="prop-address" placeholder="123 Example Road"></div><div class="form-row"><div class="form-group"><label>State</label><select id="prop-state"><option value="">Select state</option><option>Lagos</option><option>Abuja</option><option>Rivers</option><option>Enugu</option><option>Oyo</option><option>Others</option></select></div><div class="form-group"><label>Property type</label><select id="prop-type"><option>Flat</option><option>House</option><option>Duplex</option><option>Office</option></select></div></div><div class="form-row"><div class="form-group"><label>Year built</label><input type="number" id="prop-year" min="1900" max="2026" placeholder="2015"></div><div class="form-group"><label>Number of rooms</label><input type="number" id="prop-rooms" min="1" placeholder="4"></div></div><div class="form-group"><label>Construction type</label><select id="prop-construct"><option>Concrete</option><option>Wood</option><option>Mixed</option></select></div><button class="btn-primary" onclick="nextStep(2)">Continue →</button><button class="btn-secondary" onclick="prevStep(2)">← Go back</button></div>
+  <div class="step-panel" id="step-3"><div class="step-title">Cover amounts</div><div class="step-sub">Set the insured values and choose the cover types you need.</div><div class="range-group"><label>Building sum insured</label><div class="range-value" id="building-label">₦50,000,000</div><input type="range" id="building-value" min="5000000" max="500000000" step="5000000" value="50000000" oninput="updatePremium()"></div><div class="range-group"><label>Contents sum insured</label><div class="range-value" id="contents-label">₦5,000,000</div><input type="range" id="contents-value" min="500000" max="50000000" step="500000" value="5000000" oninput="updatePremium()"></div><div class="toggle-row"><div class="toggle-switch selected" id="perk-fire" onclick="togglePeril('fire')"><span>Fire</span></div><div class="toggle-switch selected" id="perk-flood" onclick="togglePeril('flood')"><span>Flood</span></div></div><div class="toggle-row"><div class="toggle-switch selected" id="perk-burglary" onclick="togglePeril('burglary')"><span>Burglary</span></div><div class="toggle-switch selected" id="perk-accidental" onclick="togglePeril('accidental')"><span>Accidental damage</span></div></div><div class="toggle-row"><div class="toggle-switch selected" id="perk-liability" onclick="togglePeril('liability')"><span>Domestic staff liability</span></div></div><div class="summary-card"><div class="summary-title">Premium estimate</div><div class="summary-row"><span>Building</span><span id="summary-building">₦50,000,000</span></div><div class="summary-row"><span>Contents</span><span id="summary-contents">₦5,000,000</span></div><div class="summary-row"><span>Selected perils</span><span id="summary-perils">Fire, Flood, Burglary, Accidental, Liability</span></div><div class="summary-total"><span class="summary-total-label">Estimated annual premium</span><span class="summary-total-price" id="summary-total">₦275,000</span></div></div><button class="btn-primary" onclick="nextStep(3)">Continue →</button><button class="btn-secondary" onclick="prevStep(3)">← Go back</button></div>
+  <div class="step-panel" id="step-4"><div class="step-title">Upload property photos</div><div class="step-sub">Add photos for key areas of the property.</div><div class="photo-grid"><div class="photo-slot" id="slot-1" onclick="triggerUpload(1)"><input class="photo-input" type="file" accept="image/*" onchange="handlePhoto(this,1)"><span class="photo-slot-icon">📷</span><div class="photo-slot-label">Front exterior</div><div class="photo-check">✓</div></div><div class="photo-slot" id="slot-2" onclick="triggerUpload(2)"><input class="photo-input" type="file" accept="image/*" onchange="handlePhoto(this,2)"><span class="photo-slot-icon">📷</span><div class="photo-slot-label">Main entrance</div><div class="photo-check">✓</div></div><div class="photo-slot" id="slot-3" onclick="triggerUpload(3)"><input class="photo-input" type="file" accept="image/*" onchange="handlePhoto(this,3)"><span class="photo-slot-icon">📷</span><div class="photo-slot-label">Living area</div><div class="photo-check">✓</div></div><div class="photo-slot" id="slot-4" onclick="triggerUpload(4)"><input class="photo-input" type="file" accept="image/*" onchange="handlePhoto(this,4)"><span class="photo-slot-icon">📷</span><div class="photo-slot-label">Existing damage</div><div class="photo-check">✓</div></div></div><div class="alert-box" id="photo-alert" style="display:none">Please upload all 4 photos to continue.</div><button class="btn-primary" onclick="nextStep(4)">Continue →</button><button class="btn-secondary" onclick="prevStep(4)">← Go back</button></div>
+  <div class="step-panel" id="step-5"><div class="step-title">Review & pay</div><div class="step-sub">Confirm your property cover and complete payment.</div><div class="summary-card"><div class="summary-title">Property summary</div><div class="summary-row"><span>Type</span><span id="summary-property-type">Home owner-occupier</span></div><div class="summary-row"><span>Address</span><span id="summary-address">—</span></div><div class="summary-row"><span>Building sum insured</span><span id="summary-building-amt">₦50,000,000</span></div><div class="summary-row"><span>Contents sum insured</span><span id="summary-contents-amt">₦5,000,000</span></div><div class="summary-row"><span>Premium</span><span class="summary-total-price" id="summary-final-total">₦275,000</span></div><div class="summary-row"><span>Note</span><span id="summary-note">Assessor visit required for policies above ₦50M.</span></div></div><button class="btn-primary" onclick="submitForm()">Pay securely with Paystack →</button><button class="btn-secondary" onclick="prevStep(5)">← Go back</button></div>
+  <div class="success-screen" id="success"><div class="success-circle">✅</div><h2>Property cover started</h2><p>Your property insurance application is complete. An assessor will visit for high-value policies above ₦50M.</p><div class="summary-card"><div class="summary-title">Policy details</div><div class="summary-row"><span>Policy number</span><span id="policy-number">COV-PROP-00000</span></div><div class="summary-row"><span>Status</span><span>Pending assessor review</span></div></div></div>
+</div>
+<script>
+let currentStep=1;let selectedProperty='Home owner-occupier';let selectedPerils=['fire','flood','burglary','accidental','liability'];let photos=[false,false,false,false];
+function goBack(){
+  if(currentStep === "1a") { prevStep("1a"); return; }
+  if(currentStep === "1b") { prevStep("1b"); return; }if(currentStep>1)prevStep(currentStep);else window.history.back();}
+function selectProperty(type){selectedProperty=type;document.querySelectorAll('#step-1 .plan-card').forEach(c=>c.classList.remove('selected'));document.getElementById('prop-'+type.toLowerCase().replace(/[^a-z]+/g,'-')).classList.add('selected');}
+function updatePremium(){const building=+document.getElementById('building-value').value;const contents=+document.getElementById('contents-value').value;document.getElementById('building-label').textContent='₦'+building.toLocaleString('en-NG');document.getElementById('contents-label').textContent='₦'+contents.toLocaleString('en-NG');const base=building*0.00035+contents*0.00065;const extra=selectedPerils.length*0.03;const total=Math.round(base*(1+extra));document.getElementById('summary-building').textContent='₦'+building.toLocaleString('en-NG');document.getElementById('summary-contents').textContent='₦'+contents.toLocaleString('en-NG');document.getElementById('summary-perils').textContent=selectedPerils.map(p=>p.charAt(0).toUpperCase()+p.slice(1)).join(', ');document.getElementById('summary-total').textContent='₦'+total.toLocaleString('en-NG');document.getElementById('summary-final-total').textContent='₦'+total.toLocaleString('en-NG');document.getElementById('summary-building-amt').textContent='₦'+building.toLocaleString('en-NG');document.getElementById('summary-contents-amt').textContent='₦'+contents.toLocaleString('en-NG');document.getElementById('summary-note').textContent=building>50000000?'Assessor visit required for policies above ₦50M.':'No assessor visit needed at this time.';}
+function togglePeril(peril){const idx=selectedPerils.indexOf(peril);const el=document.getElementById('perk-'+peril);if(idx>=0){selectedPerils.splice(idx,1);el.classList.remove('selected');}else{selectedPerils.push(peril);el.classList.add('selected');}updatePremium();}
+function triggerUpload(slot){document.querySelector('#slot-'+slot+' .photo-input').click();}
+function handlePhoto(input,slot){if(input.files&&input.files[0]){const reader=new FileReader();reader.onload=function(e){const slotEl=document.getElementById('slot-'+slot);let prev=slotEl.querySelector('.photo-preview');if(!prev){prev=document.createElement('img');prev.className='photo-preview';slotEl.appendChild(prev);}prev.src=e.target.result;slotEl.classList.add('filled');photos[slot-1]=true;};reader.readAsDataURL(input.files[0]);}}
+function validateStep(step){if(step===2){let ok=true;[['prop-address'],['prop-state'],['prop-year'],['prop-rooms']].forEach(([id])=>{const el=document.getElementById(id);const grp=el.closest('.form-group');if(!el.value){grp.classList.add('error');ok=false;}else grp.classList.remove('error');});return ok;} if(step===4){const all=photos.every(Boolean);document.getElementById('photo-alert').style.display=all?'none':'block';return all;}return true;}
+function nextStep(from){if(!validateStep(from))return; if(from===3){updatePremium();} if(from===4){document.getElementById('summary-property-type').textContent=selectedProperty;document.getElementById('summary-address').textContent=document.getElementById('prop-address').value;}goToStep(from+1);}
+  if(from === 1){
+    document.getElementById('step-1').classList.remove('active');
+    document.getElementById('step-1a').classList.add('active');
+    return;
+  }
+  if(from === '1a'){
+    if(!validateContact()) return;
+    const dest = otpMethod === 'phone' ? document.getElementById('phone').value : document.getElementById('email').value;
+    const dEl = document.getElementById('otp-destination');
+    if(dEl) dEl.textContent = dest;
+    document.getElementById('step-1a').classList.remove('active');
+    document.getElementById('step-1b').classList.add('active');
+    const firstOtp = document.querySelector('#signup-otp-container input');
+    if(firstOtp) firstOtp.focus();
+    return;
+  }
+  if(from === '1b'){
+    if(!validateOTP()) return;
+    document.getElementById('step-1b').classList.remove('active');
+    document.getElementById('step-2').classList.add('active');
+    if(typeof updateProgress === 'function') updateProgress(2);
+    else if(typeof goToStep === 'function') {
+        currentStep = 2;
+        for(let i=1; i<=6; i++) {
+           let pr = document.getElementById('prog-'+i);
+           if(pr){
+              pr.classList.remove('active', 'done');
+              if(i<2) pr.classList.add('done');
+              if(i===2) pr.classList.add('active');
+           }
+        }
+    }
+    return;
+  }
+
+function prevStep(cur){
+  if(cur === '1a') {
+    document.getElementById('step-1a').classList.remove('active');
+    document.getElementById('step-1').classList.add('active');
+    return;
+  }
+  if(cur === '1b') {
+    document.getElementById('step-1b').classList.remove('active');
+    document.getElementById('step-1a').classList.add('active');
+    return;
+  }
+  if(cur === 2) {
+    document.getElementById('step-2').classList.remove('active');
+    document.getElementById('step-1b').classList.add('active');
+    return;
+  }
+goToStep(cur-1);}function goToStep(n){document.querySelectorAll('.step-panel').forEach(p=>p.classList.remove('active'));document.getElementById('step-'+n).classList.add('active');for(let i=1;i<=5;i++){const prog=document.getElementById('prog-'+i);prog.classList.remove('active','done');if(i<n)prog.classList.add('done');if(i===n)prog.classList.add('active')}currentStep=n;window.scrollTo({top:0,behavior:'smooth'});}
+
+let otpMethod = 'phone';
+function selectOtpMethod(method) {
+  otpMethod = method;
+  const tPhone = document.getElementById('tab-opt-phone');
+  const tEmail = document.getElementById('tab-opt-email');
+  if(method === 'phone') {
+    if(tPhone) { tPhone.style.background = 'var(--w)'; tPhone.style.color = 'var(--ink)'; tPhone.style.boxShadow = '0 2px 8px rgba(0,0,0,.05)'; }
+    if(tEmail) { tEmail.style.background = 'transparent'; tEmail.style.color = 'var(--inkl)'; tEmail.style.boxShadow = 'none'; }
+  } else {
+    if(tEmail) { tEmail.style.background = 'var(--w)'; tEmail.style.color = 'var(--ink)'; tEmail.style.boxShadow = '0 2px 8px rgba(0,0,0,.05)'; }
+    if(tPhone) { tPhone.style.background = 'transparent'; tPhone.style.color = 'var(--inkl)'; tPhone.style.boxShadow = 'none'; }
+  }
+}
+function toggleBusinessFields(){
+  const type = document.getElementById('account-type');
+  const bf = document.getElementById('business-fields');
+  if(type && bf) bf.style.display = type.value === 'business' ? 'block' : 'none';
+}
+function moveToNext(el, event) {
+  if (event.key === 'Backspace') {
+    if (el.previousElementSibling) el.previousElementSibling.focus();
+  } else if (el.value.length === 1) {
+    if (el.nextElementSibling) el.nextElementSibling.focus();
+  }
+}
+function validateContact(){
+  let ok = true;
+  [['fg-fn','fn',v=>v.trim().length>1],['fg-ln','ln',v=>v.trim().length>1],
+   ['fg-phone','phone',v=>v.replace(/\D/g,'').length>=10],
+   ['fg-email','email',v=>/\S+@\S+\.\S+/.test(v)]
+  ].forEach(([g,f,fn])=>{
+    const grp=document.getElementById(g);
+    const el=document.getElementById(f);
+    if(grp && el) {
+        if(!fn(el.value)){grp.classList.add('error');ok=false;}
+        else grp.classList.remove('error');
+    }
+  });
+  return ok;
+}
+function validateOTP(){
+  let otp = '';
+  document.querySelectorAll('#signup-otp-container input').forEach(i => otp += i.value);
+  const grp = document.getElementById('fg-otp');
+  if(otp.length < 6){ if(grp) grp.classList.add('error'); return false; }
+  if(grp) grp.classList.remove('error');
+  return true;
+}
+
+
+function submitForm(){
+  const emailEl = document.getElementById('email');
+  const phoneEl = document.getElementById('phone');
+  const amountEl = document.getElementById('summary-total');
+  
+  const email = emailEl ? emailEl.value : 'user@example.com';
+  const phone = phoneEl ? phoneEl.value : '08000000000';
+  let amountStr = '0';
+  if(amountEl) amountStr = amountEl.textContent.replace(/[^0-9]/g, '');
+  if(!amountStr) amountStr = '1000'; // fallback
+  
+  const amountKobo = parseInt(amountStr, 10) * 100;
+  
+  const pkMeta = document.getElementById('paystack-key');
+  const pk = pkMeta ? pkMeta.content : 'pk_test_mock_key_12345';
+  
+  // Use global PaystackPop or window.PaystackPop
+  const popup = new PaystackPop();
+  const config = {
+    key: pk,
+    email: email,
+    amount: amountKobo,
+    currency: 'NGN',
+    ref: 'COVA-PROPERTY-' + Date.now(),
+    metadata: {
+      custom_fields: [
+        { display_name: "Product Type", variable_name: "product_type", value: "PROPERTY" },
+        { display_name: "Customer Phone", variable_name: "customer_phone", value: phone }
+      ]
+    },
+    onSuccess: function(response) {
+      localStorage.setItem('cova_last_ref', response.reference);
+      document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+      const successEl = document.getElementById('success');
+      if(successEl) successEl.classList.add('active');
+      window.scrollTo({top:0, behavior:'smooth'});
+    },
+    onCancel: function() {
+      const t = document.createElement('div');
+      t.textContent = 'Payment cancelled';
+      t.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--crd);color:white;padding:12px 24px;border-radius:8px;z-index:9999;font-weight:600;';
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 3000);
+    }
+  };
+  
+  config.plan = 'PLN_mock123';
+  
+  popup.setup(config);
+  popup.openIframe();
+}
+
+</script>
+  <script src="https://cdn.jsdelivr.net/npm/@paystack/inline-js/dist/inline.min.js">
+
+async function submitPropertyPolicy() {
+  // Get form data
+  const propertyValue = parseFloat(document.getElementById('property-value').value);
+  const coverType = document.getElementById('cover-type').value;
+  const propertyType = document.getElementById('property-type').value;
+  
+  // Validation
+  if (!propertyValue || !coverType || !propertyType) {
+    alert('Please fill in all fields');
+    return;
+  }
+  
+  // Calculate premium
+  const premium = calculatePropertyPremium(propertyValue, coverType);
+  
+  // Prepare data for backend
+  const policyData = {
+    product_type: 'property',
+    cover_type: coverType,
+    insurer: 'AIICO',
+    sum_insured: propertyValue,
+    premium_amount: premium,
+    premium_frequency: 'yearly',
+    start_date: new Date().toISOString().split('T')[0],
+    end_date: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    metadata: {
+      property_type: propertyType,
+      property_value: propertyValue,
+    },
+  };
+  
+  // Call API
+  const result = await createPolicy(policyData);
+  
+  if (result.ok) {
+    const policyId = result.data.policy.id;
+    alert('Policy created! Proceeding to payment...');
+    // Redirect to payment
+    window.location.href = `cova-claim.html?policy_id=${policyId}&amount=${policyData.premium_amount}`;
+  } else {
+    alert('Error creating policy: ' + result.data.error.message);
+  }
+}
+
+function calculatePropertyPremium(propertyValue, coverType) {
+  if (coverType === 'basic') {
+    return propertyValue * 0.015; // 1.5% for basic
+  } else if (coverType === 'comprehensive') {
+    return propertyValue * 0.03; // 3% for comprehensive
+  }
+  return 0;
+}
+
+<script src="https://cdn.jsdelivr.net/npm/@paystack/inline-js/dist/inline.min.js">
+function submitForm(){
+  const emailEl = document.getElementById('email');
+  const phoneEl = document.getElementById('phone');
+  const amountEl = document.getElementById('summary-total');
+  
+  const email = emailEl ? emailEl.value : 'user@example.com';
+  const phone = phoneEl ? phoneEl.value : '08000000000';
+  let amountStr = '0';
+  if(amountEl) amountStr = amountEl.textContent.replace(/[^0-9]/g, '');
+  if(!amountStr) amountStr = '1000'; // fallback
+  
+  const amountKobo = parseInt(amountStr, 10) * 100;
+  
+  const pkMeta = document.getElementById('paystack-key');
+  const pk = pkMeta ? pkMeta.content : 'pk_test_mock_key_12345';
+  
+  // Use global PaystackPop or window.PaystackPop
+  const popup = new PaystackPop();
+  const config = {
+    key: pk,
+    email: email,
+    amount: amountKobo,
+    currency: 'NGN',
+    ref: 'COVA-PROPERTY-' + Date.now(),
+    metadata: {
+      custom_fields: [
+        { display_name: "Product Type", variable_name: "product_type", value: "PROPERTY" },
+        { display_name: "Customer Phone", variable_name: "customer_phone", value: phone }
+      ]
+    },
+    onSuccess: function(response) {
+      localStorage.setItem('cova_last_ref', response.reference);
+      document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+      const successEl = document.getElementById('success');
+      if(successEl) successEl.classList.add('active');
+      window.scrollTo({top:0, behavior:'smooth'});
+    },
+    onCancel: function() {
+      const t = document.createElement('div');
+      t.textContent = 'Payment cancelled';
+      t.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--crd);color:white;padding:12px 24px;border-radius:8px;z-index:9999;font-weight:600;';
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 3000);
+    }
+  };
+  
+  config.plan = 'PLN_mock123';
+  
+  popup.setup(config);
+  popup.openIframe();
+}
+
+</script>
+</body>
+</html>

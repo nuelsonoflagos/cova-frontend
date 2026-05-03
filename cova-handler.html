@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cova — Claims Handler Portal</title>
+<script src="api-client.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --g:#0A5C45;--gm:#137A5C;--gl:#1D9E75;--gp:#E6F5F0;--gpp:#d0ede4;
+  --cream:#F7F4EE;--crd:#E8E4DB;--crd2:#D8D3C8;
+  --ink:#0F1A14;--inkm:#2D3E35;--inkl:#5A6E63;--inkf:#9AADA3;
+  --w:#fff;--r:#C62828;--am:#F59E0B;--amp:#FEF3E2;
+  --fd:'Syne',sans-serif;--fb:'DM Sans',sans-serif;
+  --rad:18px;--radsm:10px;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--fb);background:linear-gradient(180deg, var(--cream) 0%, #ECF8F3 100%);color:var(--ink);min-height:100vh}
+a{text-decoration:none;color:inherit}
+nav{display:flex;align-items:center;justify-content:space-between;padding:26px 5vw;max-width:1200px;margin:0 auto}
+.logo{font-family:var(--fd);font-size:22px;font-weight:800;color:var(--g)}
+.logo span{color:var(--gl)}
+.nav-cta{font-family:var(--fd);font-size:14px;font-weight:700;color:var(--w);background:var(--g);padding:12px 20px;border-radius:999px;transition:all .2s}
+.nav-cta:hover{background:var(--gm)}
+.main-wrap{max-width:1200px;margin:0 auto;padding:24px 5vw 60px}
+.handler-head{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:28px}
+.handler-info{display:flex;flex-direction:column;gap:6px}
+.handler-name{font-family:var(--fd);font-size:28px;font-weight:800;color:var(--ink)}
+.handler-active{font-size:14px;color:var(--inkl);display:flex;align-items:center;gap:8px}
+.handler-stats{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px}
+.stat-item{display:flex;align-items:center;gap:6px;background:var(--w);padding:8px 14px;border-radius:12px;border:1px solid var(--crd)}
+.stat-item label{font-size:11px;color:var(--inkl);text-transform:uppercase;letter-spacing:0.08em}
+.stat-item span{font-size:14px;font-weight:700;color:var(--g)}
+.queue-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:18px}
+.tab-btn{display:flex;align-items:center;gap:8px;padding:12px 18px;border-radius:14px;border:2px solid var(--crd);background:var(--w);color:var(--ink);font-weight:700;cursor:pointer;transition:all .2s;font-size:13px}
+.tab-btn:hover{border-color:var(--gl);background:var(--gp)}
+.tab-btn.active{background:var(--g);color:var(--w);border-color:var(--g)}
+.claim-card{background:var(--w);border:1px solid var(--crd);border-radius:24px;padding:24px;box-shadow:0 12px 40px rgba(10,92,69,.08);cursor:pointer;transition:all .2s;position:relative}
+.claim-card:hover{transform:translateY(-4px);box-shadow:0 16px 48px rgba(10,92,69,.12)}
+.card-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:16px}
+.card-title-col{display:flex;flex-direction:column;gap:6px}
+.claim-id{font-family:monospace;font-size:13px;font-weight:700;color:var(--g)}
+.customer-name{font-weight:700;color:var(--ink);font-size:15px}
+.product-chip{display:inline-flex;align-items:center;gap:4px;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:700}
+.priority-badge{font-size:11px;font-weight:700;padding:6px 10px;border-radius:999px;text-transform:uppercase}
+.priority-badge.urgent{background:var(--amp);color:var(--r)}
+.priority-badge.warning{background:var(--amp);color:var(--am)}
+.priority-badge.normal{background:var(--gpp);color:var(--g)}
+.card-body{margin-bottom:16px}
+.card-copy{font-size:14px;color:var(--inkm);line-height:1.7;margin-bottom:12px}
+.card-meta{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.photos-count{font-size:12px;color:var(--inkl)}
+.sla-countdown{font-size:12px;font-weight:700;padding:4px 8px;border-radius:8px}
+.sla-countdown.urgent{background:#FFEBEE;color:#C62828}
+.sla-countdown.warning{background:#FFF3E0;color:#F59E0B}
+.sla-countdown.normal{background:#E8F5E9;color:#059669}
+.card-actions{display:flex;gap:8px;flex-wrap:wrap}
+.action-link{font-size:12px;font-weight:700;color:var(--g);background:none;border:none;cursor:pointer;transition:color .2s}
+.action-link:hover{color:var(--gl)}
+.claim-card.urgent::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:var(--r)}
+.claim-card.warning::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:var(--am)}
+.claim-card.normal::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:var(--gl)}
+.modal-overlay{position:fixed;inset:0;background:rgba(15,26,20,.5);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;padding:24px;z-index:1000}
+.modal-overlay.open{display:flex}
+.modal{background:var(--w);border-radius:28px;max-width:1200px;width:100%;box-shadow:0 40px 80px rgba(10,92,69,.15);max-height:90vh;overflow-y:auto;display:grid;grid-template-columns:2fr 1.2fr;gap:24px;padding:32px}
+.modal-close{position:absolute;top:20px;right:20px;width:40px;height:40px;border:none;border-radius:12px;background:var(--gp);color:var(--ink);font-size:20px;cursor:pointer;transition:all .2s;z-index:10}
+.modal-close:hover{background:var(--crd);color:var(--r)}
+.modal-title{font-family:var(--fd);font-size:20px;font-weight:800;color:var(--ink);margin-bottom:20px;display:flex;align-items:center;justify-content:space-between}
+.detail-section{margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--crd)}
+.detail-section:last-child{border-bottom:none}
+.detail-label{font-size:12px;font-weight:700;color:var(--inkl);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:10px}
+.contact-item{font-size:14px;color:var(--ink);margin-bottom:6px}
+.photo-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:12px}
+.photo-thumb{width:80px;height:80px;background:var(--gp);border-radius:12px;display:grid;place-items:center;font-size:32px;cursor:pointer;transition:all .2s}
+.photo-thumb:hover{background:var(--gl);color:var(--w)}
+.timeline{display:flex;flex-direction:column;gap:12px}
+.timeline-item{display:grid;grid-template-columns:120px 1fr;gap:12px;padding:12px;border-radius:12px;background:var(--gp);transition:all .2s}
+.timeline-item.pending{background:var(--amp)}
+.timeline-item.completed{background:var(--gpp)}
+.timeline-time{font-size:12px;font-weight:700;color:var(--inkm)}
+.timeline-body{display:flex;flex-direction:column;gap:4px}
+.timeline-action{font-size:13px;font-weight:700;color:var(--ink)}
+.timeline-note{font-size:12px;color:var(--inkl)}
+.side-title{font-size:13px;font-weight:700;color:var(--inkm);margin-bottom:8px}
+.status-dropdown{width:100%;padding:12px 14px;border:1.5px solid var(--crd);border-radius:12px;background:var(--w);color:var(--ink);font-size:13px;outline:none;transition:border-color .2s}
+.status-dropdown:focus{border-color:var(--gl)}
+.btn-side{display:flex;align-items:center;justify-content:center;padding:14px 18px;border-radius:12px;border:none;background:var(--g);color:var(--w);font-family:var(--fd);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s}
+.btn-side:hover{background:var(--gm);transform:translateY(-1px)}
+@media(max-width:1024px){
+  .modal{grid-template-columns:1fr;max-width:90vw}
+  .photo-gallery{grid-template-columns:repeat(auto-fill,minmax(70px,1fr))}
+}
+@media(max-width:768px){
+  nav{flex-direction:column;align-items:flex-start;gap:16px}
+  .handler-head{flex-direction:column}
+  .handler-stats{flex-direction:column;align-items:flex-start}
+  .queue-grid{grid-template-columns:1fr}
+  .stat-item{width:100%}
+  .card-actions{flex-direction:column}
+  .action-link{width:100%;padding:10px}
+}
+@media(max-width:540px){
+  .main-wrap{padding:16px 5vw 40px}
+  .handler-name{font-size:24px}
+  .claim-card{padding:20px}
+  .modal{padding:24px;max-height:85vh}
+}
+</style>
+</head>
+<body>
+<nav>
+  <a href="cova.html" class="logo">Cov<span>a</span></a>
+  <a href="cova-admin.html" class="nav-cta">Admin portal</a>
+</nav>
+<main class="main-wrap">
+  <div class="handler-head">
+    <div class="handler-info">
+      <h1 class="handler-name">Jane Nwosu</h1>
+      <span class="handler-active">Claims handler</span>
+      <div class="handler-stats">
+        <div class="stat-item"><label>Today's claims</label><span>8</span></div>
+        <div class="stat-item"><label>Resolved this week</label><span>12</span></div>
+        <div class="stat-item"><label>Avg resolution</label><span>3.5 days</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:16px;margin-bottom:24px">
+    <button class="tab-btn active" onclick="switchTab('queue')">📋 Claims queue (8)</button>
+    <button class="tab-btn" onclick="switchTab('resolved')">✅ Resolved (12)</button>
+    <button class="tab-btn" onclick="switchTab('archived')">📦 Archived (47)</button>
+  </div>
+
+  <div id="queueTab" class="queue-grid">
+    <!-- URGENT CLAIMS (under 12hrs) -->
+    <div class="claim-card urgent" onclick="openDetail('CL-7811')">
+      <div class="card-header">
+        <div class="card-title-col">
+          <span class="claim-id">CL-7811</span>
+          <span class="customer-name">David Okonkwo</span>
+          <span class="product-chip" style="background:#96CEB420;color:#96CEB4">📱 Electronic</span>
+        </div>
+        <span class="priority-badge urgent">Urgent</span>
+      </div>
+      <div class="card-body">
+        <p class="card-copy"><strong>Incident:</strong> Device theft. Police report uploaded, photos submitted.</p>
+        <div class="card-meta">
+          <span class="photos-count">📸 3 photos</span>
+          <span>⏱️ Filed 30 Apr, 2d ago</span>
+          <span class="sla-countdown urgent">⚠️ SLA: 4h 22m</span>
+        </div>
+      </div>
+      <div class="card-actions">
+        <button class="action-link" onclick="event.stopPropagation(); updateStatus('CL-7811')">Update status</button>
+        <button class="action-link" onclick="event.stopPropagation(); addNote('CL-7811')">Add note</button>
+        <button class="action-link" onclick="event.stopPropagation(); whatsappCustomer('CL-7811','David')">WhatsApp</button>
+        <button class="action-link" onclick="event.stopPropagation(); escalate()">Escalate</button>
+      </div>
+    </div>
+
+    <!-- WARNING CLAIMS (under 24hrs) -->
+    <div class="claim-card warning" onclick="openDetail('CL-7810')">
+      <div class="card-header">
+        <div class="card-title-col">
+          <span class="claim-id">CL-7810</span>
+          <span class="customer-name">Grace Mensah</span>
+          <span class="product-chip" style="background:#45B7D120;color:#45B7D1">🚗 Motor</span>
+        </div>
+        <span class="priority-badge warning">Warning</span>
+      </div>
+      <div class="card-body">
+        <p class="card-copy"><strong>Incident:</strong> Third-party collision. Dashboard and photos uploaded.</p>
+        <div class="card-meta">
+          <span class="photos-count">📸 4 photos</span>
+          <span>⏱️ Filed 28 Apr, 5d ago</span>
+          <span class="sla-countdown warning">⏱️ SLA: 18h 45m</span>
+        </div>
+      </div>
+      <div class="card-actions">
+        <button class="action-link" onclick="event.stopPropagation(); updateStatus('CL-7810')">Update status</button>
+        <button class="action-link" onclick="event.stopPropagation(); addNote('CL-7810')">Add note</button>
+        <button class="action-link" onclick="event.stopPropagation(); whatsappCustomer('CL-7810','Grace')">WhatsApp</button>
+        <button class="action-link" onclick="event.stopPropagation(); escalate()">Escalate</button>
+      </div>
+    </div>
+
+    <div class="claim-card warning" onclick="openDetail('CL-7808')">
+      <div class="card-header">
+        <div class="card-title-col">
+          <span class="claim-id">CL-7808</span>
+          <span class="customer-name">Blessing Eze</span>
+          <span class="product-chip" style="background:#4ECDC420;color:#4ECDC4">🏥 Health</span>
+        </div>
+        <span class="priority-badge warning">Warning</span>
+      </div>
+      <div class="card-body">
+        <p class="card-copy"><strong>Incident:</strong> Hospitalization. Bills and documentation submitted.</p>
+        <div class="card-meta">
+          <span class="photos-count">📄 5 docs</span>
+          <span>⏱️ Filed 26 Apr, 7d ago</span>
+          <span class="sla-countdown warning">⏱️ SLA: 20h 30m</span>
+        </div>
+      </div>
+      <div class="card-actions">
+        <button class="action-link" onclick="event.stopPropagation(); updateStatus('CL-7808')">Update status</button>
+        <button class="action-link" onclick="event.stopPropagation(); addNote('CL-7808')">Add note</button>
+        <button class="action-link" onclick="event.stopPropagation(); whatsappCustomer('CL-7808','Blessing')">WhatsApp</button>
+        <button class="action-link" onclick="event.stopPropagation(); escalate()">Escalate</button>
+      </div>
+    </div>
+
+    <!-- NORMAL CLAIMS (over 24hrs) -->
+    <div class="claim-card normal" onclick="openDetail('CL-7812')">
+      <div class="card-header">
+        <div class="card-title-col">
+          <span class="claim-id">CL-7812</span>
+          <span class="customer-name">Chioma Adeyemi</span>
+          <span class="product-chip" style="background:#96CEB420;color:#96CEB4">📱 Electronic</span>
+        </div>
+        <span class="priority-badge normal">Normal</span>
+      </div>
+      <div class="card-body">
+        <p class="card-copy"><strong>Incident:</strong> Screen damage. Photos and receipt submitted for assessment.</p>
+        <div class="card-meta">
+          <span class="photos-count">📸 2 photos</span>
+          <span>⏱️ Filed 1 May, 2d ago</span>
+          <span class="sla-countdown normal">✅ SLA: 46h 15m</span>
+        </div>
+      </div>
+      <div class="card-actions">
+        <button class="action-link" onclick="event.stopPropagation(); updateStatus('CL-7812')">Update status</button>
+        <button class="action-link" onclick="event.stopPropagation(); addNote('CL-7812')">Add note</button>
+        <button class="action-link" onclick="event.stopPropagation(); whatsappCustomer('CL-7812','Chioma')">WhatsApp</button>
+        <button class="action-link" onclick="event.stopPropagation(); escalate()">Escalate</button>
+      </div>
+    </div>
+
+    <div class="claim-card normal" onclick="openDetail('CL-7809')">
+      <div class="card-header">
+        <div class="card-title-col">
+          <span class="claim-id">CL-7809</span>
+          <span class="customer-name">Kwame Boateng</span>
+          <span class="product-chip" style="background:#96CEB420;color:#96CEB4">📱 Electronic</span>
+        </div>
+        <span class="priority-badge normal">Normal</span>
+      </div>
+      <div class="card-body">
+        <p class="card-copy"><strong>Incident:</strong> Water damage. Device intermittent, photos uploaded.</p>
+        <div class="card-meta">
+          <span class="photos-count">📸 4 photos</span>
+          <span>⏱️ Filed 27 Apr, 6d ago</span>
+          <span class="sla-countdown normal">✅ SLA: 70h 30m</span>
+        </div>
+      </div>
+      <div class="card-actions">
+        <button class="action-link" onclick="event.stopPropagation(); updateStatus('CL-7809')">Update status</button>
+        <button class="action-link" onclick="event.stopPropagation(); addNote('CL-7809')">Add note</button>
+        <button class="action-link" onclick="event.stopPropagation(); whatsappCustomer('CL-7809','Kwame')">WhatsApp</button>
+        <button class="action-link" onclick="event.stopPropagation(); escalate()">Escalate</button>
+      </div>
+    </div>
+
+    <div class="claim-card normal" onclick="openDetail('CL-7813')">
+      <div class="card-header">
+        <div class="card-title-col">
+          <span class="claim-id">CL-7813</span>
+          <span class="customer-name">Tunde Okafor</span>
+          <span class="product-chip" style="background:#FF6B6B20;color:#FF6B6B">❤️ Life</span>
+        </div>
+        <span class="priority-badge normal">Normal</span>
+      </div>
+      <div class="card-body">
+        <p class="card-copy"><strong>Incident:</strong> Life claim. Certificate pending verification.</p>
+        <div class="card-meta">
+          <span class="photos-count">📄 3 docs</span>
+          <span>⏱️ Filed 25 Apr, 8d ago</span>
+          <span class="sla-countdown normal">✅ SLA: 92h</span>
+        </div>
+      </div>
+      <div class="card-actions">
+        <button class="action-link" onclick="event.stopPropagation(); updateStatus('CL-7813')">Update status</button>
+        <button class="action-link" onclick="event.stopPropagation(); addNote('CL-7813')">Add note</button>
+        <button class="action-link" onclick="event.stopPropagation(); whatsappCustomer('CL-7813','Tunde')">WhatsApp</button>
+        <button class="action-link" onclick="event.stopPropagation(); escalate()">Escalate</button>
+      </div>
+    </div>
+
+    <div class="claim-card normal" onclick="openDetail('CL-7807')">
+      <div class="card-header">
+        <div class="card-title-col">
+          <span class="claim-id">CL-7807</span>
+          <span class="customer-name">TechFlow Ltd</span>
+          <span class="product-chip" style="background:#FF634720;color:#FF6347">🔥 Fire</span>
+        </div>
+        <span class="priority-badge normal">Normal</span>
+      </div>
+      <div class="card-body">
+        <p class="card-copy"><strong>Incident:</strong> Fire outbreak. Loss adjuster dispatched, assessment pending.</p>
+        <div class="card-meta">
+          <span class="photos-count">📸 8 photos</span>
+          <span>⏱️ Filed 25 Apr, 8d ago</span>
+          <span class="sla-countdown normal">✅ SLA: 96h</span>
+        </div>
+      </div>
+      <div class="card-actions">
+        <button class="action-link" onclick="event.stopPropagation(); updateStatus('CL-7807')">Update status</button>
+        <button class="action-link" onclick="event.stopPropagation(); addNote('CL-7807')">Add note</button>
+        <button class="action-link" onclick="event.stopPropagation(); whatsappCustomer('CL-7807','TechFlow')">WhatsApp</button>
+        <button class="action-link" onclick="event.stopPropagation(); escalate()">Escalate</button>
+      </div>
+    </div>
+
+    <div class="claim-card normal" onclick="openDetail('CL-7806')">
+      <div class="card-header">
+        <div class="card-title-col">
+          <span class="claim-id">CL-7806</span>
+          <span class="customer-name">Emeka Adeyemi</span>
+          <span class="product-chip" style="background:#FFEAA720;color:#FFEAA7">✈️ Travel</span>
+        </div>
+        <span class="priority-badge normal">Normal</span>
+      </div>
+      <div class="card-body">
+        <p class="card-copy"><strong>Incident:</strong> Flight delay. Documentation submitted for reimbursement.</p>
+        <div class="card-meta">
+          <span class="photos-count">📄 4 docs</span>
+          <span>⏱️ Filed 23 Apr, 10d ago</span>
+          <span class="sla-countdown normal">✅ SLA: 120h</span>
+        </div>
+      </div>
+      <div class="card-actions">
+        <button class="action-link" onclick="event.stopPropagation(); updateStatus('CL-7806')">Update status</button>
+        <button class="action-link" onclick="event.stopPropagation(); addNote('CL-7806')">Add note</button>
+        <button class="action-link" onclick="event.stopPropagation(); whatsappCustomer('CL-7806','Emeka')">WhatsApp</button>
+        <button class="action-link" onclick="event.stopPropagation(); escalate()">Escalate</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Resolved Tab (hidden) -->
+  <div id="resolvedTab" style="display:none" class="queue-grid">
+    <div class="claim-card normal" style="opacity:0.7">
+      <div class="card-header">
+        <div class="card-title-col">
+          <span class="claim-id">CL-7799</span>
+          <span class="customer-name">Amina Yusuf</span>
+          <span class="product-chip" style="background:#96CEB420;color:#96CEB4">📱 Electronic</span>
+        </div>
+        <span class="priority-badge" style="background:var(--gpp);color:var(--g)">Resolved</span>
+      </div>
+      <div class="card-body">
+        <p class="card-copy"><strong>Resolution:</strong> Replacement device delivered. Customer satisfied.</p>
+        <div class="card-meta">
+          <span>✅ Resolved 28 Apr</span>
+          <span>⏱️ 5.2 days total</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="claim-card normal" style="opacity:0.7">
+      <div class="card-header">
+        <div class="card-title-col">
+          <span class="claim-id">CL-7798</span>
+          <span class="customer-name">Chidi Nnamdi</span>
+          <span class="product-chip" style="background:#45B7D120;color:#45B7D1">🚗 Motor</span>
+        </div>
+        <span class="priority-badge" style="background:var(--gpp);color:var(--g)">Resolved</span>
+      </div>
+      <div class="card-body">
+        <p class="card-copy"><strong>Resolution:</strong> Repair completed and vehicle returned.</p>
+        <div class="card-meta">
+          <span>✅ Resolved 26 Apr</span>
+          <span>⏱️ 4.8 days total</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="claim-card normal" style="opacity:0.7">
+      <div class="card-header">
+        <div class="card-title-col">
+          <span class="claim-id">CL-7797</span>
+          <span class="customer-name">Nneka Okafor</span>
+          <span class="product-chip" style="background:#4ECDC420;color:#4ECDC4">🏥 Health</span>
+        </div>
+        <span class="priority-badge" style="background:var(--gpp);color:var(--g)">Resolved</span>
+      </div>
+      <div class="card-body">
+        <p class="card-copy"><strong>Resolution:</strong> Reimbursement processed and paid.</p>
+        <div class="card-meta">
+          <span>✅ Resolved 25 Apr</span>
+          <span>⏱️ 3.5 days total</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Archived Tab (hidden) -->
+  <div id="archivedTab" style="display:none" class="queue-grid">
+    <div class="claim-card normal" style="opacity:0.5">
+      <div class="card-header">
+        <div class="card-title-col">
+          <span class="claim-id">CL-7700</span>
+          <span class="customer-name">Previous Customer</span>
+          <span class="product-chip" style="background:#96CEB420;color:#96CEB4">📱 Electronic</span>
+        </div>
+        <span class="priority-badge" style="background:var(--crd);color:var(--inkl)">Archived</span>
+      </div>
+      <div class="card-body">
+        <p class="card-copy"><strong>Resolution:</strong> Claim resolved and paid out.</p>
+        <div class="card-meta">
+          <span>📦 Archived 15 Mar</span>
+          <span>⏱️ 45 days ago</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Detail Modal -->
+<div class="modal-overlay" id="detailModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeDetail()">×</button>
+    <div id="modalMainContent">
+      <!-- Content populated by JavaScript -->
+    </div>
+    <div id="modalSideContent">
+      <!-- Content populated by JavaScript -->
+    </div>
+  </div>
+</div>
+
+<!-- Escalate Modal -->
+<div class="modal-overlay" id="escalateModal">
+  <div class="modal" style="grid-template-columns:1fr;max-width:600px;padding:32px">
+    <button class="modal-close" onclick="closeEscalate()">×</button>
+    <h2 class="modal-title">Escalate to insurer</h2>
+    <div class="detail-section">
+      <div class="detail-label">Select insurer</div>
+      <select class="status-dropdown" id="escalateInsurer">
+        <option value="aiico">AIICO Insurance (Electronic)</option>
+        <option value="axa">AXA Mansard (Motor/Travel)</option>
+        <option value="leadway">Leadway Assurance (Health/Fire/Life)</option>
+        <option value="custodian">Custodian & Allied (Fidelity/Marine)</option>
+        <option value="nem">NEM Insurance (Liability/GPA)</option>
+        <option value="cornerstone">Cornerstone Insurance (Property)</option>
+      </select>
+    </div>
+    <div class="detail-section">
+      <div class="detail-label">Insurer contact</div>
+      <div class="contact-item">📧 claims@insurer.com</div>
+      <div class="contact-item">📱 +234 700 123 4567</div>
+      <div class="contact-item">🕐 Mon-Fri, 8am-6pm</div>
+    </div>
+    <div class="detail-section">
+      <div class="detail-label">Reason for escalation</div>
+      <select class="status-dropdown">
+        <option>Complex technical assessment required</option>
+        <option>Requires specialist investigation</option>
+        <option>Policy clarification needed</option>
+        <option>Customer dispute</option>
+        <option>High-value claim requires senior approval</option>
+      </select>
+    </div>
+    <div class="detail-section">
+      <div class="detail-label">Add notes</div>
+      <textarea style="width:100%;padding:12px;border:1.5px solid var(--crd);border-radius:12px;background:var(--w);color:var(--ink);font-size:13px;min-height:100px;resize:vertical" placeholder="Provide additional context for insurer..."></textarea>
+    </div>
+    <div style="display:flex;gap:12px;margin-top:20px">
+      <button class="btn-side" onclick="confirmEscalate()">Send escalation</button>
+      <button class="btn-side" style="background:var(--crd);color:var(--ink)" onclick="closeEscalate()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Product type configurations with colors and icons
+const PRODUCT_TYPES = {
+  electronic: { name: 'Electronic', icon: '📱', color: '#96CEB4' },
+  motor: { name: 'Motor', icon: '🚗', color: '#45B7D1' },
+  health: { name: 'Health', icon: '🏥', color: '#4ECDC4' },
+  life: { name: 'Life', icon: '❤️', color: '#FF6B6B' },
+  travel: { name: 'Travel', icon: '✈️', color: '#FFEAA7' },
+  property: { name: 'Property', icon: '🏠', color: '#DDA0DD' },
+  fire: { name: 'Fire', icon: '🔥', color: '#FF6347' },
+  burglary: { name: 'Burglary', icon: '🔒', color: '#20B2AA' },
+  money: { name: 'Money', icon: '💸', color: '#F0E68C' },
+  fidelity: { name: 'Fidelity', icon: '🤝', color: '#9370DB' },
+  liability: { name: 'Public Liability', icon: '⚖️', color: '#87CEEB' },
+  gpa: { name: 'GPA', icon: '🤕', color: '#FFB6C1' },
+  workmen: { name: "Workmen's", icon: '👷', color: '#B8860B' },
+  marine: { name: 'Marine', icon: '🚢', color: '#5F9EA0' },
+  aviation: { name: 'Aviation', icon: '✈️', color: '#778899' },
+  'oil-gas': { name: 'Oil & Gas', icon: '🛢️', color: '#8B4513' },
+  engineering: { name: 'Engineering', icon: '⚙️', color: '#708090' },
+  agric: { name: 'Agriculture', icon: '🌾', color: '#6B8E23' }
+};
+
+// Claim data
+let currentClaim = null;
+
+const claims = {
+  queue: [
+    { id: 'CL-7811', customer: 'David Okonkwo', phone: '+234 812 345 6789', email: 'david.ok@email.com', product: 'electronic', incident: 'Device theft', description: 'Device theft reported on 30 April. Police report uploaded. Insurer assessment pending.', filed: '30 Apr 2026', daysOpen: 2, sla: 'urgent', photos: 3, status: 'Under review', policy: 'COVA-EP-8848', device: 'iPhone 16 Pro', sumInsured: 1450000, insurer: 'AIICO Insurance' },
+    { id: 'CL-7810', customer: 'Grace Mensah', phone: '+234 902 345 6789', email: 'grace.mensah@email.com', product: 'motor', incident: 'Third-party collision', description: 'Dashboard and photos uploaded. Third-party information provided.', filed: '28 Apr 2026', daysOpen: 5, sla: 'warning', photos: 4, status: 'Under review', policy: 'COVA-MT-7732', device: 'Toyota Camry 2023', sumInsured: 15000000, insurer: 'AXA Mansard' },
+    { id: 'CL-7808', customer: 'Blessing Eze', phone: '+234 801 987 6543', email: 'blessing.eze@email.com', product: 'health', incident: 'Hospitalization', description: 'Bills and documentation submitted. Plan verification pending.', filed: '26 Apr 2026', daysOpen: 7, sla: 'warning', photos: 0, docs: 5, status: 'Under review', policy: 'COVA-HL-6521', device: 'Gold Plan', sumInsured: 5000000, insurer: 'Leadway Assurance' },
+    { id: 'CL-7812', customer: 'Chioma Adeyemi', phone: '+234 801 234 5678', email: 'chioma.adeyemi@email.com', product: 'electronic', incident: 'Screen damage', description: 'Photos and receipt submitted for assessment.', filed: '1 May 2026', daysOpen: 2, sla: 'normal', photos: 2, status: 'Under review', policy: 'COVA-EP-8847', device: 'iPhone 17 Pro Max', sumInsured: 1200000, insurer: 'AIICO Insurance' },
+    { id: 'CL-7809', customer: 'Kwame Boateng', phone: '+234 703 456 7890', email: 'kwame.b@email.com', product: 'electronic', incident: 'Water damage', description: 'Device functional but intermittent issues reported.', filed: '27 Apr 2026', daysOpen: 6, sla: 'normal', photos: 4, status: 'Under review', policy: 'COVA-EP-8849', device: 'iPad Air M2', sumInsured: 1350000, insurer: 'AIICO Insurance' },
+    { id: 'CL-7813', customer: 'Tunde Okafor', phone: '+234 701 234 5678', email: 'tunde.o@email.com', product: 'life', incident: 'Life claim', description: 'Certificate pending verification. Beneficiary confirmation required.', filed: '25 Apr 2026', daysOpen: 8, sla: 'normal', photos: 0, docs: 3, status: 'Under review', policy: 'COVA-LF-6789', device: 'Term Life', sumInsured: 10000000, insurer: 'Cornerstone Insurance' },
+    { id: 'CL-7807', customer: 'TechFlow Ltd', phone: '+234 703 987 6543', email: 'claims@techflow.com', product: 'fire', incident: 'Fire outbreak', description: 'Loss adjuster dispatched, assessment pending.', filed: '25 Apr 2026', daysOpen: 8, sla: 'normal', photos: 8, status: 'Under review', policy: 'COVA-FR-6523', device: 'Commercial Fire', sumInsured: 150000000, insurer: 'Leadway Assurance' },
+    { id: 'CL-7806', customer: 'Emeka Adeyemi', phone: '+234 802 345 6789', email: 'emeka.a@email.com', product: 'travel', incident: 'Flight delay', description: 'Documentation submitted for reimbursement.', filed: '23 Apr 2026', daysOpen: 10, sla: 'normal', photos: 0, docs: 4, status: 'Awaiting documents', policy: 'COVA-TR-6522', device: 'Travel Annual', sumInsured: 2000000, insurer: 'AXA Mansard' }
+  ],
+  resolved: [
+    { id: 'CL-7799', customer: 'Amina Yusuf', product: 'electronic', incident: 'Replacement delivered', resolved: '28 Apr 2026', resolutionTime: '5.2 days' },
+    { id: 'CL-7798', customer: 'Chidi Nnamdi', product: 'motor', incident: 'Repair completed', resolved: '26 Apr 2026', resolutionTime: '4.8 days' },
+    { id: 'CL-7797', customer: 'Nneka Okafor', product: 'health', incident: 'Reimbursement paid', resolved: '25 Apr 2026', resolutionTime: '3.5 days' }
+  ],
+  archived: [
+    { id: 'CL-7700', customer: 'Previous Customer', product: 'electronic', incident: 'Claim resolved', archived: '15 Mar 2026' }
+  ]
+};
+
+// Product-specific workflows
+const WORKFLOWS = {
+  electronic: [
+    { step: 1, action: 'Assess damage photos', btn: '✓ Approve repair', field: 'repair_estimate' },
+    { step: 2, action: 'Assign to repair shop', btn: 'Assign shop', field: 'repair_shop' },
+    { step: 3, action: 'Confirm completion', btn: '✓ Complete', field: 'completion' }
+  ],
+  motor: [
+    { step: 1, action: 'Dispatch assessor', btn: '✓ Assign assessor', field: 'assessor' },
+    { step: 2, action: 'Receive repair estimate', btn: '✓ Approve estimate', field: 'repair_cost' },
+    { step: 3, action: 'Approve with insurer', btn: '✓ Send to insurer', field: 'insurer_approval' },
+    { step: 4, action: 'Assign repair centre', btn: 'Assign centre', field: 'repair_centre' },
+    { step: 5, action: 'Confirm vehicle returned', btn: '✓ Complete', field: 'vehicle_return' }
+  ],
+  life: [
+    { step: 1, action: 'Request death certificate', btn: '✓ Verify certificate', field: 'death_cert' },
+    { step: 2, action: 'Verify with insurer', btn: '✓ Send to insurer', field: 'insurer_verification' },
+    { step: 3, action: 'Confirm payout amount', btn: '✓ Approve payout', field: 'payout_amount' },
+    { step: 4, action: 'Initiate payment', btn: '✓ Process payment', field: 'payment_init' }
+  ],
+  health: [
+    { step: 1, action: 'Review hospital bills', btn: '✓ Verify bills', field: 'hospital_bills' },
+    { step: 2, action: 'Check against plan coverage', btn: '✓ Validate coverage', field: 'coverage_check' },
+    { step: 3, action: 'Calculate reimbursement', btn: '✓ Calculate amount', field: 'reimbursement_amount' },
+    { step: 4, action: 'Approve payment', btn: '✓ Process payment', field: 'payment_init' }
+  ],
+  travel: [
+    { step: 1, action: 'Review documentation', btn: '✓ Verify docs', field: 'travel_docs' },
+    { step: 2, action: 'Check policy terms', btn: '✓ Validate terms', field: 'terms_check' },
+    { step: 3, action: 'Calculate settlement', btn: '✓ Calculate amount', field: 'settlement_amount' },
+    { step: 4, action: 'Approve payment', btn: '✓ Process payment', field: 'payment_init' }
+  ],
+  fire: [
+    { step: 1, action: 'Dispatch loss adjuster', btn: '✓ Assign adjuster', field: 'loss_adjuster' },
+    { step: 2, action: 'Receive assessment', btn: '✓ Review assessment', field: 'assessment_report' },
+    { step: 3, action: 'Approve repair estimate', btn: '✓ Approve estimate', field: 'repair_estimate' },
+    { step: 4, action: 'Confirm completion', btn: '✓ Complete', field: 'completion' }
+  ]
+};
+
+// Tab switching
+function switchTab(tab) {
+  const tabs = ['queueTab', 'resolvedTab', 'archivedTab'];
+  tabs.forEach(t => document.getElementById(t).style.display = 'none');
+  document.getElementById(tab + 'Tab').style.display = 'grid';
+  
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.classList.remove('active');
+    if (btn.textContent.toLowerCase().includes(tab)) {
+      btn.classList.add('active');
+    }
+  });
+}
+
+// Modal functions
+function openDetail(claimId) {
+  currentClaim = claims.queue.find(c => c.id === claimId);
+  if (!currentClaim) {
+    currentClaim = claims.resolved.find(c => c.id === claimId) || claims.archived.find(c => c.id === claimId);
+  }
+  
+  renderModalContent(currentClaim);
+  document.getElementById('detailModal').classList.add('open');
+}
+
+function closeDetail() {
+  document.getElementById('detailModal').classList.remove('open');
+  currentClaim = null;
+}
+
+function renderModalContent(claim) {
+  const product = PRODUCT_TYPES[claim.product];
+  const workflow = WORKFLOWS[claim.product] || [];
+  
+  // Left panel
+  const leftContent = `
+    <h2 class="modal-title">Claim ${claim.id} — ${claim.customer}</h2>
+    
+    <div class="detail-section">
+      <div class="detail-label">Customer details</div>
+      <div class="contact-item" style="font-size:14px;margin-bottom:8px"><strong>Name:</strong> ${claim.customer}</div>
+      <div class="contact-item" style="font-size:14px;margin-bottom:8px">📱 ${claim.phone}</div>
+      <div class="contact-item" style="font-size:14px;margin-bottom:8px">📧 ${claim.email}</div>
+      <button class="btn-side" onclick="whatsappCustomer('${claim.id}','${claim.customer.split(' ')[0]}')" style="width:100%;margin-top:12px">📱 WhatsApp customer</button>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-label">Policy details</div>
+      <div class="contact-item" style="margin-bottom:8px"><strong>Product:</strong> ${product.icon} ${product.name}</div>
+      <div class="contact-item" style="margin-bottom:8px"><strong>Cover type:</strong> ${product.name.includes('Electronic') ? 'Electronic all-risk' : product.name.includes('Motor') ? 'Comprehensive' : product.name.includes('Health') ? 'Gold Plan' : 'Full coverage'}</div>
+      <div class="contact-item" style="margin-bottom:8px"><strong>Insurer:</strong> ${claim.insurer}</div>
+      <div class="contact-item" style="margin-bottom:8px"><strong>Policy number:</strong> ${claim.policy}</div>
+      <div class="contact-item" style="margin-bottom:8px"><strong>Device/Item:</strong> ${claim.device}</div>
+      <div class="contact-item" style="margin-bottom:8px"><strong>Sum insured:</strong> ₦${claim.sumInsured.toLocaleString('en-NG')}</div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-label">Incident details</div>
+      <div class="contact-item" style="margin-bottom:8px"><strong>Incident type:</strong> ${claim.incident}</div>
+      <div class="contact-item" style="margin-bottom:8px"><strong>Description:</strong> ${claim.description}</div>
+      <div class="contact-item" style="margin-bottom:8px"><strong>Date filed:</strong> ${claim.filed}</div>
+      <div class="contact-item" style="margin-bottom:8px"><strong>Days open:</strong> ${claim.daysOpen} days</div>
+      <div class="contact-item" style="margin-bottom:8px"><strong>SLA status:</strong> 
+        <span style="background:${claim.sla === 'urgent' ? '#FFEBEE' : claim.sla === 'warning' ? '#FFF3E0' : '#E8F5E9'};color:${claim.sla === 'urgent' ? '#C62828' : claim.sla === 'warning' ? '#F59E0B' : '#059669'};padding:4px 8px;border-radius:8px;font-size:11px;font-weight:700">
+          ${claim.sla === 'urgent' ? '⚠️ Urgent (<12hrs)' : claim.sla === 'warning' ? '⏱️ At risk (<24hrs)' : '✅ On track (>24hrs)'}
+        </span>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-label">${claim.photos > 0 ? 'Photos' : 'Documents'}</div>
+      <div class="photo-gallery">
+        ${claim.photos > 0 ? Array(claim.photos).fill(0).map((_, i) => `
+          <div class="photo-thumb" onclick="alert('Photo ${i + 1} expanded')">📷</div>
+        `).join('') : Array(claim.docs || 0).fill(0).map((_, i) => `
+          <div class="photo-thumb" onclick="alert('Document ${i + 1} opened')">📄</div>
+        `).join('')}
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-label">Resolution workflow — ${product.name}</div>
+      <div class="timeline">
+        ${workflow.map((step, index) => `
+          <div class="timeline-item ${index < workflow.length ? 'pending' : 'completed'}">
+            <div class="timeline-time">Step ${step.step}</div>
+            <div class="timeline-body">
+              <div class="timeline-action">${step.action}</div>
+              <div style="margin-top:8px">
+                <input type="${step.field === 'repair_estimate' || step.field === 'repair_cost' || step.field === 'reimbursement_amount' || step.field === 'settlement_amount' || step.field === 'payout_amount' ? 'number' : 'text'}" placeholder="${step.field.replace('_', ' ')}" class="status-dropdown" style="width:100%;max-width:250px">
+                ${step.btn ? `<button class="btn-side" style="margin-left:8px" onclick="executeWorkflowStep(${index})">${step.btn}</button>` : ''}
+              </div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-label">Internal notes</div>
+      <textarea id="internalNote" placeholder="Add internal note for this claim..." style="width:100%;padding:12px;border:1.5px solid var(--crd);border-radius:12px;background:var(--w);color:var(--ink);font-size:13px;min-height:100px;resize:vertical;margin-top:8px"></textarea>
+      <button class="btn-side" onclick="saveInternalNote()" style="width:100%;margin-top:12px">💾 Save note</button>
+    </div>
+  `;
+  
+  document.getElementById('modalMainContent').innerHTML = leftContent;
+  
+  // Right panel
+  const rightContent = `
+    <div>
+      <div class="side-title">Status</div>
+      <select class="status-dropdown" id="claimStatus" onchange="updateClaimStatus('${claim.id}')">
+        <option value="under-review" ${claim.status === 'Under review' ? 'selected' : ''}>Under review</option>
+        <option value="awaiting-documents" ${claim.status === 'Awaiting documents' ? 'selected' : ''}>Awaiting documents</option>
+        <option value="awaiting-insurer" ${claim.status === 'Awaiting insurer' ? 'selected' : ''}>Awaiting insurer approval</option>
+        <option value="repair-arranged" ${claim.status === 'Repair arranged' ? 'selected' : ''}>Repair/settlement arranged</option>
+        <option value="awaiting-completion" ${claim.status === 'Awaiting completion' ? 'selected' : ''}>Awaiting completion</option>
+        <option value="resolved" ${claim.status === 'Resolved' ? 'selected' : ''}>Resolved</option>
+        <option value="rejected" ${claim.status === 'Rejected' ? 'selected' : ''}>Rejected</option>
+      </select>
+    </div>
+
+    <div>
+      <div class="side-title">Quick actions</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <button class="btn-side" onclick="whatsappCustomer('${claim.id}','${claim.customer.split(' ')[0]}')">📱 WhatsApp customer</button>
+        <button class="btn-side" onclick="updateStatus('${claim.id}')">📝 Update status</button>
+        <button class="btn-side" onclick="addNote('${claim.id}')">💬 Add note</button>
+      </div>
+    </div>
+
+    <div>
+      <div class="side-title">Escalation</div>
+      <div class="contact-item" style="margin-bottom:12px;color:var(--inkl);font-size:13px">Need insurer assistance? Escalate to:</div>
+      <button class="btn-side" style="background:var(--r);color:var(--w)" onclick="openEscalateModal()">⬆️ Escalate to insurer</button>
+    </div>
+
+    <div>
+      <div class="side-title">SLA Countdown</div>
+      <div class="contact-item" style="font-size:18px;font-weight:700;color:${claim.sla === 'urgent' ? 'var(--r)' : claim.sla === 'warning' ? 'var(--am)' : 'var(--g)'}">
+        ${claim.sla === 'urgent' ? '⚠️ 4h 22m' : claim.sla === 'warning' ? '⏱️ 18h 45m' : '✅ 46h 15m'}
+      </div>
+      <div class="contact-item" style="color:var(--inkl);font-size:12px">Time remaining before SLA breach</div>
+    </div>
+  `;
+  
+  document.getElementById('modalSideContent').innerHTML = rightContent;
+}
+
+// Workflow execution
+function executeWorkflowStep(stepIndex) {
+  alert(`Executing workflow step ${stepIndex + 1}`);
+}
+
+// Status updates
+function updateClaimStatus(claimId) {
+  const status = document.getElementById('claimStatus').value;
+  console.log(`Updating claim ${claimId} to status: ${status}`);
+  // In production, send to backend
+}
+
+function updateStatus(claimId) {
+  alert(`Update status for claim ${claimId}`);
+}
+
+function saveInternalNote() {
+  const note = document.getElementById('internalNote').value;
+  if (note.trim()) {
+    alert('Note saved successfully');
+    document.getElementById('internalNote').value = '';
+  }
+}
+
+function addNote(claimId) {
+  alert(`Add note for claim ${claimId}`);
+}
+
+// WhatsApp integration
+function whatsappCustomer(claimId, firstName) {
+  const message = `Hello ${firstName}, regarding your claim ${claimId}. I'm your Cova claims handler. How can I help?`;
+  const phoneNumber = currentClaim ? currentClaim.phone.replace('+234 ', '') : '';
+  const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+  window.open(whatsappUrl, '_blank');
+}
+
+// Escalation
+function openEscalateModal() {
+  document.getElementById('escalateModal').classList.add('open');
+}
+
+function closeEscalate() {
+  document.getElementById('escalateModal').classList.remove('open');
+}
+
+function confirmEscalate() {
+  const insurer = document.getElementById('escalateInsurer').value;
+  alert(`Escalation sent to insurer: ${insurer}`);
+  closeEscalate();
+}
+
+function escalate() {
+  alert('Escalate claim to insurer');
+}
+
+// Close modals on overlay click
+document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('detailModal').addEventListener('click', function(e) {
+    if (e.target === this) closeDetail();
+  });
+  
+  document.getElementById('escalateModal').addEventListener('click', function(e) {
+    if (e.target === this) closeEscalate();
+  });
+});
+</script>
+</body>
+</html>

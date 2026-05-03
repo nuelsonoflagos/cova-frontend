@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cova — Claim tracker</title>
+<script src="api-client.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --g:#0A5C45;--gm:#137A5C;--gl:#1D9E75;--gp:#E6F5F0;--gpp:#d0ede4;
+  --cream:#F7F4EE;--crd:#E8E4DB;--crd2:#D8D3C8;
+  --ink:#0F1A14;--inkm:#2D3E35;--inkl:#5A6E63;--inkf:#9AADA3;
+  --w:#fff;--r:#C0392B;--am:#D4860A;--amp:#FEF3E2;
+  --fd:'Syne',sans-serif;--fb:'DM Sans',sans-serif;
+  --rad:18px;--radsm:10px;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--fb);background:linear-gradient(180deg, var(--cream) 0%, #ECF8F3 100%);color:var(--ink);min-height:100vh;padding-bottom:100px}
+a{text-decoration:none;color:inherit}
+nav{display:flex;align-items:center;justify-content:space-between;padding:26px 5vw;max-width:1200px;margin:0 auto}
+.logo{font-family:var(--fd);font-size:22px;font-weight:800;color:var(--g)}
+.logo span{color:var(--gl)}
+.nav-cta{font-family:var(--fd);font-size:14px;font-weight:700;color:var(--w);background:var(--g);padding:12px 20px;border-radius:999px;transition:all .2s}
+.nav-cta:hover{background:var(--gm)}
+.main-wrap{max-width:1160px;margin:0 auto;padding:24px 5vw 40px}
+.top-card{background:var(--w);border:1px solid var(--crd);border-radius:28px;padding:30px;box-shadow:0 24px 70px rgba(10,92,69,.08);margin-bottom:24px}
+.meta-row{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.claim-header{display:flex;flex-direction:column;gap:10px}
+.claim-title{font-family:var(--fd);font-size:clamp(30px,4vw,40px);font-weight:800;color:var(--ink);line-height:1.05}
+.claim-ref{font-size:14px;font-weight:700;color:var(--inkl);letter-spacing:0.08em}
+.countdown-pill{display:inline-flex;align-items:center;gap:10px;font-size:14px;font-weight:700;padding:12px 18px;border-radius:999px;background:var(--gpp);color:var(--g)}
+.countdown-time{font-family:var(--fd);font-size:18px;color:var(--g)}
+.grid-two{display:grid;grid-template-columns:1.5fr 1fr;gap:24px}
+.tracker-card{background:var(--w);border:1px solid var(--crd);border-radius:28px;padding:30px;box-shadow:0 24px 70px rgba(10,92,69,.08);display:flex;flex-direction:column;gap:24px}
+.stage-list{position:relative;padding-left:34px}
+.stage-list::before{content:'';position:absolute;top:20px;left:16px;width:2px;height:calc(100% - 40px);background:var(--crd)}
+.stage-item{position:relative;padding:24px 24px 24px 36px;background:var(--gp);border-radius:22px;margin-bottom:20px}
+.stage-item:last-child{margin-bottom:0}
+.stage-bullet{position:absolute;left:-4px;top:28px;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-size:14px;font-weight:700;color:var(--w);background:var(--crd)}
+.stage-bullet.complete{background:var(--g)}
+.stage-bullet.active{background:var(--gl);animation:pulse 2s infinite}
+.stage-bullet.pending{background:var(--inkf)}
+.stage-meta{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:12px}
+.stage-title{font-size:17px;font-weight:800;color:var(--ink)}
+.stage-time{font-size:13px;color:var(--inkf)}
+.stage-copy{font-size:14px;color:var(--inkl);line-height:1.7}
+.stage-status{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;font-size:13px;font-weight:700}
+.stage-status.complete{background:var(--gpp);color:var(--g)}
+.stage-status.active{background:var(--gp);color:var(--gl)}
+.stage-status.pending{background:var(--amp);color:var(--am)}
+.handler-card{background:var(--w);border:1px solid var(--crd);border-radius:28px;padding:28px;box-shadow:0 24px 70px rgba(10,92,69,.08);display:flex;flex-direction:column;gap:20px}
+.handler-top{display:flex;align-items:center;gap:16px}
+.handler-avatar{width:78px;height:78px;border-radius:24px;background:linear-gradient(135deg, rgba(10,92,69,.15), rgba(29,158,117,.15));display:grid;place-items:center;font-size:26px;color:var(--g);font-weight:800}
+.handler-info{display:flex;flex-direction:column;gap:6px}
+.handler-name{font-size:20px;font-weight:800;color:var(--ink)}
+.handler-role{font-size:14px;color:var(--inkl)}
+.whatsapp-btn{display:inline-flex;align-items:center;justify-content:center;padding:16px 18px;border-radius:16px;border:none;background:var(--gl);color:var(--w);font-weight:700;cursor:pointer;transition:all .2s}
+.whatsapp-btn:hover{background:var(--gm)}
+.fixed-help{position:fixed;right:20px;bottom:20px;z-index:1000}
+.help-btn{display:flex;align-items:center;justify-content:center;gap:10px;padding:16px 20px;border-radius:24px;background:var(--g);color:var(--w);font-family:var(--fd);font-size:15px;font-weight:700;border:none;cursor:pointer;box-shadow:0 18px 40px rgba(10,92,69,.16);transition:all .2s}
+.help-btn:hover{background:var(--gm);transform:translateY(-1px)}
+
+/* Product badge */
+.product-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.product-badge.device {
+  background: rgba(22, 160, 133, 0.12);
+  color: #16A085;
+}
+.product-badge.motor {
+  background: rgba(52, 152, 219, 0.12);
+  color: #3498DB;
+}
+.product-badge.life {
+  background: rgba(233, 30, 99, 0.12);
+  color: #E91E63;
+}
+.product-badge.health {
+  background: rgba(39, 174, 96, 0.12);
+  color: #27AE60;
+}
+.product-badge.travel {
+  background: rgba(243, 156, 18, 0.12);
+  color: #F39C12;
+}
+.product-badge.property {
+  background: rgba(230, 126, 34, 0.12);
+  color: #E67E22;
+}
+.product-badge.investment {
+  background: rgba(155, 89, 182, 0.12);
+  color: #9B59B6;
+}
+.product-badge.group {
+  background: rgba(142, 68, 173, 0.12);
+  color: #8E44AD;
+}
+.product-badge.fire {
+  background: rgba(231, 76, 60, 0.12);
+  color: #E74C3C;
+}
+.product-badge.workmen {
+  background: rgba(241, 196, 15, 0.12);
+  color: #D4AC0D;
+}
+.product-badge.gpa {
+  background: rgba(211, 84, 0, 0.12);
+  color: #D35400;
+}
+
+/* Progress bar */
+.progress-section {
+  margin-bottom: 24px;
+}
+.progress-bar-container {
+  background: var(--crd);
+  border-radius: 12px;
+  height: 8px;
+  overflow: hidden;
+}
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--g), var(--gl));
+  border-radius: 12px;
+  transition: width 0.5s ease;
+}
+.progress-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.progress-label-text {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+}
+.progress-percentage {
+  font-family: var(--fd);
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--g);
+}
+
+/* Product selector */
+.product-selector {
+  margin-bottom: 20px;
+}
+.product-selector select {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1.5px solid var(--crd);
+  border-radius: 16px;
+  background: var(--gp);
+  color: var(--ink);
+  outline: none;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Customer info */
+.customer-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+}
+.customer-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--g);
+  color: var(--w);
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+  font-weight: 700;
+}
+.customer-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--inkm);
+}
+
+/* Share button */
+.share-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 16px;
+  background: var(--gp);
+  border: 1px solid var(--crd);
+  color: var(--inkm);
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.share-btn:hover {
+  background: var(--gpp);
+  border-color: var(--gl);
+  color: var(--g);
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.1); }
+}
+
+@media(max-width:980px){.grid-two{grid-template-columns:1fr}.meta-row{justify-content:flex-start}} 
+@media(max-width:700px){
+  nav{flex-direction:column;align-items:flex-start;gap:16px}
+  .claim-title{font-size:28px}
+  .top-card{padding:24px}
+  .tracker-card,.handler-card{padding:24px}
+  .stage-item{padding:20px}
+  .handler-top{flex-direction:column;align-items:flex-start}
+  .fixed-help{right:50%;transform:translateX(50%);width:calc(100% - 40px)}
+}
+@media(max-width:520px){
+  body{padding-bottom:140px}
+  .claim-ref,.countdown-pill{width:100%}
+  .stage-list{padding-left:22px}
+  .stage-item{padding-left:28px}
+  .stage-bullet{left:-10px}
+}
+</style>
+</head>
+<body>
+<nav>
+  <a href="cova-dashboard.html" class="logo">Cov<span>a</span></a>
+  <a href="cova-dashboard.html" class="nav-cta">← Back to dashboard</a>
+</nav>
+<main class="main-wrap">
+  <div class="top-card">
+    <div class="meta-row">
+      <div class="claim-header">
+        <span class="claim-ref">Claim #COVA-CL-7812</span>
+        <h1 class="claim-title">Your claim status</h1>
+        <div class="customer-info">
+          <div class="customer-avatar">AB</div>
+          <span class="customer-name">Adaeze Bright</span>
+        </div>
+      </div>
+      <div>
+        <div class="countdown-pill" id="slaLabel">72hr SLA remaining</div>
+        <span class="countdown-time" id="slaTimer">71:34:22</span>
+      </div>
+    </div>
+    
+    <!-- Progress Bar -->
+    <div class="progress-section" style="margin-top: 24px;">
+      <div class="progress-label">
+        <span class="progress-label-text">Claim progress</span>
+        <span class="progress-percentage" id="progressPercentage">60%</span>
+      </div>
+      <div class="progress-bar-container">
+        <div class="progress-bar-fill" id="progressFill" style="width: 60%;"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-two">
+    <section class="tracker-card">
+      <div class="product-selector">
+        <select id="productTypeSelect" onchange="updateProductType()">
+          <option value="device">📱 Electronic Equipment</option>
+          <option value="motor" selected>🚗 Motor Insurance</option>
+          <option value="life">❤️ Life Insurance</option>
+          <option value="health">🏥 Health Insurance</option>
+          <option value="travel">✈️ Travel Insurance</option>
+          <option value="property">🏠 Property Insurance</option>
+          <option value="investment">📈 Investment Plan</option>
+          <option value="group">👥 Group Insurance</option>
+          <option value="fire">🔥 Fire Insurance</option>
+        </select>
+      </div>
+      
+      <div class="stage-list" id="stageList">
+        <!-- Stages populated by JavaScript -->
+      </div>
+    </section>
+
+    <aside class="handler-card">
+      <div class="handler-top">
+        <div class="handler-avatar">JN</div>
+        <div class="handler-info">
+          <span class="handler-name">Jane Nwosu</span>
+          <span class="handler-role">Claims handler</span>
+          <span class="stage-copy">Your dedicated handler is ready to answer questions and support your claim at every stage.</span>
+        </div>
+      </div>
+      <button class="whatsapp-btn" onclick="window.open('https://wa.me/2348012345678','_blank')">📱 WhatsApp your handler</button>
+      
+      <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--crd);">
+        <span style="font-size: 14px; font-weight: 700; color: var(--inkm);">Share this claim</span>
+        <button class="share-btn" onclick="shareClaim()" style="margin-top: 12px; width: 100%;">
+          🔗 Share link
+        </button>
+      </div>
+    </aside>
+  </div>
+</main>
+<div class="fixed-help">
+  <button class="help-btn" onclick="window.open('https://wa.me/2348012345678','_blank')">Need help? WhatsApp support</button>
+</div>
+
+<script>
+// Product configurations with stages and SLA
+const PRODUCT_CONFIG = {
+  device: {
+    icon: '📱',
+    name: 'Electronic Equipment',
+    badgeClass: 'device',
+    sla: 72, // hours
+    stages: [
+      { title: 'Claim submitted', description: 'We received your claim and confirmed your policy details.', time: '1 May 2026, 09:12', status: 'complete' },
+      { title: 'Damage assessed', description: 'Our team reviewed the damage photos and assessment report.', time: '1 May 2026, 12:05', status: 'complete' },
+      { title: 'Approved by insurer', description: 'The insurer approved the claim and issued repair authorization.', time: '2 May 2026, 14:30', status: 'complete' },
+      { title: 'Repair shop assigned', description: 'Device sent to authorized repair center.', time: '2 May 2026, 16:45', status: 'active' },
+      { title: 'Repaired and returned', description: 'Device repaired and shipped back to you.', time: 'Pending', status: 'pending' }
+    ]
+  },
+  motor: {
+    icon: '🚗',
+    name: 'Motor Insurance',
+    badgeClass: 'motor',
+    sla: 5, // days
+    stages: [
+      { title: 'Claim submitted', description: 'We received your claim and confirmed your policy details.', time: '1 May 2026, 09:12', status: 'complete' },
+      { title: 'Assessor dispatched', description: 'Claims assessor has been dispatched to inspect vehicle.', time: '1 May 2026, 11:00', status: 'complete' },
+      { title: 'Repair estimate approved', description: 'Inspection complete and repair estimate approved by insurer.', time: '3 May 2026, 10:00', status: 'complete' },
+      { title: 'Repair centre assigned', description: 'Vehicle sent to authorized repair center.', time: 'Pending', status: 'active' },
+      { title: 'Vehicle returned', description: 'Vehicle repaired and returned to you.', time: 'Pending', status: 'pending' }
+    ]
+  },
+  life: {
+    icon: '❤️',
+    name: 'Life Insurance',
+    badgeClass: 'life',
+    sla: 14, // days
+    stages: [
+      { title: 'Claim submitted', description: 'We received your claim and confirmed your policy details.', time: '1 May 2026, 09:12', status: 'complete' },
+      { title: 'Documents verified', description: 'Death certificate and beneficiary details verified.', time: '1 May 2026, 14:00', status: 'complete' },
+      { title: 'Underwriter review', description: 'Claim under review by insurance underwriter.', time: '3 May 2026, 10:00', status: 'complete' },
+      { title: 'Insurer decision', description: 'Decision being prepared by insurer.', time: 'Pending', status: 'active' },
+      { title: 'Payment processed', description: 'Payment will be processed and sent to beneficiary.', time: 'Pending', status: 'pending' }
+    ]
+  },
+  health: {
+    icon: '🏥',
+    name: 'Health Insurance',
+    badgeClass: 'health',
+    sla: 48, // hours
+    stages: [
+      { title: 'Claim submitted', description: 'We received your claim and confirmed your policy details.', time: '1 May 2026, 09:12', status: 'complete' },
+      { title: 'Hospital bills received', description: 'Hospital receipts and medical records reviewed.', time: '1 May 2026, 12:00', status: 'complete' },
+      { title: 'Medical review', description: 'Medical team reviewing claim and coverage validation.', time: '2 May 2026, 14:00', status: 'complete' },
+      { title: 'Insurer approval', description: 'Claim approved for reimbursement.', time: 'Pending', status: 'active' },
+      { title: 'Reimbursement sent', description: 'Payment processed and sent to your account.', time: 'Pending', status: 'pending' }
+    ]
+  },
+  travel: {
+    icon: '✈️',
+    name: 'Travel Insurance',
+    badgeClass: 'travel',
+    sla: 72, // hours
+    stages: [
+      { title: 'Claim submitted', description: 'We received your claim and confirmed your policy details.', time: '1 May 2026, 09:12', status: 'complete' },
+      { title: 'Documentation reviewed', description: 'Travel documents and airline records reviewed.', time: '1 May 2026, 14:00', status: 'complete' },
+      { title: 'Insurer assessment', description: 'Claim being assessed against travel policy terms.', time: '3 May 2026, 10:00', status: 'complete' },
+      { title: 'Settlement calculated', description: 'Settlement amount calculated and approved.', time: 'Pending', status: 'active' },
+      { title: 'Payment sent', description: 'Payment processed and sent to your account.', time: 'Pending', status: 'pending' }
+    ]
+  },
+  property: {
+    icon: '🏠',
+    name: 'Property Insurance',
+    badgeClass: 'property',
+    sla: 7, // days
+    stages: [
+      { title: 'Claim submitted', description: 'We received your claim and confirmed your policy details.', time: '1 May 2026, 09:12', status: 'complete' },
+      { title: 'Loss adjuster assigned', description: 'Loss adjuster assigned to assess property damage.', time: '1 May 2026, 14:00', status: 'complete' },
+      { title: 'Site inspection done', description: 'Property inspection completed and report filed.', time: '3 May 2026, 10:00', status: 'complete' },
+      { title: 'Repair estimate approved', description: 'Repair estimate reviewed and approved by insurer.', time: 'Pending', status: 'active' },
+      { title: 'Settlement paid', description: 'Settlement processed and payment sent.', time: 'Pending', status: 'pending' }
+    ]
+  },
+  investment: {
+    icon: '📈',
+    name: 'Investment Plan',
+    badgeClass: 'investment',
+    sla: 5, // days
+    stages: [
+      { title: 'Request submitted', description: 'We received your early withdrawal request.', time: '1 May 2026, 09:12', status: 'complete' },
+      { title: 'Application reviewed', description: 'Withdrawal terms and penalties calculated.', time: '1 May 2026, 14:00', status: 'complete' },
+      { title: 'Value verified', description: 'Current investment value and charges verified.', time: '3 May 2026, 10:00', status: 'complete' },
+      { title: 'Processing payment', description: 'Payment being processed to your bank account.', time: 'Pending', status: 'active' },
+      { title: 'Payment complete', description: 'Funds transferred successfully.', time: 'Pending', status: 'pending' }
+    ]
+  },
+  group: {
+    icon: '👥',
+    name: 'Group Insurance',
+    badgeClass: 'group',
+    sla: 14, // days
+    stages: [
+      { title: 'Claim submitted', description: 'We received your claim and confirmed your policy details.', time: '1 May 2026, 09:12', status: 'complete' },
+      { title: 'Documents verified', description: 'Employee and claim details verified.', time: '1 May 2026, 14:00', status: 'complete' },
+      { title: 'Underwriter review', description: 'Claim under review by insurance underwriter.', time: '3 May 2026, 10:00', status: 'complete' },
+      { title: 'Insurer decision', description: 'Decision being prepared by insurer.', time: 'Pending', status: 'active' },
+      { title: 'Payment processed', description: 'Payment or benefit processed.', time: 'Pending', status: 'pending' }
+    ]
+  },
+  fire: {
+    icon: '🔥',
+    name: 'Fire Insurance',
+    badgeClass: 'fire',
+    sla: 7, // days
+    stages: [
+      { title: 'Claim submitted', description: 'We received your claim and confirmed your policy details.', time: '1 May 2026, 09:12', status: 'complete' },
+      { title: 'Loss adjuster assigned', description: 'Fire adjuster assigned to assess damage.', time: '1 May 2026, 14:00', status: 'complete' },
+      { title: 'Site inspection done', description: 'Property inspection completed and report filed.', time: '3 May 2026, 10:00', status: 'complete' },
+      { title: 'Repair estimate approved', description: 'Repair estimate reviewed and approved by insurer.', time: 'Pending', status: 'active' },
+      { title: 'Settlement paid', description: 'Settlement processed and payment sent.', time: 'Pending', status: 'pending' }
+    ]
+  },
+  workmen: {
+    icon: '👷',
+    name: "Workmen's Compensation",
+    badgeClass: 'workmen',
+    sla: 14, // days
+    stages: [
+      { title: 'Claim submitted', description: 'We received your claim and confirmed your policy details.', time: '1 May 2026, 09:12', status: 'complete' },
+      { title: 'Incident verified', description: 'Workplace incident and employee details verified.', time: '1 May 2026, 14:00', status: 'complete' },
+      { title: 'Medical review', description: 'Medical records and treatment details reviewed.', time: '3 May 2026, 10:00', status: 'complete' },
+      { title: 'Compensation calculated', description: 'Benefits and compensation being calculated.', time: 'Pending', status: 'active' },
+      { title: 'Payment processed', description: 'Payment processed to employee or beneficiary.', time: 'Pending', status: 'pending' }
+    ]
+  },
+  gpa: {
+    icon: '🤝',
+    name: 'Group Personal Accident',
+    badgeClass: 'gpa',
+    sla: 7, // days
+    stages: [
+      { title: 'Claim submitted', description: 'We received your claim and confirmed your policy details.', time: '1 May 2026, 09:12', status: 'complete' },
+      { title: 'Documents verified', description: 'Accident details and medical records verified.', time: '1 May 2026, 14:00', status: 'complete' },
+      { title: 'Assessment complete', description: 'Claim assessment and coverage validation completed.', time: '3 May 2026, 10:00', status: 'complete' },
+      { title: 'Payment processing', description: 'Benefit payment being processed.', time: 'Pending', status: 'active' },
+      { title: 'Payment complete', description: 'Payment sent to employee.', time: 'Pending', status: 'pending' }
+    ]
+  },
+  money: {
+    icon: '💸',
+    name: 'Money Insurance',
+    badgeClass: 'device',
+    sla: 5, // days
+    stages: [
+      { title: 'Claim submitted', description: 'We received your claim and confirmed your policy details.', time: '1 May 2026, 09:12', status: 'complete' },
+      { title: 'Investigation started', description: 'Cash loss investigation initiated.', time: '1 May 2026, 14:00', status: 'complete' },
+      { title: 'Evidence reviewed', description: 'Supporting documents and evidence reviewed.', time: '3 May 2026, 10:00', status: 'complete' },
+      { title: 'Approval pending', description: 'Claim approval in progress.', time: 'Pending', status: 'active' },
+      { title: 'Reimbursement sent', description: 'Payment processed and sent.', time: 'Pending', status: 'pending' }
+    ]
+  },
+  fidelity: {
+    icon: '🤝',
+    name: 'Fidelity Guarantee',
+    badgeClass: 'device',
+    sla: 14, // days
+    stages: [
+      { title: 'Claim submitted', description: 'We received your claim and confirmed your policy details.', time: '1 May 2026, 09:12', status: 'complete' },
+      { title: 'Investigation started', description: 'Fraud investigation and evidence review initiated.', time: '1 May 2026, 14:00', status: 'complete' },
+      { title: 'Evidence review', description: 'Staff evidence and documentation reviewed.', time: '3 May 2026, 10:00', status: 'complete' },
+      { title: 'Liability assessed', description: 'Employee liability and damages assessed.', time: 'Pending', status: 'active' },
+      { title: 'Recovery processed', description: 'Recovery payment processed.', time: 'Pending', status: 'pending' }
+    ]
+  },
+  liability: {
+    icon: '⚖️',
+    name: 'Public Liability',
+    badgeClass: 'device',
+    sla: 7, // days
+    stages: [
+      { title: 'Claim submitted', description: 'We received your claim and confirmed your policy details.', time: '1 May 2026, 09:12', status: 'complete' },
+      { title: 'Incident investigation', description: 'Third party incident investigation started.', time: '1 May 2026, 14:00', status: 'complete' },
+      { title: 'Liability assessment', description: 'Liability and damages being assessed.', time: '3 May 2026, 10:00', status: 'complete' },
+      { title: 'Settlement calculated', description: 'Settlement amount being calculated.', time: 'Pending', status: 'active' },
+      { title: 'Claim resolved', description: 'Settlement paid and claim closed.', time: 'Pending', status: 'pending' }
+    ]
+  }
+};
+
+let currentProduct = 'motor';
+
+function updateProductType() {
+  currentProduct = document.getElementById('productTypeSelect').value;
+  const config = PRODUCT_CONFIG[currentProduct];
+  if (!config) return;
+  
+  // Update SLA label
+  const slaLabel = document.getElementById('slaLabel');
+  if (config.sla < 24) {
+    slaLabel.textContent = `${config.sla}hr SLA remaining`;
+  } else {
+    slaLabel.textContent = `${config.sla} days SLA remaining`;
+  }
+  
+  // Update stages
+  renderStages(config.stages);
+  
+  // Calculate progress percentage
+  updateProgress(config.stages);
+}
+
+function renderStages(stages) {
+  const stageList = document.getElementById('stageList');
+  stageList.innerHTML = stages.map((stage, index) => `
+    <div class="stage-item">
+      <div class="stage-bullet ${stage.status}">${index + 1}</div>
+      <div class="stage-meta">
+        <div class="stage-title">${stage.title}</div>
+        <div class="stage-time">${stage.time}</div>
+      </div>
+      <div class="stage-copy">${stage.description}</div>
+      <span class="stage-status ${stage.status}">${stage.status.charAt(0).toUpperCase() + stage.status.slice(1)}</span>
+    </div>
+  `).join('');
+}
+
+function updateProgress(stages) {
+  const completed = stages.filter(s => s.status === 'complete').length;
+  const total = stages.length;
+  const percentage = Math.round((completed / total) * 100);
+  
+  document.getElementById('progressPercentage').textContent = `${percentage}%`;
+  document.getElementById('progressFill').style.width = `${percentage}%`;
+}
+
+function shareClaim() {
+  const url = window.location.href;
+  if (navigator.share) {
+    navigator.share({
+      title: 'Cova Claim Tracker',
+      text: 'Track my insurance claim status',
+      url: url
+    });
+  } else {
+    navigator.clipboard.writeText(url).then(() => {
+      alert('Link copied to clipboard!');
+    });
+  }
+}
+
+function displayClaimStatus(claim) {
+  // Update claim reference
+  document.querySelector('.claim-ref').textContent = 'Claim #' + claim.claim_ref;
+  
+  // Update claim title
+  document.querySelector('.claim-title').textContent = claim.status || 'In Review';
+  
+  // Update handler info
+  const handlerNameEl = document.querySelector('.handler-name');
+  if (handlerNameEl && claim.handler_name) {
+    handlerNameEl.textContent = claim.handler_name;
+  }
+  
+  // Update SLA timer based on claim data
+  const config = PRODUCT_CONFIG[currentProduct];
+  if (config) {
+    const slaLabel = document.getElementById('slaLabel');
+    if (config.sla < 24) {
+      slaLabel.textContent = `${config.sla}hr SLA remaining`;
+    } else {
+      slaLabel.textContent = `${config.sla} days SLA remaining`;
+    }
+    
+    // Update stages based on claim status
+    updateStagesForClaim(config.stages, claim);
+  }
+}
+
+function updateStagesForClaim(stages, claim) {
+  const stageList = document.getElementById('stageList');
+  if (!stageList) return;
+  
+  // Update stage statuses based on claim data
+  const updatedStages = stages.map((stage, index) => {
+    // For demo, mark earlier stages as complete
+    const isComplete = index < 2;
+    const isActive = index === 2;
+    return {
+      ...stage,
+      status: isComplete ? 'complete' : (isActive ? 'active' : 'pending')
+    };
+  });
+  
+  stageList.innerHTML = updatedStages.map((stage, index) => `
+    <div class="stage-item">
+      <div class="stage-bullet ${stage.status}">${index + 1}</div>
+      <div class="stage-meta">
+        <div class="stage-title">${stage.title}</div>
+        <div class="stage-time">${stage.time}</div>
+      </div>
+      <div class="stage-copy">${stage.description}</div>
+      <span class="stage-status ${stage.status}">${stage.status.charAt(0).toUpperCase() + stage.status.slice(1)}</span>
+    </div>
+  `).join('');
+  
+  // Update progress
+  updateProgress(updatedStages);
+}
+
+// Get product type from URL or default to motor
+function getProductType() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const type = urlParams.get('type');
+  return type && PRODUCT_CONFIG[type] ? type : 'motor';
+}
+
+// Initialize
+let secondsLeft;
+let timerInterval;
+
+function updateTimer() {
+  const config = PRODUCT_CONFIG[currentProduct];
+  if (!config) return;
+  
+  const slaLabel = document.getElementById('slaLabel');
+  if (config.sla < 24) {
+    secondsLeft = config.sla * 3600 - 9000; // hours to seconds
+  } else {
+    secondsLeft = config.sla * 86400 - 9000; // days to seconds
+  }
+}
+
+function formatTime(value) {
+  return value.toString().padStart(2, '0');
+}
+
+function updateSLATimer() {
+  const config = PRODUCT_CONFIG[currentProduct];
+  if (!config || secondsLeft <= 0) return;
+  
+  secondsLeft -= 1;
+  
+  if (config.sla < 24) {
+    // Format as HH:MM:SS
+    const hrs = Math.floor(secondsLeft / 3600);
+    const mins = Math.floor((secondsLeft % 3600) / 60);
+    const secs = secondsLeft % 60;
+    document.getElementById('slaTimer').textContent = `${formatTime(hrs)}:${formatTime(mins)}:${formatTime(secs)}`;
+  } else {
+    // Format as DD:HH:MM:SS
+    const days = Math.floor(secondsLeft / 86400);
+    const hrs = Math.floor((secondsLeft % 86400) / 3600);
+    const mins = Math.floor((secondsLeft % 3600) / 60);
+    const secs = secondsLeft % 60;
+    document.getElementById('slaTimer').textContent = `${days}d ${formatTime(hrs)}:${formatTime(mins)}:${formatTime(secs)}`;
+  }
+}
+
+// Page load
+window.addEventListener('DOMContentLoaded', async () => {
+  const claimId = new URLSearchParams(window.location.search).get('claim_id');
+  
+  if (!claimId) {
+    alert('Claim ID not found');
+    return;
+  }
+  
+  const result = await getClaimStatus(claimId);
+  
+  if (result.ok) {
+    displayClaimStatus(result.data.claim);
+  } else {
+    alert('Error loading claim: ' + result.data.error.message);
+  }
+});
+</script>
+</body>
+</html>
