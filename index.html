@@ -67,6 +67,7 @@ nav{position:sticky;top:0;left:0;right:0;z-index:1000;height:var(--nav-height);d
 .stat-label{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em}
 .section{padding:92px 5vw}
 .section-alt{background:var(--ink);color:var(--white)}
+.section-label{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.16em;color:var(--green-strong);margin-bottom:12px}
 .section-title{font-family:var(--font-heading);font-size:clamp(34px,4vw,50px);font-weight:800;line-height:1.05;margin-bottom:16px}
 .section-title.light{color:var(--white)}
 .section-sub{font-size:17px;color:var(--muted);max-width:640px;line-height:1.75;margin-bottom:36px;font-weight:300}
@@ -77,12 +78,12 @@ nav{position:sticky;top:0;left:0;right:0;z-index:1000;height:var(--nav-height);d
 .card-label{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.16em;color:var(--green-strong)}
 .card-title{font-family:var(--font-heading);font-size:20px;font-weight:800;line-height:1.2}
 .card-copy{font-size:15px;color:var(--muted);line-height:1.75}
-.slider-header{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:24px;flex-wrap:wrap}
+
 .slider-header a{font-size:14px;font-weight:700;color:var(--green);transition:color .2s}
 .slider-header a:hover{color:var(--green-strong)}
 .product-row{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(260px,300px);gap:18px;overflow-x:auto;padding-bottom:16px;scroll-snap-type:x mandatory;scrollbar-width:none;-ms-overflow-style:none}
 .product-row::-webkit-scrollbar{display:none}
-.product-card{scroll-snap-align:start;background:var(--white);border:1px solid var(--border);border-radius:24px;padding:24px;display:flex;flex-direction:column;gap:16px;min-height:250px;cursor:pointer;transition:transform .25s}
+.product-card{scroll-snap-align:start;background:var(--white);border:1px solid var(--border);border-radius:24px;padding:24px;display:flex;flex-direction:column;gap:16px;cursor:pointer;transition:transform .25s}
 .product-card:hover{transform:translateY(-4px);box-shadow:0 20px 50px rgba(10,92,69,.08)}
 .product-card .product-icon{width:54px;height:54px;border-radius:18px;background:var(--green-soft);display:grid;place-items:center;font-size:24px}
 .product-title{font-family:var(--font-heading);font-size:18px;font-weight:800;line-height:1.2}
@@ -103,7 +104,7 @@ nav{position:sticky;top:0;left:0;right:0;z-index:1000;height:var(--nav-height);d
 .insurer-name{font-family:var(--font-heading);font-size:17px;font-weight:800;color:var(--ink);margin-bottom:8px}
 .insurer-rating{font-size:13px;color:var(--muted);margin-bottom:8px}
 .insurer-rec{font-size:13px;color:var(--green-strong);font-weight:700}
-.why-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.why-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
 .why-card{background:var(--white);border:1px solid var(--border);border-radius:24px;padding:28px;transition:transform .2s}
 .why-card:hover{transform:translateY(-3px)}
 .why-icon{font-size:28px;margin-bottom:16px}
@@ -156,11 +157,455 @@ footer{background:var(--dark);color:rgba(255,255,255,.72);padding:56px 5vw 32px}
   .product-row{grid-auto-columns:minmax(220px,1fr);}
   .footer-grid{grid-template-columns:1fr;}
 }
+
+.hero-central {
+  padding: 80px 5vw;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+.hero-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--green-strong);
+  margin-bottom: 24px;
+}
+.hero-tag::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  background: var(--green);
+  border-radius: 50%;
+}
+.hero-title-central {
+  font-family: var(--font-heading);
+  font-size: clamp(48px, 6vw, 84px);
+  font-weight: 800;
+  line-height: 1.05;
+  color: var(--ink);
+  margin-bottom: 24px;
+  max-width: 900px;
+  letter-spacing: -0.02em;
+}
+.hero-copy-central {
+  font-size: 18px;
+  color: var(--muted);
+  max-width: 680px;
+  line-height: 1.6;
+  margin-bottom: 60px;
+}
+
+.side-by-side-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  width: 100%;
+  text-align: left;
+}
+.sbs-card {
+  border-radius: 32px;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  color: var(--white);
+  min-height: 480px;
+}
+.personal-card {
+  background: var(--green);
+}
+.business-card {
+  background: var(--dark);
+}
+.sbs-icon {
+  width: 48px;
+  height: 48px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  font-size: 24px;
+  margin-bottom: 24px;
+}
+.sbs-title {
+  font-family: var(--font-heading);
+  font-size: 32px;
+  font-weight: 800;
+  margin-bottom: 32px;
+}
+.sbs-list {
+  list-style: none;
+  margin-bottom: auto;
+  display: grid;
+  gap: 16px;
+}
+.sbs-list li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 15px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.9);
+}
+.sbs-list li::before {
+  content: '•';
+  color: var(--white);
+  opacity: 0.5;
+}
+.btn-sbs {
+  display: inline-block;
+  padding: 14px 28px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 14px;
+  text-align: center;
+  margin-top: 40px;
+  width: max-content;
+  transition: all 0.2s;
+}
+.personal-btn {
+  background: rgba(255,255,255,0.15);
+  color: var(--white);
+}
+.personal-btn:hover {
+  background: var(--white);
+  color: var(--green);
+}
+.business-btn {
+  background: rgba(29,158,117,0.15);
+  color: var(--green-strong);
+}
+.business-btn:hover {
+  background: var(--white);
+  color: var(--dark);
+}
+
+@media (max-width: 768px) {
+  .side-by-side-cards { grid-template-columns: 1fr; }
+  .hero-central { padding: 60px 5vw; }
+}
+
+
+.hero-split {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 40px;
+  align-items: center;
+  padding: 40px 5vw 60px;
+  max-width: 1400px;
+  margin: 0 auto;
+  min-height: 65vh;
+}
+.hero-left {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.hero-title-split {
+  font-family: var(--font-heading);
+  font-size: clamp(32px, 3.8vw, 52px);
+  font-weight: 800;
+  line-height: 1.05;
+  color: var(--ink);
+  margin-bottom: 16px;
+  letter-spacing: -0.02em;
+}
+.hero-copy-split {
+  font-size: 15px;
+  color: var(--muted);
+  max-width: 520px;
+  line-height: 1.6;
+  margin-bottom: 32px;
+}
+.side-by-side-cards-compact {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  width: 100%;
+}
+.sbs-card-compact {
+  border-radius: 20px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  color: var(--white);
+}
+.sbs-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.sbs-card-compact .sbs-icon {
+  width: 36px;
+  height: 36px;
+  margin-bottom: 0;
+  font-size: 18px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.1);
+  display: grid;
+  place-items: center;
+}
+.sbs-card-compact .sbs-title {
+  font-family: var(--font-heading);
+  font-size: 18px;
+  font-weight: 800;
+  margin-bottom: 0;
+}
+.sbs-card-compact .sbs-list {
+  list-style: none;
+  display: grid;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.sbs-card-compact .sbs-list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.9);
+}
+.sbs-card-compact .sbs-list li::before {
+  content: '•';
+  color: var(--white);
+  opacity: 0.5;
+}
+.sbs-card-compact .btn-sbs {
+  display: inline-block;
+  border-radius: 999px;
+  font-weight: 700;
+  text-align: center;
+  transition: all 0.2s;
+  margin-top: auto;
+  padding: 10px 16px;
+  width: 100%;
+  font-size: 13px;
+}
+.personal-btn {
+  background: rgba(255,255,255,0.15);
+  color: var(--white);
+}
+.personal-btn:hover {
+  background: var(--white);
+  color: var(--green);
+}
+.business-btn {
+  background: rgba(29,158,117,0.15);
+  color: var(--green-strong);
+}
+.business-btn:hover {
+  background: var(--white);
+  color: var(--dark);
+}
+.personal-card { background: var(--green); }
+.business-card { background: var(--dark); }
+
+/* Right Side Floating Images */
+.hero-right {
+  position: relative;
+  height: 100%;
+  min-height: 500px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.shape-img {
+  position: absolute;
+  background-size: cover;
+  background-position: center;
+  box-shadow: 0 20px 40px rgba(10,92,69,0.15);
+  animation: float 6s ease-in-out infinite;
+}
+.img-1 {
+  width: 220px;
+  height: 320px;
+  border-radius: 110px;
+  background-image: url('img-1.jpg');
+  top: 20px;
+  left: 0px;
+  animation-delay: 0s;
+  z-index: 2;
+}
+.img-2 {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background-image: url('img-2.jpg');
+  bottom: 20px;
+  left: 60px;
+  animation-delay: 1.5s;
+  z-index: 3;
+  border: 6px solid var(--bg);
+}
+.img-3 {
+  width: 240px;
+  height: 260px;
+  border-radius: 40px 120px 40px 40px;
+  background-image: url('img-3.jpg');
+  top: 80px;
+  right: 0px;
+  animation-delay: 3s;
+  z-index: 1;
+}
+@keyframes float {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-15px); }
+  100% { transform: translateY(0); }
+}
+@media (max-width: 1024px) {
+  .hero-split { grid-template-columns: 1fr; text-align: center; }
+  .hero-left { align-items: center; }
+  .hero-copy-split { margin: 0 auto 32px; }
+  .hero-right { display: none; }
+}
+@media (max-width: 600px) {
+  .side-by-side-cards-compact { grid-template-columns: 1fr; }
+}
+
+
+.container-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+
+.product-row-wrapper {
+  width: 100%;
+  position: relative;
+  cursor: grab;
+}
+.product-row-wrapper:active {
+  cursor: grabbing;
+}
+.product-row-track {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scroll-snap-type: x mandatory;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  padding: 0 5vw 24px;
+  align-items: stretch;
+}
+.product-row-track::-webkit-scrollbar {
+  display: none;
+}
+.product-card {
+  width: 260px;
+  flex-shrink: 0;
+  scroll-snap-align: start;
+}
+@media (max-width: 1024px) {
+  .product-card { width: 280px; }
+}
+@media (max-width: 768px) {
+  .product-card { width: 240px; }
+}
+
+.slider-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 16px;
+}
+.slider-arrow {
+  background: transparent;
+  border: 1.5px solid var(--border);
+  color: var(--ink);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  font-size: 18px;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: all 0.2s;
+}
+.slider-arrow:hover {
+  background: var(--green);
+  border-color: var(--green);
+  color: var(--white);
+}
+.slider-dashes {
+  display: flex;
+  gap: 6px;
+}
+.slider-dashes span {
+  width: 8px;
+  height: 3px;
+  background: rgba(10,92,69,0.2);
+  border-radius: 2px;
+}
+.slider-dashes span.active {
+  background: var(--green);
+}
+
+
+.section-green {
+  background-color: var(--green);
+  color: var(--white);
+}
+.section-green .section-label {
+  color: rgba(255,255,255,0.7);
+}
+.section-green .section-title {
+  color: var(--white);
+}
+.section-green .slider-header a {
+  color: rgba(255,255,255,0.9);
+}
+.section-green .slider-header a:hover {
+  color: var(--white);
+}
+.section-green .slider-arrow {
+  border-color: rgba(255,255,255,0.2);
+  color: var(--white);
+}
+.section-green .slider-arrow:hover {
+  background: var(--white);
+  color: var(--green);
+}
+.section-green .slider-dashes span {
+  background: rgba(255,255,255,0.2);
+}
+.section-green .slider-dashes span.active {
+  background: var(--white);
+}
+.section-green .product-card,
+.section-green .how-card,
+.section-green .why-card {
+  color: var(--ink); 
+}
+.section-green .section-sub {
+  color: rgba(255,255,255,0.85);
+}
+
+
+.slider-header {
+  max-width: 1400px;
+  margin: 0 auto 24px;
+  padding: 0 5vw;
+}
+.product-row-track {
+  padding: 0 5vw 24px;
+}
+
 </style>
 </head>
 <body>
 <nav>
-  <a class="logo" href="cova.html">Cov<span>a</span></a>
+  <a class="logo" href="index.html">Cov<span>a</span></a>
   <div class="nav-center">
     <div class="nav-dropdown">
       <button class="nav-dropdown-button">Products</button>
@@ -198,7 +643,7 @@ footer{background:var(--dark);color:rgba(255,255,255,.72);padding:56px 5vw 32px}
 </nav>
 <div class="mobile-menu" id="mobileMenu">
   <div class="mobile-menu-header">
-    <a class="logo" href="cova.html">Cov<span>a</span></a>
+    <a class="logo" href="index.html">Cov<span>a</span></a>
     <button style="background:none;border:none;font-size:32px;cursor:pointer;color:var(--ink)" onclick="toggleMobileMenu()">✕</button>
   </div>
   <div class="mobile-links">
@@ -222,74 +667,54 @@ footer{background:var(--dark);color:rgba(255,255,255,.72);padding:56px 5vw 32px}
     <a class="mobile-link" href="#insurers">Insurers</a>
   </div>
 </div>
-<section class="hero">
-  <div class="hero-copy">
-    <div class="hero-tag">Insurance simplified</div>
-    <h1 class="hero-title">Every insurance policy your life and business will ever need.</h1>
-    <p>Cova is Nigeria's independent broker — we compare 6 insurers, deliver the best policies, and manage claims on WhatsApp so you never have to fight an insurer alone.</p>
-    <div class="path-grid">
-      <div class="path-card green">
-        <div class="path-icon">👤</div>
-        <div class="path-title">Personal cover</div>
-        <div class="path-list">
-          <div class="path-item">Life</div>
-          <div class="path-item">Health</div>
-          <div class="path-item">Motor</div>
-          <div class="path-item">Travel</div>
-          <div class="path-item">Property</div>
-          <div class="path-item">Devices</div>
+
+
+<section class="hero-split">
+  <div class="hero-left">
+    <div class="hero-tag">INSURANCE SIMPLIFIED</div>
+    <h1 class="hero-title-split">Every insurance policy your life and business will ever need.</h1>
+    <p class="hero-copy-split">Cova is Nigeria's independent broker — we compare 6 insurers, deliver the best policies, and manage claims on WhatsApp so you never have to fight an insurer alone.</p>
+    
+    <div class="side-by-side-cards-compact">
+      <!-- Personal Cover Card -->
+      <div class="sbs-card-compact personal-card">
+        <div class="sbs-header">
+            <div class="sbs-icon">👤</div>
+            <h2 class="sbs-title">Personal cover</h2>
         </div>
-        <a class="btn-primary" href="cova-personal.html">Explore personal cover</a>
+        <ul class="sbs-list">
+          <li>Life & Health</li>
+          <li>Motor & Travel</li>
+          <li>Devices & Property</li>
+        </ul>
+        <a class="btn-sbs personal-btn" href="cova-personal.html">Explore personal</a>
       </div>
-      <div class="path-card dark">
-        <div class="path-icon">🏢</div>
-        <div class="path-title">Business cover</div>
-        <div class="path-list">
-          <div class="path-item">Fleet</div>
-          <div class="path-item">Group health</div>
-          <div class="path-item">Fire</div>
-          <div class="path-item">Workmen's</div>
+
+      <!-- Business Cover Card -->
+      <div class="sbs-card-compact business-card">
+        <div class="sbs-header">
+            <div class="sbs-icon">🏢</div>
+            <h2 class="sbs-title">Business cover</h2>
         </div>
-        <a class="btn-primary" href="cova-business.html">Explore business cover</a>
-      </div>
-    </div>
-    <div class="hero-stats">
-      <div class="stat-card"><div class="stat-number">19</div><div class="stat-label">products available</div></div>
-      <div class="stat-card"><div class="stat-number">6</div><div class="stat-label">insurers compared</div></div>
-      <div class="stat-card"><div class="stat-number">72hr</div><div class="stat-label">claim SLA</div></div>
-    </div>
-  </div>
-</section>
-<section class="section section-alt">
-  <div>
-    <div class="section-label">The problem</div>
-    <h2 class="section-title light">Insurance in Nigeria is too slow, confusing and untrustworthy.</h2>
-    <div class="cards-grid">
-      <div class="card-spot">
-        <div class="card-label">Problem</div>
-        <div class="card-title">It takes too long to buy cover.</div>
-        <div class="card-copy">Forms, phone calls and paperwork delay every quote — and people give up before they get covered.</div>
-        <div class="card-label">Solution</div>
-        <div class="card-copy">Buy the right policy online in minutes with a broker that compares insurers for you.</div>
-      </div>
-      <div class="card-spot">
-        <div class="card-label">Problem</div>
-        <div class="card-title">Claims disappear into call centers.</div>
-        <div class="card-copy">People wait days for responses and spend time chasing insurers.</div>
-        <div class="card-label">Solution</div>
-        <div class="card-copy">A dedicated claims handler manages your case on WhatsApp and keeps you updated.</div>
-      </div>
-      <div class="card-spot">
-        <div class="card-label">Problem</div>
-        <div class="card-title">Claim outcomes are unclear.</div>
-        <div class="card-copy">Customers receive little visibility and no timeline for repair, payment or settlement.</div>
-        <div class="card-label">Solution</div>
-        <div class="card-copy">Live progress tracking and a 72‑hour SLA mean you always know where your claim stands.</div>
+        <ul class="sbs-list">
+          <li>Electronic fleet</li>
+          <li>Motor fleet</li>
+          <li>Group life & health</li>
+        </ul>
+        <a class="btn-sbs business-btn" href="cova-business.html">Explore business</a>
       </div>
     </div>
   </div>
+  
+  <div class="hero-right">
+    <div class="shape-img img-1"></div>
+    <div class="shape-img img-2"></div>
+    <div class="shape-img img-3"></div>
+  </div>
 </section>
-<section class="section" id="personal-products">
+
+
+<section class="section section-green" id="personal-products">
   <div class="slider-header">
     <div>
       <div class="section-label">Personal cover</div>
@@ -297,7 +722,8 @@ footer{background:var(--dark);color:rgba(255,255,255,.72);padding:56px 5vw 32px}
     </div>
     <a href="cova-personal.html">See all personal cover →</a>
   </div>
-  <div class="product-row">
+  <div class="product-row-wrapper"><div class="product-row-track">
+
     <div class="product-card" onclick="window.location='cova-onboarding.html'">
       <div class="product-icon">📱</div>
       <div class="product-title">Electronic Equipment</div>
@@ -374,8 +800,8 @@ footer{background:var(--dark);color:rgba(255,255,255,.72);padding:56px 5vw 32px}
       <div class="product-copy">Cover for school, campus and travel risks.</div>
       <span class="product-badge waitlist">Waitlist</span>
       <div class="product-link">Join waitlist</div>
-    </div>
-  </div>
+    </di
+</div></div>/div>
 </section>
 <section class="section" id="business-products">
   <div class="slider-header">
@@ -385,7 +811,8 @@ footer{background:var(--dark);color:rgba(255,255,255,.72);padding:56px 5vw 32px}
     </div>
     <a href="cova-business.html">See all business cover →</a>
   </div>
-  <div class="product-row">
+  <div class="product-row-wrapper"><div class="product-row-track">
+
     <div class="product-card" onclick="window.location='cova-onboarding.html'">
       <div class="product-icon">📱</div>
       <div class="product-title">Electronic Fleet</div>
@@ -469,10 +896,11 @@ footer{background:var(--dark);color:rgba(255,255,255,.72);padding:56px 5vw 32px}
       <div class="product-copy">Cover third-party injury and property damage claims.</div>
       <span class="product-badge live">Live</span>
       <div class="product-link">View product</div>
-    </div>
-  </div>
+    </di
+</div></div>/div>
 </section>
-<section class="section" id="how">
+<section class="section section-green" id="how">
+  <div class="container-inner">
   <div class="section-label">How it works</div>
   <h2 class="section-title">A simple broker experience for individuals and businesses.</h2>
   <p class="section-sub">Answer a few questions, compare multiple insurers, buy online, and claim on WhatsApp with a dedicated handler.</p>
@@ -498,8 +926,10 @@ footer{background:var(--dark);color:rgba(255,255,255,.72);padding:56px 5vw 32px}
       <div class="how-desc">Send a message to your handler, and we manage the claim end to end.</div>
     </div>
   </div>
+</div>
 </section>
 <section class="section" id="insurers">
+  <div class="container-inner">
   <div class="section-label">Insurers</div>
   <h2 class="section-title">We work with Nigeria's leading insurers.</h2>
   <p class="section-sub">Trusted partners who support Cova policies across health, motor, fire, device and corporate insurance.</p>
@@ -512,24 +942,28 @@ footer{background:var(--dark);color:rgba(255,255,255,.72);padding:56px 5vw 32px}
     <div class="insurer-card"><div class="insurer-name">NEM Insurance</div><div class="insurer-rating">A rated</div><div class="insurer-rec">Recommended for workmen's compensation</div></div>
   </div>
 </section>
-<section class="section section-alt" id="why">
-  <div class="section-label">Why Cova</div>
-  <h2 class="section-title light">Built around the moment that matters most — the claim.</h2>
-  <p class="section-sub light">Insurance is only valuable when something goes wrong. Cova makes buying easy and claims fast.</p>
-  <div class="why-grid">
-    <div class="why-card"><div class="why-icon">💬</div><div class="why-title">WhatsApp-first claims</div><div class="why-desc">Submit claims instantly with a message, photo or voice note on WhatsApp.</div></div>
-    <div class="why-card"><div class="why-icon">👤</div><div class="why-title">Named handler</div><div class="why-desc">A single claims handler manages your case from first report to settlement.</div></div>
-    <div class="why-card"><div class="why-icon">⏱️</div><div class="why-title">72hr SLA</div><div class="why-desc">Claims are resolved quickly or your next month is free.</div></div>
-    <div class="why-card"><div class="why-icon">🔒</div><div class="why-title">Zero out-of-pocket</div><div class="why-desc">Approved claims are settled directly with service providers.</div></div>
-    <div class="why-card"><div class="why-icon">⚖️</div><div class="why-title">Independent broker</div><div class="why-desc">We compare insurers and recommend what is best for you.</div></div>
-    <div class="why-card"><div class="why-icon">📊</div><div class="why-title">Live tracking</div><div class="why-desc">Track claims progress in real time with clear status updates.</div></div>
+
+<section class="section section-green" id="why">
+  <div class="container-inner" style="max-width: 1080px;">
+    <div class="section-label">Why Cova</div>
+    <h2 class="section-title light">Built around the moment that matters most — the claim.</h2>
+    <p class="section-sub light">Insurance is only valuable when something goes wrong. Cova makes buying easy and claims fast.</p>
+    <div class="why-grid">
+      <div class="why-card"><div class="why-icon">💬</div><div class="why-title">WhatsApp-first claims</div><div class="why-desc">Submit claims instantly with a message, photo or voice note on WhatsApp.</div></div>
+      <div class="why-card"><div class="why-icon">👤</div><div class="why-title">Named handler</div><div class="why-desc">A single claims handler manages your case from first report to settlement.</div></div>
+      <div class="why-card"><div class="why-icon">⏱️</div><div class="why-title">72hr SLA</div><div class="why-desc">Claims are resolved quickly or your next month is free.</div></div>
+      <div class="why-card"><div class="why-icon">🔒</div><div class="why-title">Zero out-of-pocket</div><div class="why-desc">Approved claims are settled directly with service providers.</div></div>
+      <div class="why-card"><div class="why-icon">⚖️</div><div class="why-title">Independent broker</div><div class="why-desc">We compare insurers and recommend what is best for you.</div></div>
+      <div class="why-card"><div class="why-icon">📊</div><div class="why-title">Live tracking</div><div class="why-desc">Track claims progress in real time with clear status updates.</div></div>
+    </div>
   </div>
 </section>
+
 <section class="section">
-  <div class="split-cta">
+  <div class="container-inner"><div class="split-cta">
     <div class="cta-panel left"><h3>Individual and family cover</h3><p>Life, health, motor, travel, property and device protection.</p><a class="btn-white" href="cova-personal.html">Get personal cover</a></div>
     <div class="cta-panel right"><h3>Business and SME cover</h3><p>Fleet, group health, fire, liability and workplace protection.</p><a class="btn-white" href="cova-business.html">Get business cover</a></div>
-  </div>
+  </div></div>
 </section>
 <footer>
   <div class="footer-grid">
@@ -584,10 +1018,113 @@ footer{background:var(--dark);color:rgba(255,255,255,.72);padding:56px 5vw 32px}
   </div>
 </div>
 <script>
-function toggleMobileMenu(){document.getElementById('mobileMenu').classList.toggle('open')}
-function openWaitlist(product){document.getElementById('waitlistTitle').textContent=product;document.getElementById('waitlistCopy').textContent=`Enter your details and we’ll contact you first when ${product} becomes available.`;document.getElementById('waitlistProduct').value=product;document.getElementById('waitlistName').value='';document.getElementById('waitlistPhone').value='';document.getElementById('waitlistSuccess').style.display='none';document.getElementById('waitlistModal').classList.add('open')}
-function closeWaitlistModal(){document.getElementById('waitlistModal').classList.remove('open')}
-function submitWaitlistForm(){const phone=document.getElementById('waitlistPhone').value.trim();if(!phone){alert('Please enter your WhatsApp number.');return;}document.getElementById('waitlistSuccess').style.display='block'}
+  document.addEventListener('DOMContentLoaded', () => {
+    const wrappers = document.querySelectorAll('.product-row-wrapper');
+    
+    wrappers.forEach(wrapper => {
+      const track = wrapper.querySelector('.product-row-track');
+      
+      // Duplicate items for infinite scroll
+      const items = Array.from(track.children);
+      items.forEach(item => {
+        const clone = item.cloneNode(true);
+        track.appendChild(clone);
+      });
+
+      // Create controls
+      const controls = document.createElement('div');
+      controls.className = 'slider-controls';
+      controls.innerHTML = `
+        <button class="slider-arrow prev">&larr;</button>
+        <div class="slider-dashes">
+          <span class="active"></span><span></span><span class="active"></span><span></span><span class="active"></span><span></span><span class="active"></span><span></span>
+        </div>
+        <button class="slider-arrow next">&rarr;</button>
+      `;
+      wrapper.appendChild(controls);
+
+      const prevBtn = controls.querySelector('.prev');
+      const nextBtn = controls.querySelector('.next');
+
+      let isDown = false;
+      let startX;
+      let scrollLeft;
+      let isHovered = false;
+      let pauseTimeout = null;
+
+      // Drag logic
+      track.addEventListener('mousedown', (e) => {
+        isDown = true;
+        wrapper.style.cursor = 'grabbing';
+        startX = e.pageX - track.offsetLeft;
+        scrollLeft = track.scrollLeft;
+        track.style.scrollBehavior = 'auto';
+      });
+
+      track.addEventListener('mouseleave', () => {
+        isDown = false;
+        wrapper.style.cursor = 'grab';
+        isHovered = false;
+      });
+
+      track.addEventListener('mouseenter', () => {
+        isHovered = true;
+      });
+
+      track.addEventListener('mouseup', () => {
+        isDown = false;
+        wrapper.style.cursor = 'grab';
+      });
+
+      track.addEventListener('mousemove', (e) => {
+        if (!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - track.offsetLeft;
+        const walk = (x - startX) * 2;
+        track.scrollLeft = scrollLeft - walk;
+      });
+
+      // Arrow logic
+      prevBtn.addEventListener('click', () => {
+        track.style.scrollBehavior = 'smooth';
+        track.scrollBy({ left: -300 });
+        pauseAutoScroll();
+      });
+
+      nextBtn.addEventListener('click', () => {
+        track.style.scrollBehavior = 'smooth';
+        track.scrollBy({ left: 300 });
+        pauseAutoScroll();
+      });
+
+      function pauseAutoScroll() {
+        isHovered = true;
+        clearTimeout(pauseTimeout);
+        pauseTimeout = setTimeout(() => {
+          isHovered = false;
+          track.style.scrollBehavior = 'auto';
+        }, 1500);
+      }
+
+      // Infinite auto-scroll
+      function autoScroll() {
+        if (!isDown && !isHovered) {
+          track.style.scrollBehavior = 'auto';
+          track.scrollLeft += 1;
+          
+          // Reset scroll position when reaching the cloned half
+          if (track.scrollLeft >= track.scrollWidth / 2) {
+            track.scrollLeft = 0;
+          }
+        }
+        requestAnimationFrame(autoScroll);
+      }
+      
+      // Start auto-scroll
+      autoScroll();
+    });
+  });
 </script>
 </body>
+
 </html>
