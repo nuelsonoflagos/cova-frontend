@@ -101,7 +101,9 @@ nav{position:sticky;top:0;left:0;right:0;z-index:1000;height:var(--nav-height);d
 .insurer-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
 .insurer-card{background:var(--white);border:1px solid var(--border);border-radius:24px;padding:24px;transition:transform .2s}
 .insurer-card:hover{transform:translateY(-3px)}
-.insurer-name{font-family:var(--font-heading);font-size:17px;font-weight:800;color:var(--ink);margin-bottom:8px}
+.insurer-header{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.insurer-logo{width:28px;height:28px;border-radius:4px;object-fit:contain}
+.insurer-name{font-family:var(--font-heading);font-size:17px;font-weight:800;color:var(--ink)}
 .insurer-rating{font-size:13px;color:var(--muted);margin-bottom:8px}
 .insurer-rec{font-size:13px;color:var(--green-strong);font-weight:700}
 .why-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
@@ -934,12 +936,48 @@ footer{background:var(--dark);color:rgba(255,255,255,.72);padding:56px 5vw 32px}
   <h2 class="section-title">We work with Nigeria's leading insurers.</h2>
   <p class="section-sub">Trusted partners who support Cova policies across health, motor, fire, device and corporate insurance.</p>
   <div class="insurer-grid">
-    <div class="insurer-card"><div class="insurer-name">AXA Mansard</div><div class="insurer-rating">A+ rated</div><div class="insurer-rec">Recommended for motor and devices</div></div>
-    <div class="insurer-card"><div class="insurer-name">Leadway Assurance</div><div class="insurer-rating">A rated</div><div class="insurer-rec">Recommended for fire and property</div></div>
-    <div class="insurer-card"><div class="insurer-name">Zenith Insurance</div><div class="insurer-rating">A+ rated</div><div class="insurer-rec">Recommended for corporate risks</div></div>
-    <div class="insurer-card"><div class="insurer-name">AIICO Insurance</div><div class="insurer-rating">A rated</div><div class="insurer-rec">Recommended for group health</div></div>
-    <div class="insurer-card"><div class="insurer-name">Cornerstone Insurance</div><div class="insurer-rating">BBB rated</div><div class="insurer-rec">Recommended for SME bundles</div></div>
-    <div class="insurer-card"><div class="insurer-name">NEM Insurance</div><div class="insurer-rating">A rated</div><div class="insurer-rec">Recommended for workmen's compensation</div></div>
+    <div class="insurer-card">
+      <div class="insurer-header">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/9/94/AXA_Logo.svg" alt="AXA Mansard Logo" class="insurer-logo">
+        <div class="insurer-name">AXA Mansard</div>
+      </div>
+      <div class="insurer-rating">A+ rated</div><div class="insurer-rec">Recommended for motor and devices</div>
+    </div>
+    <div class="insurer-card">
+      <div class="insurer-header">
+        <img src="https://www.google.com/s2/favicons?domain=leadway.com&sz=128" alt="Leadway Assurance Logo" class="insurer-logo">
+        <div class="insurer-name">Leadway Assurance</div>
+      </div>
+      <div class="insurer-rating">A rated</div><div class="insurer-rec">Recommended for fire and property</div>
+    </div>
+    <div class="insurer-card">
+      <div class="insurer-header">
+        <img src="https://www.google.com/s2/favicons?domain=zenithbank.com&sz=128" alt="Zenith Insurance Logo" class="insurer-logo">
+        <div class="insurer-name">Zenith Insurance</div>
+      </div>
+      <div class="insurer-rating">A+ rated</div><div class="insurer-rec">Recommended for corporate risks</div>
+    </div>
+    <div class="insurer-card">
+      <div class="insurer-header">
+        <img src="https://www.aiicoplc.com/images/AIICO_Insurance_PLC_.png" alt="AIICO Insurance Logo" class="insurer-logo" style="object-fit: contain; width: 40px; height: 28px;">
+        <div class="insurer-name">AIICO Insurance</div>
+      </div>
+      <div class="insurer-rating">A rated</div><div class="insurer-rec">Recommended for group health</div>
+    </div>
+    <div class="insurer-card">
+      <div class="insurer-header">
+        <img src="https://www.google.com/s2/favicons?domain=cornerstone.com.ng&sz=128" alt="Cornerstone Insurance Logo" class="insurer-logo">
+        <div class="insurer-name">Cornerstone Insurance</div>
+      </div>
+      <div class="insurer-rating">BBB rated</div><div class="insurer-rec">Recommended for SME bundles</div>
+    </div>
+    <div class="insurer-card">
+      <div class="insurer-header">
+        <img src="https://www.google.com/s2/favicons?domain=nem-insurance.com&sz=128" alt="NEM Insurance Logo" class="insurer-logo">
+        <div class="insurer-name">NEM Insurance</div>
+      </div>
+      <div class="insurer-rating">A rated</div><div class="insurer-rec">Recommended for workmen's compensation</div>
+    </div>
   </div>
 </section>
 
