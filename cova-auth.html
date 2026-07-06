@@ -524,8 +524,19 @@
               </div>
               <button type="submit" class="btn-primary">Log In</button>
               <div style="text-align: center; margin-top: 16px">
-                <a href="#" class="secondary-link">Forgot password?</a>
+                <a href="#" class="secondary-link" onclick="switchAuthMode('reset'); event.preventDefault();">Forgot password?</a>
               </div>
+            </form>
+
+            <!-- RESET PASSWORD FORM -->
+            <form id="reset-form" onsubmit="handleReset(event)" class="otp-step reset-box">
+              <h3>Reset your password</h3>
+              <p>Enter your email address and we'll send you a link to reset your password.</p>
+              <div class="form-group">
+                <input type="email" id="reset_email" placeholder="you@company.com" required />
+              </div>
+              <button type="submit" class="btn-secondary">Send reset link</button>
+              <a href="#" class="secondary-link" onclick="switchAuthMode('login'); event.preventDefault();" style="display: block; text-align: center; margin-top: 16px;">Back to Log In</a>
             </form>
 
             <!-- SUCCESS MESSAGE -->
@@ -554,22 +565,34 @@
     <script>
       function switchAuthMode(mode) {
         const tabs = document.querySelectorAll(".login-tab");
+        document.getElementById('signup-form').classList.remove("active");
+        document.getElementById('login-form').classList.remove("active");
+        document.getElementById('success-message').classList.remove("active");
+        
+        const resetForm = document.getElementById('reset-form');
+        if (resetForm) resetForm.classList.remove("active");
+        
         if (mode === 'signup') {
           tabs[0].classList.add("active");
           tabs[1].classList.remove("active");
+          document.getElementById('auth-tabs').style.display = "flex";
           document.getElementById('auth-title').textContent = "Create your account";
           document.getElementById('auth-sub').textContent = "Register to manage your policies and claims.";
           document.getElementById('signup-form').classList.add("active");
-          document.getElementById('login-form').classList.remove("active");
-          document.getElementById('success-message').classList.remove("active");
-        } else {
+        } else if (mode === 'login') {
           tabs[0].classList.remove("active");
           tabs[1].classList.add("active");
+          document.getElementById('auth-tabs').style.display = "flex";
           document.getElementById('auth-title').textContent = "Log in to your account";
           document.getElementById('auth-sub').textContent = "Access your broker dashboard securely.";
-          document.getElementById('signup-form').classList.remove("active");
           document.getElementById('login-form').classList.add("active");
-          document.getElementById('success-message').classList.remove("active");
+        } else if (mode === 'reset') {
+          tabs[0].classList.remove("active");
+          tabs[1].classList.remove("active");
+          document.getElementById('auth-tabs').style.display = "none";
+          document.getElementById('auth-title').textContent = "Forgot Password";
+          document.getElementById('auth-sub').textContent = "We'll help you get back into your account.";
+          if (resetForm) resetForm.classList.add("active");
         }
       }
 
@@ -591,11 +614,30 @@
         
         // Show success message for email verification
         document.getElementById('signup-form').classList.remove("active");
+        document.getElementById('login-form').classList.remove("active");
+        const resetForm = document.getElementById('reset-form');
+        if (resetForm) resetForm.classList.remove("active");
+        
         document.getElementById('auth-tabs').style.display = "none";
         document.getElementById('success-message').classList.add("active");
         document.getElementById('email-display').textContent = email;
         document.getElementById('auth-title').textContent = "Verification Sent";
         document.getElementById('auth-sub').textContent = "Please check your inbox.";
+      }
+
+      async function handleReset(event) {
+        event.preventDefault();
+        const email = document.getElementById("reset_email").value;
+        if(!email) return;
+        
+        // Hide forms, show success message
+        document.getElementById('reset-form').classList.remove("active");
+        document.getElementById('auth-tabs').style.display = "none";
+        document.getElementById('success-message').classList.add("active");
+        
+        document.getElementById('email-display').textContent = email;
+        document.getElementById('auth-title').textContent = "Reset Link Sent";
+        document.getElementById('auth-sub').textContent = "Please check your inbox to reset your password.";
       }
 
       async function handleLogin(event) {
