@@ -97,6 +97,8 @@
     // Generate recommendations based on session storage
     const interestsStr = sessionStorage.getItem('cova_interests');
     const risk = sessionStorage.getItem('cova_risk') || 'medium';
+    const employment = sessionStorage.getItem('cova_employment');
+    const housing = sessionStorage.getItem('cova_housing');
     
     const recContainer = document.getElementById('recommendations');
     
@@ -145,15 +147,39 @@
       }
 
       if (interests.includes('property')) {
-        html += `
-          <div class="rec-item">
-            <div class="rec-icon">🏠</div>
-            <div class="rec-content">
-              <h3>Cova Property Guard</h3>
-              <p>Protection against fire, theft, and damage. ${riskText}.</p>
+        if (housing === 'rent') {
+          html += `
+            <div class="rec-item">
+              <div class="rec-icon">🛋️</div>
+              <div class="rec-content">
+                <h3>Cova Renter's Guard</h3>
+                <p>Protection for your personal belongings and liability in your rented space. ${riskText}.</p>
+              </div>
             </div>
-          </div>
-        `;
+          `;
+        } else {
+          html += `
+            <div class="rec-item">
+              <div class="rec-icon">🏠</div>
+              <div class="rec-content">
+                <h3>Cova Homeowner's Premium</h3>
+                <p>Comprehensive protection against fire, theft, and damage. ${riskText}.</p>
+              </div>
+            </div>
+          `;
+        }
+      }
+      
+      if (employment === 'self_employed' || employment === 'business_owner') {
+          html += `
+            <div class="rec-item">
+              <div class="rec-icon">💼</div>
+              <div class="rec-content">
+                <h3>Cova Income Protection</h3>
+                <p>Because you work for yourself, ensure your income continues even if you can't work due to illness or injury.</p>
+              </div>
+            </div>
+          `;
       }
       
       if (html === '') {

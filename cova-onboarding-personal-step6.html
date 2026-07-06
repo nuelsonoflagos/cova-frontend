@@ -3,16 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cova — Housing</title>
+  <title>Cova — Budget</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <div class="progress-container">
-    <div class="progress-bar" style="width: 75%"></div>
+    <div class="progress-bar" style="width: 85%"></div>
   </div>
 
   <header class="onboarding-header">
-    <button class="back-btn" onclick="window.location.href='cova-onboarding-personal-step4.html'">
+    <button class="back-btn" onclick="window.location.href='cova-onboarding-personal-step5.html'">
       <span>←</span> Back
     </button>
     <a href="index.html" class="logo">
@@ -22,34 +22,39 @@
 
   <main class="onboarding-main">
     <div class="onboarding-card">
-      <h1 class="onboarding-title">What is your housing situation?</h1>
-      <p class="onboarding-desc">This lets us recommend the right property protection for your needs.</p>
+      <h1 class="onboarding-title">What is your monthly budget?</h1>
+      <p class="onboarding-desc">This helps us find plans that fit comfortably within your financial goals.</p>
 
       <div class="selection-grid">
-        <label class="selection-card" onclick="selectHousing(event, this, 'rent')">
-          <input type="radio" name="housing" value="rent">
+        <label class="selection-card" onclick="selectBudget(event, this, 'under_10k')">
+          <input type="radio" name="budget" value="under_10k">
           <div class="radio-custom"></div>
           <div class="selection-content">
-            <div class="selection-title">I rent</div>
-            <div class="selection-desc">Apartment, house, or shared space.</div>
+            <div class="selection-title">Under ₦10,000 / month</div>
           </div>
         </label>
 
-        <label class="selection-card" onclick="selectHousing(event, this, 'own')">
-          <input type="radio" name="housing" value="own">
+        <label class="selection-card" onclick="selectBudget(event, this, '10k_50k')">
+          <input type="radio" name="budget" value="10k_50k">
           <div class="radio-custom"></div>
           <div class="selection-content">
-            <div class="selection-title">I own my home</div>
-            <div class="selection-desc">House, condo, or duplex.</div>
+            <div class="selection-title">₦10,000 - ₦50,000 / month</div>
           </div>
         </label>
 
-        <label class="selection-card" onclick="selectHousing(event, this, 'live_with_family')">
-          <input type="radio" name="housing" value="live_with_family">
+        <label class="selection-card" onclick="selectBudget(event, this, '50k_150k')">
+          <input type="radio" name="budget" value="50k_150k">
           <div class="radio-custom"></div>
           <div class="selection-content">
-            <div class="selection-title">I live with family</div>
-            <div class="selection-desc">Not currently paying rent or a mortgage.</div>
+            <div class="selection-title">₦50,000 - ₦150,000 / month</div>
+          </div>
+        </label>
+
+        <label class="selection-card" onclick="selectBudget(event, this, 'over_150k')">
+          <input type="radio" name="budget" value="over_150k">
+          <div class="radio-custom"></div>
+          <div class="selection-content">
+            <div class="selection-title">Over ₦150,000 / month</div>
           </div>
         </label>
       </div>
@@ -59,7 +64,7 @@
   </main>
 
   <script>
-    const stored = sessionStorage.getItem('cova_housing');
+    const stored = sessionStorage.getItem('cova_budget');
     if (stored) {
       document.querySelectorAll('.selection-card').forEach(card => {
         if (card.querySelector('input').value === stored) {
@@ -69,16 +74,16 @@
       });
     }
 
-    function selectHousing(e, element, value) {
+    function selectBudget(e, element, value) {
       if(e) e.preventDefault();
       document.querySelectorAll('.selection-card').forEach(card => card.classList.remove('selected'));
       element.classList.add('selected');
       document.getElementById('next-btn').disabled = false;
-      sessionStorage.setItem('cova_housing', value);
+      sessionStorage.setItem('cova_budget', value);
     }
 
     function nextStep() {
-      window.location.href = 'cova-onboarding-personal-step6.html';
+      window.location.href = 'cova-onboarding-personal-step7.html';
     }
   </script>
 </body>

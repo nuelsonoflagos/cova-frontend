@@ -26,7 +26,7 @@
       <p class="onboarding-desc">Select all the areas where you need coverage. We'll tailor your quotes based on this.</p>
 
       <div class="selection-grid">
-        <label class="selection-card" onclick="toggleSelection(this, 'health')">
+        <label class="selection-card" onclick="toggleSelection(event, this, 'health')">
           <input type="checkbox" value="health">
           <div class="checkbox-custom"></div>
           <div class="selection-content">
@@ -35,7 +35,7 @@
           </div>
         </label>
 
-        <label class="selection-card" onclick="toggleSelection(this, 'auto')">
+        <label class="selection-card" onclick="toggleSelection(event, this, 'auto')">
           <input type="checkbox" value="auto">
           <div class="checkbox-custom"></div>
           <div class="selection-content">
@@ -44,7 +44,7 @@
           </div>
         </label>
 
-        <label class="selection-card" onclick="toggleSelection(this, 'life')">
+        <label class="selection-card" onclick="toggleSelection(event, this, 'life')">
           <input type="checkbox" value="life">
           <div class="checkbox-custom"></div>
           <div class="selection-content">
@@ -53,7 +53,7 @@
           </div>
         </label>
 
-        <label class="selection-card" onclick="toggleSelection(this, 'property')">
+        <label class="selection-card" onclick="toggleSelection(event, this, 'property')">
           <input type="checkbox" value="property">
           <div class="checkbox-custom"></div>
           <div class="selection-content">
@@ -83,9 +83,9 @@
       checkButtonState();
     }
 
-    function toggleSelection(element, value) {
-      // Prevent default to handle custom logic
-      event.preventDefault();
+    function toggleSelection(e, element, value) {
+      // Prevent default to handle custom logic safely across all browsers
+      if(e) e.preventDefault();
       
       const index = selectedInterests.indexOf(value);
       if (index === -1) {

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cova — Budget</title>
+  <title>Cova — Employment</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -22,39 +22,43 @@
 
   <main class="onboarding-main">
     <div class="onboarding-card">
-      <h1 class="onboarding-title">What is your monthly budget?</h1>
-      <p class="onboarding-desc">This helps us find plans that fit comfortably within your financial goals.</p>
+      <h1 class="onboarding-title">What is your employment status?</h1>
+      <p class="onboarding-desc">We use this to tailor income protection and related benefits.</p>
 
       <div class="selection-grid">
-        <label class="selection-card" onclick="selectBudget('under_10k')">
-          <input type="radio" name="budget" value="under_10k">
+        <label class="selection-card" onclick="selectEmployment(event, this, 'employed')">
+          <input type="radio" name="employment" value="employed">
           <div class="radio-custom"></div>
           <div class="selection-content">
-            <div class="selection-title">Under ₦10,000 / month</div>
+            <div class="selection-title">Employed</div>
+            <div class="selection-desc">Working full-time or part-time for an employer.</div>
           </div>
         </label>
 
-        <label class="selection-card" onclick="selectBudget('10k_50k')">
-          <input type="radio" name="budget" value="10k_50k">
+        <label class="selection-card" onclick="selectEmployment(event, this, 'self_employed')">
+          <input type="radio" name="employment" value="self_employed">
           <div class="radio-custom"></div>
           <div class="selection-content">
-            <div class="selection-title">₦10,000 - ₦50,000 / month</div>
+            <div class="selection-title">Self-employed / Freelance</div>
+            <div class="selection-desc">Working independently.</div>
           </div>
         </label>
 
-        <label class="selection-card" onclick="selectBudget('50k_150k')">
-          <input type="radio" name="budget" value="50k_150k">
+        <label class="selection-card" onclick="selectEmployment(event, this, 'business_owner')">
+          <input type="radio" name="employment" value="business_owner">
           <div class="radio-custom"></div>
           <div class="selection-content">
-            <div class="selection-title">₦50,000 - ₦150,000 / month</div>
+            <div class="selection-title">Business Owner</div>
+            <div class="selection-desc">Running a registered business.</div>
           </div>
         </label>
 
-        <label class="selection-card" onclick="selectBudget('over_150k')">
-          <input type="radio" name="budget" value="over_150k">
+        <label class="selection-card" onclick="selectEmployment(event, this, 'other')">
+          <input type="radio" name="employment" value="other">
           <div class="radio-custom"></div>
           <div class="selection-content">
-            <div class="selection-title">Over ₦150,000 / month</div>
+            <div class="selection-title">Student / Unemployed / Retired</div>
+            <div class="selection-desc">Not currently working.</div>
           </div>
         </label>
       </div>
@@ -64,7 +68,7 @@
   </main>
 
   <script>
-    const stored = sessionStorage.getItem('cova_budget');
+    const stored = sessionStorage.getItem('cova_employment');
     if (stored) {
       document.querySelectorAll('.selection-card').forEach(card => {
         if (card.querySelector('input').value === stored) {
@@ -74,11 +78,12 @@
       });
     }
 
-    function selectBudget(value) {
+    function selectEmployment(e, element, value) {
+      if(e) e.preventDefault();
       document.querySelectorAll('.selection-card').forEach(card => card.classList.remove('selected'));
-      event.currentTarget.classList.add('selected');
+      element.classList.add('selected');
       document.getElementById('next-btn').disabled = false;
-      sessionStorage.setItem('cova_budget', value);
+      sessionStorage.setItem('cova_employment', value);
     }
 
     function nextStep() {
