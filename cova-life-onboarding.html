@@ -1038,7 +1038,7 @@
         }
         return true;
       }
-      function origNextStep(from) {
+      function nextStep(from) {
         if (!validateStep(from)) return;
         if (from === 3) {
           document.getElementById("sum-plan").textContent = selectedPlan;
@@ -1065,37 +1065,7 @@
         goToStep(from + 1);
       }
 
-      function nextStep(from) {
-        if (from === 2) {
-          // Before moving to OTP, validate contact step
-          // The original nextStep also validates, so let's just use it to validate but NOT route
-          // Wait, original nextStep routes immediately if validation passes.
-          // Instead of calling origNextStep, let's just do validateStep.
-          if (!validateStep(from)) return;
-
-          const dest =
-            (otpMethod === "phone" || otpMethod === "sms") ? document.getElementById("life-phone").value : document.getElementById("life-email").value;
-          const dEl = document.getElementById("otp-destination");
-          if (dEl) dEl.textContent = dest;
-          document.getElementById("step-2").classList.remove("active");
-          document.getElementById("step-2b").classList.add("active");
-          const firstOtp = document.querySelector(
-            "#signup-otp-container input",
-          );
-          if (firstOtp) firstOtp.focus();
-          return;
-        }
-        if (from === "2b") {
-          if (!validateOTP()) return;
-          document.getElementById("step-2b").classList.remove("active");
-          // Now trigger the original nextStep logic for leaving 2
-          // Since origNextStep expects 'from', and it will route to 3
-          // We just call origNextStep(2) and it will do the summary updates and routing!
-          origNextStep(2);
-          return;
-        }
-        origNextStep(from);
-      }
+      
 
       function prevStep(cur) {
         if (cur === "2b") {
