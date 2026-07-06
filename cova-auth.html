@@ -479,14 +479,17 @@
             <p>Access your broker dashboard using a secure OTP code.</p>
 
             <div class="login-tabs" id="login-tabs">
+              <div class="login-tab" onclick="switchLoginMethod('sms')">
+                Text Message
+              </div>
               <div
                 class="login-tab active"
                 onclick="switchLoginMethod('phone')"
               >
-                WhatsApp Number
+                WhatsApp
               </div>
               <div class="login-tab" onclick="switchLoginMethod('email')">
-                Email Address
+                Email
               </div>
             </div>
 
@@ -562,64 +565,20 @@
       function switchLoginMethod(method) {
         loginMethod = method;
         const tabs = document.querySelectorAll(".login-tab");
-        tabs[0].classList.toggle("active", method === "phone");
-        tabs[1].classList.toggle("active", method === "email");
+        tabs[0].classList.toggle("active", method === "sms");
+        tabs[1].classList.toggle("active", method === "phone");
+        tabs[2].classList.toggle("active", method === "email");
 
         document.getElementById("input-phone-wrap").style.display =
-          method === "phone" ? "block" : "none";
+          (method === "phone" || method === "sms") ? "block" : "none";
         document.getElementById("input-email-wrap").style.display =
           method === "email" ? "block" : "none";
-      }
 
-      function sendOTP(event) {
-        event.preventDefault();
-        identifierValue =
-          loginMethod === "phone"
-            ? document.getElementById("phone").value.trim()
-            : document.getElementById("email").value.trim();
-
-        if (!identifierValue) {
-          alert(
-            "Please enter your " +
-              (loginMethod === "phone" ? "phone number" : "email address"),
-          );
-          return;
+        const phoneLabel = document.querySelector('label[for="phone"]');
+        if (phoneLabel) {
+            phoneLabel.textContent = method === 'sms' ? 'Phone Number' : 'WhatsApp Number';
         }
-
-        document.getElementById("sent-to").textContent = identifierValue;
-        document.getElementById("step-identifier").classList.remove("active");
-        document.getElementById("step-verify").classList.add("active");
-        document.getElementById("login-tabs").style.display = "none";
-
-        // Focus first OTP input
-        document.querySelector(".otp-inputs input").focus();
-      }
-
-      function setupOTPInputs() {
-        document.querySelectorAll(".otp-inputs").forEach((container) => {
-          const inputs = container.querySelectorAll("input");
-          inputs.forEach((input, index) => {
-            input.addEventListener("paste", (e) => {
-              e.preventDefault();
-              const pastedData = (e.clipboardData || window.clipboardData)
-                .getData("text")
-                .replace(/[^0-9]/g, "");
-              if (!pastedData) return;
-              let currIndex = index;
-              for (
-                let i = 0;
-                i < pastedData.length && currIndex < inputs.length;
-                i++
-              ) {
-                inputs[currIndex].value = pastedData[i];
-                currIndex++;
-              }
-              if (currIndex < inputs.length) {
-                inputs[currIndex].focus();
-              } else {
-                inputs[inputs.length - 1].focus();
-              }
-            });
+      });
 
             input.addEventListener("input", (e) => {
               input.value = input.value.replace(/[^0-9]/g, "");
@@ -693,7 +652,7 @@
 
         alert(
           "Logging in with " +
-            loginMethod +
+            (loginMethod === "phone" ? "WhatsApp" : loginMethod === "sms" ? "SMS" : "Email") +
             ": " +
             identifierValue +
             " (OTP: " +

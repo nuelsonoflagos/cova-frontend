@@ -782,6 +782,23 @@
             </div>
             <div
               class="login-tab"
+              id="tab-opt-sms"
+              onclick="selectOtpMethod('sms')"
+              style="
+                flex: 1;
+                text-align: center;
+                padding: 10px;
+                font-size: 13px;
+                font-weight: 600;
+                cursor: pointer;
+                border-radius: 8px;
+                color: var(--inkl);
+              "
+            >
+              Text Message
+            </div>
+            <div
+              class="login-tab"
               id="tab-opt-email"
               onclick="selectOtpMethod('email')"
               style="
@@ -1081,9 +1098,7 @@
           if (!validateStep(from)) return;
 
           const dest =
-            otpMethod === "phone"
-              ? document.getElementById("inv-phone").value
-              : document.getElementById("inv-email").value;
+            (otpMethod === "phone" || otpMethod === "sms") ? document.getElementById("inv-phone").value : document.getElementById("inv-email").value;
           const dEl = document.getElementById("otp-destination");
           if (dEl) dEl.textContent = dest;
           document.getElementById("step-3").classList.remove("active");
@@ -1136,18 +1151,28 @@
 
       let otpMethod = "phone";
       function selectOtpMethod(method) {
-        otpMethod = method;
+        window.otpMethod = method;
         const tPhone = document.getElementById("tab-opt-phone");
+        const tSms = document.getElementById("tab-opt-sms");
         const tEmail = document.getElementById("tab-opt-email");
+
+        const activeStyle = { bg: "var(--w)", color: "var(--ink)", shadow: "0 2px 8px rgba(0,0,0,.05)" };
+        const inactiveStyle = { bg: "transparent", color: "var(--inkl)", shadow: "none" };
+
         if (tPhone) {
-          tPhone.style.background = method === "phone" ? "var(--w)" : "transparent";
-          tPhone.style.color = method === "phone" ? "var(--ink)" : "var(--inkl)";
-          tPhone.style.boxShadow = method === "phone" ? "0 2px 8px rgba(0,0,0,.05)" : "none";
+          tPhone.style.background = method === "phone" ? activeStyle.bg : inactiveStyle.bg;
+          tPhone.style.color = method === "phone" ? activeStyle.color : inactiveStyle.color;
+          tPhone.style.boxShadow = method === "phone" ? activeStyle.shadow : inactiveStyle.shadow;
+        }
+        if (tSms) {
+          tSms.style.background = method === "sms" ? activeStyle.bg : inactiveStyle.bg;
+          tSms.style.color = method === "sms" ? activeStyle.color : inactiveStyle.color;
+          tSms.style.boxShadow = method === "sms" ? activeStyle.shadow : inactiveStyle.shadow;
         }
         if (tEmail) {
-          tEmail.style.background = method === "email" ? "var(--w)" : "transparent";
-          tEmail.style.color = method === "email" ? "var(--ink)" : "var(--inkl)";
-          tEmail.style.boxShadow = method === "email" ? "0 2px 8px rgba(0,0,0,.05)" : "none";
+          tEmail.style.background = method === "email" ? activeStyle.bg : inactiveStyle.bg;
+          tEmail.style.color = method === "email" ? activeStyle.color : inactiveStyle.color;
+          tEmail.style.boxShadow = method === "email" ? activeStyle.shadow : inactiveStyle.shadow;
         }
 
         const phoneInput = document.querySelector('input[type="tel"]');
@@ -1155,10 +1180,22 @@
         if (phoneInput && emailInput) {
           const phoneGroup = phoneInput.closest('.form-group');
           const emailGroup = emailInput.closest('.form-group');
-          if (method === 'phone') {
+
+          if (method === 'phone' || method === 'sms') {
             if (phoneGroup) phoneGroup.style.display = 'block';
             if (emailGroup) { emailGroup.style.display = 'none'; emailGroup.classList.remove('error'); }
+
+            // update label
+            const label = phoneGroup.querySelector('label');
+            if (label) {
+              label.textContent = method === 'sms' ? 'Phone number' : 'WhatsApp number';
+            }
           } else {
+            if (phoneGroup) { phoneGroup.style.display = 'none'; phoneGroup.classList.remove('error'); }
+            if (emailGroup) emailGroup.style.display = 'block';
+          }
+        }
+      } else {
             if (phoneGroup) { phoneGroup.style.display = 'none'; phoneGroup.classList.remove('error'); }
             if (emailGroup) emailGroup.style.display = 'block';
           }
