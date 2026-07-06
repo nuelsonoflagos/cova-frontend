@@ -615,6 +615,11 @@
         
         window.location.href = "cova-dashboard.html";
       }
+      document.addEventListener('DOMContentLoaded', () => {
+        if (window.location.hash === '#login' || window.location.hash === '#log-in') {
+          switchAuthMode('login');
+        }
+      });
     </script>
     <script>
       function toggleMobileMenu() {
