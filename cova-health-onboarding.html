@@ -1099,6 +1099,7 @@
       let selectedInsurer = "AIICO";
       let selectedHospital = "Lagos University Teaching Hospital";
       function goBack() {
+        if (currentStep === 'otp') { prevStep('otp'); return; }
         if (currentStep > 1) prevStep(currentStep);
         else window.history.back();
       }

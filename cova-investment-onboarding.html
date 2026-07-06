@@ -985,6 +985,7 @@
       let selectedInvestment = "Investment Plan";
       let selectedRisk = "Conservative";
       function goBack() {
+        if (currentStep === 'otp') { prevStep('otp'); return; }
         if (currentStep > 1) prevStep(currentStep);
         else window.history.back();
       }

@@ -2696,9 +2696,9 @@
             <button
               class="btn-primary"
               style="align-self: flex-start"
-              onclick="showToast('Profile saved successfully')"
+              onclick="initiateAccountUpdate()"
             >
-              Save changes
+              Update Account
             </button>
           </div>
         </div>
@@ -3010,6 +3010,58 @@
       </div>
     </div>
 
+    <!-- ══ ACCOUNT VERIFY MODAL ══ -->
+    <div class="modal-overlay" id="account-verify-modal">
+      <div class="modal">
+        <button class="modal-close" onclick="closeModal('account-verify-modal')">✕</button>
+        <div id="account-verify-form">
+          <div class="modal-title">Verify your identity</div>
+          <div class="modal-sub">
+            To apply these changes, please verify your identity via email or SMS.
+          </div>
+          
+          <div class="form-group">
+            <label>Select verification method</label>
+            <select id="verify-method">
+              <option value="sms">SMS / WhatsApp</option>
+              <option value="email">Email</option>
+            </select>
+          </div>
+
+          <button class="btn-primary" style="width: 100%; justify-content: center" onclick="sendAccountOTP()">
+            Send Code
+          </button>
+        </div>
+
+        <div id="account-verify-input" style="display: none;">
+          <div class="modal-title">Enter the code</div>
+          <div class="modal-sub">
+            We've sent a 6-digit code to <strong id="verify-dest"></strong>.
+          </div>
+          <div class="form-group" id="fg-account-otp">
+            <div style="display: flex; gap: 10px; justify-content: space-between; margin: 20px 0;" class="otp-inputs">
+              <input type="text" maxlength="1" style="width: 45px; height: 50px; text-align: center; font-size: 20px; font-weight: 700; border-radius: 12px; border: 1.5px solid var(--crd); background: var(--gp);" />
+              <input type="text" maxlength="1" style="width: 45px; height: 50px; text-align: center; font-size: 20px; font-weight: 700; border-radius: 12px; border: 1.5px solid var(--crd); background: var(--gp);" />
+              <input type="text" maxlength="1" style="width: 45px; height: 50px; text-align: center; font-size: 20px; font-weight: 700; border-radius: 12px; border: 1.5px solid var(--crd); background: var(--gp);" />
+              <input type="text" maxlength="1" style="width: 45px; height: 50px; text-align: center; font-size: 20px; font-weight: 700; border-radius: 12px; border: 1.5px solid var(--crd); background: var(--gp);" />
+              <input type="text" maxlength="1" style="width: 45px; height: 50px; text-align: center; font-size: 20px; font-weight: 700; border-radius: 12px; border: 1.5px solid var(--crd); background: var(--gp);" />
+              <input type="text" maxlength="1" style="width: 45px; height: 50px; text-align: center; font-size: 20px; font-weight: 700; border-radius: 12px; border: 1.5px solid var(--crd); background: var(--gp);" />
+            </div>
+            <div class="field-error" style="color: var(--r); font-size: 12px; display: none;" id="verify-error">Please enter the 6-digit code</div>
+          </div>
+          <button class="btn-primary" style="width: 100%; justify-content: center" onclick="confirmAccountOTP()">
+            Verify & Apply Changes
+          </button>
+        </div>
+
+        <div class="success-state" id="account-verify-success">
+          <div class="success-icon">✅</div>
+          <div class="success-title">Changes applied!</div>
+          <div class="success-sub">Your account profile has been successfully updated.</div>
+        </div>
+      </div>
+    </div>
+
     <div id="toast"></div>
 
     <script>
@@ -3053,6 +3105,75 @@
       function closeModal(id) {
         document.getElementById(id).classList.remove("open");
       }
+      function initiateAccountUpdate() {
+        document.getElementById("account-verify-form").style.display = "block";
+        document.getElementById("account-verify-input").style.display = "none";
+        document.getElementById("account-verify-success").style.display = "none";
+        document.getElementById("account-verify-modal").classList.add("open");
+      }
+      function sendAccountOTP() {
+        const method = document.getElementById("verify-method").value;
+        const dest = method === "sms" ? "0803 555 1234" : "adaeze@brightsupermarkets.ng";
+        document.getElementById("verify-dest").textContent = dest;
+        document.getElementById("account-verify-form").style.display = "none";
+        
+        if (method === "email") {
+          // Skip OTP input for email, just show success since "Supabase sends email verification link"
+          document.getElementById("account-verify-success").style.display = "block";
+          document.querySelector("#account-verify-success .success-sub").textContent = "We've sent a verification link to your email. Click it to apply changes.";
+        } else {
+          document.getElementById("account-verify-input").style.display = "block";
+          // Focus first OTP input
+          const firstInput = document.querySelector("#account-verify-input .otp-inputs input");
+          if (firstInput) firstInput.focus();
+        }
+      }
+      function confirmAccountOTP() {
+        let otp = "";
+        document.querySelectorAll("#account-verify-input .otp-inputs input").forEach(i => otp += i.value);
+        if (otp.length < 6) {
+          document.getElementById("verify-error").style.display = "block";
+          return;
+        }
+        document.getElementById("verify-error").style.display = "none";
+        document.getElementById("account-verify-input").style.display = "none";
+        document.getElementById("account-verify-success").style.display = "block";
+        document.querySelector("#account-verify-success .success-sub").textContent = "Your account profile has been successfully updated.";
+      }
+      
+      // OTP Input Logic
+      document.addEventListener("DOMContentLoaded", () => {
+        document.querySelectorAll(".otp-inputs").forEach((container) => {
+          const inputs = container.querySelectorAll("input");
+          inputs.forEach((input, index) => {
+            input.addEventListener("paste", (e) => {
+              e.preventDefault();
+              const pastedData = (e.clipboardData || window.clipboardData)
+                .getData("text")
+                .replace(/[^0-9]/g, "");
+              if (!pastedData) return;
+              let currIndex = index;
+              for (let i = 0; i < pastedData.length && currIndex < inputs.length; i++) {
+                inputs[currIndex].value = pastedData[i];
+                currIndex++;
+              }
+              if (currIndex < inputs.length) inputs[currIndex].focus();
+              else inputs[inputs.length - 1].focus();
+            });
+            input.addEventListener("input", (e) => {
+              input.value = input.value.replace(/[^0-9]/g, "");
+              if (input.value.length === 1 && index < inputs.length - 1) inputs[index + 1].focus();
+            });
+            input.addEventListener("keydown", (e) => {
+              if (e.key === "Backspace" && !input.value && index > 0) {
+                inputs[index - 1].focus();
+                inputs[index - 1].value = "";
+              }
+            });
+          });
+        });
+      });
+
       function submitClaim() {
         document.getElementById("claim-form").style.display = "none";
         document.getElementById("claim-success").style.display = "block";

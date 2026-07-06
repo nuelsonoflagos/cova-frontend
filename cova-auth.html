@@ -475,75 +475,65 @@
         </div>
         <div class="auth-form-wrap">
           <div class="form-card">
-            <h2>Log in to your account</h2>
-            <p>Access your broker dashboard using a secure OTP code.</p>
+            <h2 id="auth-title">Create your account</h2>
+            <p id="auth-sub">Register to manage your policies and claims.</p>
 
-            <div class="login-tabs" id="login-tabs">
-              <div class="login-tab" onclick="switchLoginMethod('sms')">
-                Text Message
-              </div>
-              <div
-                class="login-tab active"
-                onclick="switchLoginMethod('phone')"
-              >
-                WhatsApp
-              </div>
-              <div class="login-tab" onclick="switchLoginMethod('email')">
-                Email
-              </div>
+            <div class="login-tabs" id="auth-tabs">
+              <div class="login-tab active" onclick="switchAuthMode('signup')">Sign Up</div>
+              <div class="login-tab" onclick="switchAuthMode('login')">Log In</div>
             </div>
 
-            <div id="step-identifier" class="otp-step active">
-              <form onsubmit="sendOTP(event)">
-                <div class="form-group" id="input-phone-wrap">
-                  <label for="phone">WhatsApp Number</label>
-                  <input id="phone" type="tel" placeholder="080 xxxx xxxx" />
+            <!-- SIGNUP FORM -->
+            <form id="signup-form" onsubmit="handleSignup(event)" class="otp-step active">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="first_name">First Name</label>
+                  <input id="first_name" type="text" placeholder="Emeka" required />
                 </div>
-                <div
-                  class="form-group"
-                  id="input-email-wrap"
-                  style="display: none"
-                >
-                  <label for="email">Email Address</label>
-                  <input
-                    id="email"
-                    type="email"
-                    placeholder="you@company.com"
-                  />
+                <div class="form-group">
+                  <label for="last_name">Last Name</label>
+                  <input id="last_name" type="text" placeholder="Adekunle" required />
                 </div>
-                <button type="submit" class="btn-primary">Send OTP</button>
-              </form>
-            </div>
+              </div>
+              <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <input id="phone" type="tel" placeholder="080 xxxx xxxx" required />
+              </div>
+              <div class="form-group">
+                <label for="signup_email">Email Address</label>
+                <input id="signup_email" type="email" placeholder="you@company.com" required />
+              </div>
+              <div class="form-group">
+                <label for="signup_password">Password</label>
+                <input id="signup_password" type="password" placeholder="Create a strong password" required />
+              </div>
+              <button type="submit" class="btn-primary">Create Account</button>
+            </form>
 
-            <div id="step-verify" class="otp-step">
-              <form onsubmit="verifyOTP(event)">
-                <p
-                  style="
-                    font-size: 13px;
-                    color: var(--inkm);
-                    margin-bottom: 14px;
-                  "
-                >
-                  We've sent a 6-digit code to <strong id="sent-to"></strong>.
-                  Enter it below to securely log in.
-                </p>
-                <div class="otp-inputs" id="otp-container">
-                  <input type="text" maxlength="1" />
-                  <input type="text" maxlength="1" />
-                  <input type="text" maxlength="1" />
-                  <input type="text" maxlength="1" />
-                  <input type="text" maxlength="1" />
-                  <input type="text" maxlength="1" />
-                </div>
-                <button type="submit" class="btn-primary">
-                  Verify & Log in
-                </button>
-                <div style="text-align: center; margin-top: 16px">
-                  <a href="#" class="secondary-link" onclick="goBack(event)"
-                    >← Use a different method</a
-                  >
-                </div>
-              </form>
+            <!-- LOGIN FORM -->
+            <form id="login-form" onsubmit="handleLogin(event)" class="otp-step">
+              <div class="form-group">
+                <label for="login_email">Email Address</label>
+                <input id="login_email" type="email" placeholder="you@company.com" required />
+              </div>
+              <div class="form-group">
+                <label for="login_password">Password</label>
+                <input id="login_password" type="password" placeholder="Enter your password" required />
+              </div>
+              <button type="submit" class="btn-primary">Log In</button>
+              <div style="text-align: center; margin-top: 16px">
+                <a href="#" class="secondary-link">Forgot password?</a>
+              </div>
+            </form>
+
+            <!-- SUCCESS MESSAGE -->
+            <div id="success-message" class="otp-step" style="text-align: center; padding: 20px 0;">
+              <div style="font-size: 40px; margin-bottom: 10px;">✉️</div>
+              <h3 style="font-family: var(--fd); font-size: 20px; color: var(--ink); margin-bottom: 10px;">Check your email</h3>
+              <p style="font-size: 14px; color: var(--inkl); line-height: 1.6;">
+                We've sent a verification link to your email address. Click the link to activate your account.
+              </p>
+              <button type="button" class="btn-primary" style="margin-top: 20px;" onclick="switchAuthMode('login')">Return to Log In</button>
             </div>
 
             <p class="support-note" style="margin-top: 24px">
@@ -559,168 +549,69 @@
       </section>
     </main>
     <script>
-      let loginMethod = "phone";
-      let identifierValue = "";
-
-
-      function formatPhoneForTermii(phone) {
-        if (!phone) return phone;
-        let clean = phone.replace(/\D/g, '');
-        if (clean.startsWith('0')) {
-          return '234' + clean.substring(1);
-        }
-        return clean;
-      }
-      function sendOTP(event) {
-        event.preventDefault();
-        identifierValue =
-          (loginMethod === "phone" || loginMethod === "sms")
-            ? document.getElementById("phone").value.trim()
-            : document.getElementById("email").value.trim();
-
-        if (!identifierValue) {
-          alert(
-            "Please enter your " +
-              (loginMethod === "phone" ? "WhatsApp number" : loginMethod === "sms" ? "Phone number" : "Email address"),
-          );
-          return;
-        }
-
-        if (loginMethod === "phone" || loginMethod === "sms") {
-          identifierValue = formatPhoneForTermii(identifierValue);
-        }
-
-        document.getElementById("sent-to").textContent = identifierValue;
-        document.getElementById("step-identifier").classList.remove("active");
-        document.getElementById("step-verify").classList.add("active");
-        document.getElementById("login-tabs").style.display = "none";
-
-        document.querySelector(".otp-inputs input").focus();
-      }
-      function switchLoginMethod(method) {
-        loginMethod = method;
+      function switchAuthMode(mode) {
         const tabs = document.querySelectorAll(".login-tab");
-        tabs[0].classList.toggle("active", method === "sms");
-        tabs[1].classList.toggle("active", method === "phone");
-        tabs[2].classList.toggle("active", method === "email");
-
-        document.getElementById("input-phone-wrap").style.display =
-          (method === "phone" || method === "sms") ? "block" : "none";
-        document.getElementById("input-email-wrap").style.display =
-          method === "email" ? "block" : "none";
-
-        const phoneLabel = document.querySelector('label[for="phone"]');
-        if (phoneLabel) {
-            phoneLabel.textContent = method === 'sms' ? 'Phone Number' : 'WhatsApp Number';
+        if (mode === 'signup') {
+          tabs[0].classList.add("active");
+          tabs[1].classList.remove("active");
+          document.getElementById('auth-title').textContent = "Create your account";
+          document.getElementById('auth-sub').textContent = "Register to manage your policies and claims.";
+          document.getElementById('signup-form').classList.add("active");
+          document.getElementById('login-form').classList.remove("active");
+          document.getElementById('success-message').classList.remove("active");
+        } else {
+          tabs[0].classList.remove("active");
+          tabs[1].classList.add("active");
+          document.getElementById('auth-title').textContent = "Log in to your account";
+          document.getElementById('auth-sub').textContent = "Access your broker dashboard securely.";
+          document.getElementById('signup-form').classList.remove("active");
+          document.getElementById('login-form').classList.add("active");
+          document.getElementById('success-message').classList.remove("active");
         }
-      });
-
-            input.addEventListener("input", (e) => {
-              input.value = input.value.replace(/[^0-9]/g, "");
-              if (input.value.length === 1 && index < inputs.length - 1) {
-                inputs[index + 1].focus();
-              }
-            });
-
-            input.addEventListener("keydown", (e) => {
-              if (e.key === "Backspace" && !input.value && index > 0) {
-                inputs[index - 1].focus();
-                inputs[index - 1].value = "";
-              }
-            });
-          });
-        });
       }
-      document.addEventListener("DOMContentLoaded", setupOTPInputs);
 
-      function goBack(event) {
+      async function handleSignup(event) {
         event.preventDefault();
-        document.getElementById("step-verify").classList.remove("active");
-        document.getElementById("step-identifier").classList.add("active");
-        document.getElementById("login-tabs").style.display = "flex";
-      }
-
-      async function handleSignup() {
-        const phone = document.getElementById("phone").value;
-        const email = document.getElementById("email").value;
         const firstName = document.getElementById("first_name").value;
         const lastName = document.getElementById("last_name").value;
-        const accountType =
-          document.getElementById("account_type").value || "personal";
+        const phone = document.getElementById("phone").value;
+        const email = document.getElementById("signup_email").value;
+        const password = document.getElementById("signup_password").value;
 
-        // Validation
-        if (!phone || !email || !firstName || !lastName) {
+        if (!phone || !email || !firstName || !lastName || !password) {
           alert("Please fill in all fields");
           return;
         }
 
-        // Call API
-        const result = await signup(
-          phone,
-          email,
-          firstName,
-          lastName,
-          accountType,
-        );
-
-        if (result.ok) {
-          alert("OTP sent to " + phone);
-          // Show OTP verification screen
-          document.getElementById("signup-form").style.display = "none";
-          document.getElementById("otp-form").style.display = "block";
-        } else {
-          alert("Signup failed: " + result.data.error.message);
-        }
+        // Simulate Supabase signUp API call
+        console.log("Signing up with:", { email, phone, firstName, lastName });
+        
+        // Show success message for email verification
+        document.getElementById('signup-form').classList.remove("active");
+        document.getElementById('auth-tabs').style.display = "none";
+        document.getElementById('success-message').classList.add("active");
+        document.getElementById('auth-title').textContent = "Verification Sent";
+        document.getElementById('auth-sub').textContent = "Please check your inbox.";
       }
 
-      function verifyOTP(event) {
+      async function handleLogin(event) {
         event.preventDefault();
-        let otp = "";
-        document.querySelectorAll(".otp-inputs input").forEach((input) => {
-          otp += input.value;
-        });
+        const email = document.getElementById("login_email").value;
+        const password = document.getElementById("login_password").value;
 
-        if (otp.length < 6) {
-          alert("Please enter the full 6-digit code");
+        if (!email || !password) {
+          alert("Please enter email and password");
           return;
         }
 
-        alert(
-          "Logging in with " +
-            (loginMethod === "phone" ? "WhatsApp" : loginMethod === "sms" ? "SMS" : "Email") +
-            ": " +
-            identifierValue +
-            " (OTP: " +
-            otp +
-            ")",
-        );
-        // Redirect to dashboard in real app
+        // Simulate Supabase signInWithPassword API call
+        console.log("Logging in with:", { email });
+        
+        // Mock successful login
+        localStorage.setItem("accessToken", "mock_token_123");
+        localStorage.setItem("user", JSON.stringify({ email }));
+        
         window.location.href = "cova-dashboard.html";
-      }
-
-      async function handleVerifyOTP() {
-        const phone = document.getElementById("phone").value;
-        const otpCode = document.getElementById("otp-code").value;
-
-        if (!otpCode || otpCode.length !== 6) {
-          alert("Please enter valid 6-digit OTP");
-          return;
-        }
-
-        // Call API
-        const result = await verifyOTP(phone, otpCode);
-
-        if (result.ok) {
-          // Save token to localStorage
-          localStorage.setItem("accessToken", result.data.accessToken);
-          localStorage.setItem("user", JSON.stringify(result.data.user));
-
-          alert("Login successful!");
-          // Redirect to dashboard
-          window.location.href = "cova-dashboard.html";
-        } else {
-          alert("Invalid OTP: " + result.data.error.message);
-        }
       }
     </script>
     <script>

@@ -970,120 +970,6 @@
         <button class="btn-primary" onclick="nextStep(1)">Continue →</button>
       </div>
 
-      <!-- STEP 1b: OTP Verification -->
-      <div class="step-panel" id="step-1b">
-        <div class="step-title">Verify your contact</div>
-        <div class="step-sub">
-          We've sent a 6-digit code to <strong id="otp-destination"></strong>.
-        </div>
-
-        <div class="form-group" id="fg-otp">
-          <div
-            style="
-              display: flex;
-              gap: 10px;
-              justify-content: space-between;
-              margin: 20px 0;
-            "
-            class="otp-inputs"
-            id="signup-otp-container"
-          >
-            <input
-              type="text"
-              maxlength="1"
-              style="
-                width: 45px;
-                height: 50px;
-                text-align: center;
-                font-size: 20px;
-                font-weight: 700;
-                border-radius: 12px;
-                border: 1.5px solid var(--crd);
-                background: var(--gp);
-              "
-            />
-            <input
-              type="text"
-              maxlength="1"
-              style="
-                width: 45px;
-                height: 50px;
-                text-align: center;
-                font-size: 20px;
-                font-weight: 700;
-                border-radius: 12px;
-                border: 1.5px solid var(--crd);
-                background: var(--gp);
-              "
-            />
-            <input
-              type="text"
-              maxlength="1"
-              style="
-                width: 45px;
-                height: 50px;
-                text-align: center;
-                font-size: 20px;
-                font-weight: 700;
-                border-radius: 12px;
-                border: 1.5px solid var(--crd);
-                background: var(--gp);
-              "
-            />
-            <input
-              type="text"
-              maxlength="1"
-              style="
-                width: 45px;
-                height: 50px;
-                text-align: center;
-                font-size: 20px;
-                font-weight: 700;
-                border-radius: 12px;
-                border: 1.5px solid var(--crd);
-                background: var(--gp);
-              "
-            />
-            <input
-              type="text"
-              maxlength="1"
-              style="
-                width: 45px;
-                height: 50px;
-                text-align: center;
-                font-size: 20px;
-                font-weight: 700;
-                border-radius: 12px;
-                border: 1.5px solid var(--crd);
-                background: var(--gp);
-              "
-            />
-            <input
-              type="text"
-              maxlength="1"
-              style="
-                width: 45px;
-                height: 50px;
-                text-align: center;
-                font-size: 20px;
-                font-weight: 700;
-                border-radius: 12px;
-                border: 1.5px solid var(--crd);
-                background: var(--gp);
-              "
-            />
-          </div>
-          <div class="field-error">Please enter the 6-digit code</div>
-        </div>
-
-        <button class="btn-primary" onclick="nextStep('1b')">
-          Verify & Continue →
-        </button>
-        <button class="btn-secondary" onclick="prevStep('1b')">
-          ← Go back
-        </button>
-      </div>
-
       <!-- STEP 2: Device Info -->
       <div class="step-panel" id="step-2">
         <div class="step-title">Tell us about your device</div>
@@ -1377,8 +1263,8 @@
           </p>
         </div>
 
-        <button class="btn-primary" onclick="submitPolicy()">
-          Pay securely with Paystack →
+        <button class="btn-primary" onclick="handleBuyPolicy()">
+          Proceed to Payment →
         </button>
         <button class="btn-secondary" onclick="prevStep(5)">← Go back</button>
 
@@ -1393,6 +1279,32 @@
           By continuing you agree to Cova's terms of service and privacy policy.
           Policies are underwritten by NAICOM-licensed insurers.
         </p>
+      </div>
+
+      
+      <!-- STEP OTP: Phone Verification -->
+      <div class="step-panel" id="step-otp">
+        <div class="step-title">Verify your phone number</div>
+        <div class="step-sub">
+          Before completing your purchase, please verify your phone number. We've sent a 6-digit code to <strong id="otp-destination"></strong>.
+        </div>
+        <div class="form-group" id="fg-otp">
+          <div style="display: flex; gap: 10px; justify-content: space-between; margin: 20px 0;" class="otp-inputs" id="purchase-otp-container">
+            <input type="text" maxlength="1" style="width: 45px; height: 50px; text-align: center; font-size: 20px; font-weight: 700; border-radius: 12px; border: 1.5px solid var(--crd); background: var(--gp);" />
+            <input type="text" maxlength="1" style="width: 45px; height: 50px; text-align: center; font-size: 20px; font-weight: 700; border-radius: 12px; border: 1.5px solid var(--crd); background: var(--gp);" />
+            <input type="text" maxlength="1" style="width: 45px; height: 50px; text-align: center; font-size: 20px; font-weight: 700; border-radius: 12px; border: 1.5px solid var(--crd); background: var(--gp);" />
+            <input type="text" maxlength="1" style="width: 45px; height: 50px; text-align: center; font-size: 20px; font-weight: 700; border-radius: 12px; border: 1.5px solid var(--crd); background: var(--gp);" />
+            <input type="text" maxlength="1" style="width: 45px; height: 50px; text-align: center; font-size: 20px; font-weight: 700; border-radius: 12px; border: 1.5px solid var(--crd); background: var(--gp);" />
+            <input type="text" maxlength="1" style="width: 45px; height: 50px; text-align: center; font-size: 20px; font-weight: 700; border-radius: 12px; border: 1.5px solid var(--crd); background: var(--gp);" />
+          </div>
+          <div class="field-error">Please enter the 6-digit code</div>
+        </div>
+        <button class="btn-primary" onclick="verifyPurchaseOTP()">
+          Verify & Pay securely with Paystack →
+        </button>
+        <button class="btn-secondary" onclick="prevStep('otp')">
+          ← Go back
+        </button>
       </div>
 
       <!-- SUCCESS -->
@@ -1731,21 +1643,8 @@
 
       function nextStep(from) {
         if (!validateStep(from)) return;
-        if (from === 1) {
-          const dest =
-            (otpMethod === "phone" || otpMethod === "sms") ? document.getElementById("phone").value : document.getElementById("email").value;
-          document.getElementById("otp-destination").textContent = dest;
-          document.getElementById("step-1").classList.remove("active");
-          document.getElementById("step-1b").classList.add("active");
-          document.querySelector("#signup-otp-container input").focus();
-          return;
-        }
-        if (from === "1b") {
-          document.getElementById("step-1b").classList.remove("active");
-          document.getElementById("step-2").classList.add("active");
-          updateProgress(2);
-          return;
-        }
+        if (from === 1) { goToStep(2); return; }
+        
         if (from === 2) {
           const fn = document.getElementById("firstname").value;
           const ln = document.getElementById("lastname").value;
@@ -1764,11 +1663,13 @@
       }
 
       function prevStep(current) {
-        if (current === "1b") {
-          document.getElementById("step-1b").classList.remove("active");
-          document.getElementById("step-1").classList.add("active");
+        if (current === 'otp') {
+          document.getElementById("step-otp").classList.remove("active");
+          document.getElementById("step-6").classList.add("active");
+          currentStep = 6;
           return;
         }
+        
         if (current === 2) {
           document.getElementById("step-2").classList.remove("active");
           document.getElementById("step-1").classList.add("active");
@@ -1800,9 +1701,36 @@
       }
 
       function goBack() {
+        if (currentStep === 'otp') { prevStep('otp'); return; }
         if (currentStep === "1b") prevStep("1b");
         else if (currentStep > 1) prevStep(currentStep);
         else window.history.back();
+      }
+
+      let phone_verified = false;
+      function handleBuyPolicy() {
+        if (!phone_verified) {
+          const dest = document.getElementById("phone").value;
+          document.getElementById("otp-destination").textContent = dest;
+          document.getElementById("step-6").classList.remove("active");
+          document.getElementById("step-otp").classList.add("active");
+          currentStep = "otp";
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        } else {
+          submitPolicy();
+        }
+      }
+      function verifyPurchaseOTP() {
+        let otp = "";
+        document.querySelectorAll("#purchase-otp-container input").forEach((i) => (otp += i.value));
+        if (otp.length < 6) {
+          document.getElementById("fg-otp").classList.add("error");
+          return;
+        }
+        document.getElementById("fg-otp").classList.remove("error");
+        phone_verified = true;
+        document.getElementById("step-otp").classList.remove("active");
+        submitPolicy();
       }
 
       function submitPolicy() {

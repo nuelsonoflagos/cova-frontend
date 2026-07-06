@@ -1159,6 +1159,7 @@
       ];
       let photos = [false, false, false, false];
       function goBack() {
+        if (currentStep === 'otp') { prevStep('otp'); return; }
         if (currentStep === "1a") {
           prevStep("1a");
           return;
@@ -1282,48 +1283,7 @@
         }
         goToStep(from + 1);
       }
-      if (from === 1) {
-        document.getElementById("step-1").classList.remove("active");
-        document.getElementById("step-1a").classList.add("active");
-        return;
-      }
-      if (from === "1a") {
-        if (!validateContact()) return;
-        const dest =
-          (otpMethod === "phone" || otpMethod === "sms") ? document.getElementById("phone").value : document.getElementById("email").value;
-        const dEl = document.getElementById("otp-destination");
-        if (dEl) dEl.textContent = dest;
-        document.getElementById("step-1a").classList.remove("active");
-        document.getElementById("step-1b").classList.add("active");
-        const firstOtp = document.querySelector("#signup-otp-container input");
-        if (firstOtp) firstOtp.focus();
-        return;
-      }
-      if (from === "1b") {
-        if (!validateOTP()) return;
-        document.getElementById("step-1b").classList.remove("active");
-        document.getElementById("step-2").classList.add("active");
-        if (typeof updateProgress === "function") updateProgress(2);
-        else if (typeof goToStep === "function") {
-          currentStep = 2;
-          for (let i = 1; i <= 6; i++) {
-            let pr = document.getElementById("prog-" + i);
-            if (pr) {
-              pr.classList.remove("active", "done");
-              if (i < 2) pr.classList.add("done");
-              if (i === 2) pr.classList.add("active");
-            }
-          }
-        }
-        return;
-      }
-
-      function prevStep(cur) {
-        if (cur === "1a") {
-          document.getElementById("step-1a").classList.remove("active");
-          document.getElementById("step-1").classList.add("active");
-          return;
-        }
+      if (from === 1) { goToStep(2); return; }
         if (cur === "1b") {
           document.getElementById("step-1b").classList.remove("active");
           document.getElementById("step-1a").classList.add("active");
