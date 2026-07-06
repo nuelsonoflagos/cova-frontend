@@ -1126,16 +1126,8 @@
       
 
       function prevStep(cur) {
-        if (cur === "2b") {
-          document.getElementById("step-2b").classList.remove("active");
-          document.getElementById("step-2").classList.add("active");
-          return;
-        }
-        if (cur === 3) {
-          document.getElementById("step-3").classList.remove("active");
-          document.getElementById("step-2b").classList.add("active");
-          return;
-        }
+        
+        
         goToStep(cur - 1);
       }
       function goToStep(n) {

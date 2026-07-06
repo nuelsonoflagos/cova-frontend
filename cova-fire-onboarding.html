@@ -1330,11 +1330,7 @@
           document.getElementById("step-1a").classList.add("active");
           return;
         }
-        if (cur === 2) {
-          document.getElementById("step-2").classList.remove("active");
-          document.getElementById("step-1b").classList.add("active");
-          return;
-        }
+        
         goToStep(cur - 1);
       }
       function goToStep(n) {
