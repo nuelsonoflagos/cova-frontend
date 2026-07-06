@@ -1691,10 +1691,11 @@
       function validateStep(step) {
         if (step === 1) {
           let ok = true;
-          const type = document.getElementById("account-type").value;
+          const typeEl = document.getElementById("account-type");
+          const type = typeEl ? typeEl.value : null;
           const fields = [
-            ["fg-fn", "fn", (v) => v.trim().length > 1],
-            ["fg-ln", "ln", (v) => v.trim().length > 1],
+            ["fg-fn", "fn", (v) => v.trim().length > 0],
+            ["fg-ln", "ln", (v) => v.trim().length > 0],
             ["fg-phone", "phone", (v) => v.replace(/\D/g, "").length >= 10],
             ["fg-email", "email", (v) => /\S+@\S+\.\S+/.test(v)],
           ];
@@ -1707,10 +1708,15 @@
           }
           fields.forEach(([g, f, fn]) => {
             const grp = document.getElementById(g);
-            if (!fn(document.getElementById(f).value)) {
-              grp.classList.add("error");
-              ok = false;
-            } else grp.classList.remove("error");
+            const input = document.getElementById(f);
+            if (grp && input) {
+              if (!fn(input.value)) {
+                grp.classList.add("error");
+                ok = false;
+              } else {
+                grp.classList.remove("error");
+              }
+            }
           });
           return ok;
         }

@@ -1510,10 +1510,11 @@
       function validateStep(step) {
         if (step === 1) {
           let ok = true;
-          const type = document.getElementById("account-type").value;
+          const typeEl = document.getElementById("account-type");
+          const type = typeEl ? typeEl.value : null;
           const fields = [
-            ["fg-firstname", "firstname", (v) => v.trim().length > 1],
-            ["fg-lastname", "lastname", (v) => v.trim().length > 1],
+            ["fg-fn", "fn", (v) => v.trim().length > 0],
+            ["fg-ln", "ln", (v) => v.trim().length > 0],
             ["fg-phone", "phone", (v) => v.replace(/\D/g, "").length >= 10],
             ["fg-email", "email", (v) => /\S+@\S+\.\S+/.test(v)],
           ];
@@ -1524,13 +1525,17 @@
               (v) => v.trim().length > 1,
             ]);
           }
-          fields.forEach(([gid, fid, fn]) => {
-            const val = document.getElementById(fid).value;
-            const grp = document.getElementById(gid);
-            if (!fn(val)) {
-              grp.classList.add("error");
-              ok = false;
-            } else grp.classList.remove("error");
+          fields.forEach(([g, f, fn]) => {
+            const grp = document.getElementById(g);
+            const input = document.getElementById(f);
+            if (grp && input) {
+              if (!fn(input.value)) {
+                grp.classList.add("error");
+                ok = false;
+              } else {
+                grp.classList.remove("error");
+              }
+            }
           });
           return ok;
         }
