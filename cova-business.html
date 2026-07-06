@@ -66,7 +66,7 @@
         justify-content: space-between;
         padding: 0 5vw;
         background: rgba(247, 244, 238, 0.96);
-        backdrop-filter: blur(16px);
+        /* blur removed for perf */
         border-bottom: 1px solid var(--border);
       }
       .logo {
@@ -690,6 +690,9 @@
           style="height: 32px; width: auto; display: block"
       /></a>
       <div class="nav-links">
+        <a class="nav-link" href="index.html">Home</a>
+        <a class="nav-link" href="cova-about.html">About us</a>
+        <a class="nav-link" href="cova-contact.html">Contact us</a>
         <a class="nav-link" href="cova-personal.html">For Individuals</a>
         <a class="nav-cta" href="cova-onboarding.html">Get a quote</a>
       </div>
@@ -717,12 +720,52 @@
         </button>
       </div>
       <div class="mobile-links">
-        <a class="mobile-link" href="cova-personal.html">For Individuals</a>
-        <a class="mobile-link" href="cova-onboarding.html">Get a quote</a>
+        <a class="mobile-link" href="index.html" onclick="toggleMobileMenu()"
+          >Home</a
+        >
+        <a
+          class="mobile-link"
+          href="cova-about.html"
+          onclick="toggleMobileMenu()"
+          >About us</a
+        >
+        <a
+          class="mobile-link"
+          href="cova-contact.html"
+          onclick="toggleMobileMenu()"
+          >Contact us</a
+        >
+        <a
+          class="mobile-link"
+          href="cova-personal.html"
+          onclick="toggleMobileMenu()"
+          >For Individuals</a
+        >
+        <a
+          class="mobile-link"
+          href="cova-onboarding.html"
+          onclick="toggleMobileMenu()"
+          >Get a quote</a
+        >
         <div class="mobile-section">Products</div>
-        <a class="mobile-link" href="cova-onboarding.html">Electronic Fleet</a>
-        <a class="mobile-link" href="cova-motor-onboarding.html">Motor Fleet</a>
-        <a class="mobile-link" href="cova-group-onboarding.html">Group Life</a>
+        <a
+          class="mobile-link"
+          href="cova-onboarding.html"
+          onclick="toggleMobileMenu()"
+          >Electronic Fleet</a
+        >
+        <a
+          class="mobile-link"
+          href="cova-motor-onboarding.html"
+          onclick="toggleMobileMenu()"
+          >Motor Fleet</a
+        >
+        <a
+          class="mobile-link"
+          href="cova-group-onboarding.html"
+          onclick="toggleMobileMenu()"
+          >Group Life</a
+        >
         <a class="mobile-link" href="cova-health-onboarding.html"
           >Group Health / HMO</a
         >
@@ -751,8 +794,10 @@
           >Public Liability</a
         >
         <div class="mobile-section">Company</div>
-        <a class="mobile-link" href="#how">How it works</a>
-        <a class="mobile-link" href="#faq">FAQ</a>
+        <a class="mobile-link" href="#how" onclick="toggleMobileMenu()"
+          >How it works</a
+        >
+        <a class="mobile-link" href="#faq" onclick="toggleMobileMenu()">FAQ</a>
       </div>
     </div>
     <section class="hero">

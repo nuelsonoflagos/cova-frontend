@@ -68,7 +68,7 @@
         justify-content: space-between;
         padding: 0 5vw;
         background: rgba(247, 244, 238, 0.96);
-        backdrop-filter: blur(16px);
+        /* blur removed for perf */
         border-bottom: 1px solid var(--border);
       }
       .logo {
@@ -583,7 +583,7 @@
         max-width: 480px;
         width: 100%;
         position: relative;
-        box-shadow: 0 40px 110px rgba(10, 92, 69, 0.2);
+        box-shadow: 0 20px 50px rgba(10, 92, 69, 0.2);
       }
       .modal-close {
         position: absolute;
@@ -721,6 +721,9 @@
           style="height: 32px; width: auto; display: block"
       /></a>
       <div class="nav-links">
+        <a class="nav-link" href="index.html">Home</a>
+        <a class="nav-link" href="cova-about.html">About us</a>
+        <a class="nav-link" href="cova-contact.html">Contact us</a>
         <a class="nav-link" href="cova-business.html">For Business</a>
         <a class="nav-cta" href="cova-onboarding.html">Get protected</a>
       </div>
@@ -748,8 +751,33 @@
         </button>
       </div>
       <div class="mobile-links">
-        <a class="mobile-link" href="cova-business.html">For Business</a>
-        <a class="mobile-link" href="cova-onboarding.html">Get protected</a>
+        <a class="mobile-link" href="index.html" onclick="toggleMobileMenu()"
+          >Home</a
+        >
+        <a
+          class="mobile-link"
+          href="cova-about.html"
+          onclick="toggleMobileMenu()"
+          >About us</a
+        >
+        <a
+          class="mobile-link"
+          href="cova-contact.html"
+          onclick="toggleMobileMenu()"
+          >Contact us</a
+        >
+        <a
+          class="mobile-link"
+          href="cova-business.html"
+          onclick="toggleMobileMenu()"
+          >For Business</a
+        >
+        <a
+          class="mobile-link"
+          href="cova-onboarding.html"
+          onclick="toggleMobileMenu()"
+          >Get protected</a
+        >
         <div class="mobile-section">Products</div>
         <a class="mobile-link" href="cova-onboarding.html"
           >Electronic Equipment</a
@@ -772,8 +800,10 @@
         <a class="mobile-link" href="cova-investment-onboarding.html"
           >Investment Plans</a
         >
-        <a class="mobile-link" href="#why">Why Cova</a>
-        <a class="mobile-link" href="#faq">FAQ</a>
+        <a class="mobile-link" href="#why" onclick="toggleMobileMenu()"
+          >Why Cova</a
+        >
+        <a class="mobile-link" href="#faq" onclick="toggleMobileMenu()">FAQ</a>
       </div>
     </div>
     <section class="hero">

@@ -1926,5 +1926,43 @@
           });
       });
     </script>
+    <script>
+      function toggleMobileMenu() {
+        const menu = document.getElementById("mobileMenu");
+        if (menu) menu.classList.toggle("open");
+      }
+      function openWaitlist(product) {
+        const modal = document.getElementById("waitlistModal");
+        if (modal) {
+          modal.classList.add("open");
+          document.getElementById("waitlistTitle").textContent = product;
+          document.getElementById("waitlistCopy").textContent =
+            "Choose the product you want and enter your details. We’ll contact you first when " +
+            product +
+            " becomes available.";
+          document.getElementById("waitlistProduct").value = product;
+          document.getElementById("waitlistName").value = "";
+          document.getElementById("waitlistPhone").value = "";
+          document.getElementById("waitlistSuccess").style.display = "none";
+        }
+      }
+      function closeWaitlistModal() {
+        const modal = document.getElementById("waitlistModal");
+        if (modal) modal.classList.remove("open");
+      }
+      function submitWaitlistForm() {
+        const phone = document.getElementById("waitlistPhone").value
+          ? document.getElementById("waitlistPhone").value.trim()
+          : "";
+        if (!phone) {
+          alert("Please enter your WhatsApp number.");
+          return;
+        }
+        document.getElementById("waitlistSuccess").style.display = "block";
+      }
+      function toggleFaq(element) {
+        if (element) element.classList.toggle("open");
+      }
+    </script>
   </body>
 </html>

@@ -69,7 +69,7 @@
         justify-content: space-between;
         padding: 0 5vw;
         background: rgba(247, 244, 238, 0.96);
-        backdrop-filter: blur(16px);
+        /* blur removed for perf */
         border-bottom: 1px solid var(--border);
       }
       .logo {
@@ -123,7 +123,7 @@
         background: var(--white);
         border: 1px solid var(--border);
         border-radius: 24px;
-        box-shadow: 0 24px 80px rgba(10, 92, 69, 0.12);
+        box-shadow: 0 12px 40px rgba(10, 92, 69, 0.12);
         padding: 22px;
         display: none;
       }
@@ -355,7 +355,7 @@
         min-height: 380px;
         position: relative;
         overflow: hidden;
-        box-shadow: 0 30px 60px rgba(10, 92, 69, 0.08);
+        box-shadow: 0 15px 30px rgba(10, 92, 69, 0.08);
       }
       .path-card.green {
         background: linear-gradient(
@@ -815,7 +815,7 @@
         max-width: 480px;
         width: 100%;
         position: relative;
-        box-shadow: 0 40px 110px rgba(10, 92, 69, 0.2);
+        box-shadow: 0 20px 50px rgba(10, 92, 69, 0.2);
       }
       .modal-close {
         position: absolute;
@@ -1209,6 +1209,7 @@
         justify-content: center;
       }
       .shape-img {
+        will-change: transform;
         position: absolute;
         background-size: cover;
         background-position: center;
@@ -1536,25 +1537,94 @@
           Business cover
         </div>
         <div class="mobile-section-title">Products</div>
-        <a class="mobile-link" href="cova-personal.html">Life</a>
-        <a class="mobile-link" href="cova-personal.html">Health</a>
-        <a class="mobile-link" href="cova-personal.html">Motor</a>
-        <a class="mobile-link" href="cova-personal.html">Travel</a>
-        <a class="mobile-link" href="cova-personal.html">Property</a>
-        <a class="mobile-link" href="cova-personal.html">Devices</a>
-        <a class="mobile-link" href="cova-business.html">Electronic fleet</a>
-        <a class="mobile-link" href="cova-business.html">Motor fleet</a>
-        <a class="mobile-link" href="cova-business.html">Group life</a>
-        <a class="mobile-link" href="cova-business.html">Group health</a>
-        <a class="mobile-link" href="cova-business.html">Fire & perils</a>
+        <a
+          class="mobile-link"
+          href="cova-personal.html"
+          onclick="toggleMobileMenu()"
+          >Life</a
+        >
+        <a
+          class="mobile-link"
+          href="cova-personal.html"
+          onclick="toggleMobileMenu()"
+          >Health</a
+        >
+        <a
+          class="mobile-link"
+          href="cova-personal.html"
+          onclick="toggleMobileMenu()"
+          >Motor</a
+        >
+        <a
+          class="mobile-link"
+          href="cova-personal.html"
+          onclick="toggleMobileMenu()"
+          >Travel</a
+        >
+        <a
+          class="mobile-link"
+          href="cova-personal.html"
+          onclick="toggleMobileMenu()"
+          >Property</a
+        >
+        <a
+          class="mobile-link"
+          href="cova-personal.html"
+          onclick="toggleMobileMenu()"
+          >Devices</a
+        >
+        <a
+          class="mobile-link"
+          href="cova-business.html"
+          onclick="toggleMobileMenu()"
+          >Electronic fleet</a
+        >
+        <a
+          class="mobile-link"
+          href="cova-business.html"
+          onclick="toggleMobileMenu()"
+          >Motor fleet</a
+        >
+        <a
+          class="mobile-link"
+          href="cova-business.html"
+          onclick="toggleMobileMenu()"
+          >Group life</a
+        >
+        <a
+          class="mobile-link"
+          href="cova-business.html"
+          onclick="toggleMobileMenu()"
+          >Group health</a
+        >
+        <a
+          class="mobile-link"
+          href="cova-business.html"
+          onclick="toggleMobileMenu()"
+          >Fire & perils</a
+        >
         <a class="mobile-link" href="cova-business.html"
           >Workmen's compensation</a
         >
         <div class="mobile-section-title">Company</div>
-        <a class="mobile-link" href="cova-about.html">About us</a>
-        <a class="mobile-link" href="#how">How it works</a>
-        <a class="mobile-link" href="#insurers">Insurers</a>
-        <a class="mobile-link" href="cova-contact.html">Contact us</a>
+        <a
+          class="mobile-link"
+          href="cova-about.html"
+          onclick="toggleMobileMenu()"
+          >About us</a
+        >
+        <a class="mobile-link" href="#how" onclick="toggleMobileMenu()"
+          >How it works</a
+        >
+        <a class="mobile-link" href="#insurers" onclick="toggleMobileMenu()"
+          >Insurers</a
+        >
+        <a
+          class="mobile-link"
+          href="cova-contact.html"
+          onclick="toggleMobileMenu()"
+          >Contact us</a
+        >
       </div>
     </div>
 
@@ -2302,13 +2372,55 @@
                 track.scrollLeft = 0;
               }
             }
-            requestAnimationFrame(autoScroll);
+            if (window.innerWidth > 768) {
+              requestAnimationFrame(autoScroll);
+            } else {
+              setTimeout(autoScroll, 100);
+            }
           }
 
           // Start auto-scroll
           autoScroll();
         });
       });
+    </script>
+    <script>
+      function toggleMobileMenu() {
+        const menu = document.getElementById("mobileMenu");
+        if (menu) menu.classList.toggle("open");
+      }
+      function openWaitlist(product) {
+        const modal = document.getElementById("waitlistModal");
+        if (modal) {
+          modal.classList.add("open");
+          document.getElementById("waitlistTitle").textContent = product;
+          document.getElementById("waitlistCopy").textContent =
+            "Choose the product you want and enter your details. We’ll contact you first when " +
+            product +
+            " becomes available.";
+          document.getElementById("waitlistProduct").value = product;
+          document.getElementById("waitlistName").value = "";
+          document.getElementById("waitlistPhone").value = "";
+          document.getElementById("waitlistSuccess").style.display = "none";
+        }
+      }
+      function closeWaitlistModal() {
+        const modal = document.getElementById("waitlistModal");
+        if (modal) modal.classList.remove("open");
+      }
+      function submitWaitlistForm() {
+        const phone = document.getElementById("waitlistPhone").value
+          ? document.getElementById("waitlistPhone").value.trim()
+          : "";
+        if (!phone) {
+          alert("Please enter your WhatsApp number.");
+          return;
+        }
+        document.getElementById("waitlistSuccess").style.display = "block";
+      }
+      function toggleFaq(element) {
+        if (element) element.classList.toggle("open");
+      }
     </script>
   </body>
 </html>
