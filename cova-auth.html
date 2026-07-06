@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Cova — Login</title>
-    <script src="api-client.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link
       href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap"
       rel="stylesheet"
@@ -563,6 +563,10 @@
       </section>
     </main>
     <script>
+      const supabaseUrl = 'https://sipbkoxamzsurjsojsov.supabase.co';
+      const supabaseAnonKey = 'sb_publishable_K5waOlfDMf1e7nwO7CkTmQ_fMyB5E5x';
+      const supabaseClient = supabase.createClient(supabaseUrl, supabaseAnonKey);
+
       function switchAuthMode(mode) {
         const tabs = document.querySelectorAll(".login-tab");
         document.getElementById('signup-form').classList.remove("active");
@@ -609,20 +613,43 @@
           return;
         }
 
-        // Simulate Supabase signUp API call
-        console.log("Signing up with:", { email, phone, firstName, lastName });
-        
-        // Show success message for email verification
-        document.getElementById('signup-form').classList.remove("active");
-        document.getElementById('login-form').classList.remove("active");
-        const resetForm = document.getElementById('reset-form');
-        if (resetForm) resetForm.classList.remove("active");
-        
-        document.getElementById('auth-tabs').style.display = "none";
-        document.getElementById('success-message').classList.add("active");
-        document.getElementById('email-display').textContent = email;
-        document.getElementById('auth-title').textContent = "Verification Sent";
-        document.getElementById('auth-sub').textContent = "Please check your inbox.";
+        const btn = event.target.querySelector('button[type="submit"]');
+        const originalText = btn.textContent;
+        btn.textContent = 'Processing...';
+        btn.disabled = true;
+
+        try {
+          const { data, error } = await supabaseClient.auth.signUp({
+            email: email,
+            password: password,
+            options: {
+              data: {
+                first_name: firstName,
+                last_name: lastName,
+                phone: phone
+              }
+            }
+          });
+
+          if (error) throw error;
+
+          // Show success message for email verification
+          document.getElementById('signup-form').classList.remove("active");
+          document.getElementById('login-form').classList.remove("active");
+          const resetForm = document.getElementById('reset-form');
+          if (resetForm) resetForm.classList.remove("active");
+          
+          document.getElementById('auth-tabs').style.display = "none";
+          document.getElementById('success-message').classList.add("active");
+          document.getElementById('email-display').textContent = email;
+          document.getElementById('auth-title').textContent = "Verification Sent";
+          document.getElementById('auth-sub').textContent = "Please check your inbox.";
+        } catch (error) {
+          alert("Signup failed: " + error.message);
+        } finally {
+          btn.textContent = originalText;
+          btn.disabled = false;
+        }
       }
 
       async function handleReset(event) {
@@ -630,14 +657,32 @@
         const email = document.getElementById("reset_email").value;
         if(!email) return;
         
-        // Hide forms, show success message
-        document.getElementById('reset-form').classList.remove("active");
-        document.getElementById('auth-tabs').style.display = "none";
-        document.getElementById('success-message').classList.add("active");
-        
-        document.getElementById('email-display').textContent = email;
-        document.getElementById('auth-title').textContent = "Reset Link Sent";
-        document.getElementById('auth-sub').textContent = "Please check your inbox to reset your password.";
+        const btn = event.target.querySelector('button[type="submit"]');
+        const originalText = btn.textContent;
+        btn.textContent = 'Sending...';
+        btn.disabled = true;
+
+        try {
+          const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+            redirectTo: window.location.origin + '/cova-dashboard.html',
+          });
+
+          if (error) throw error;
+
+          // Hide forms, show success message
+          document.getElementById('reset-form').classList.remove("active");
+          document.getElementById('auth-tabs').style.display = "none";
+          document.getElementById('success-message').classList.add("active");
+          
+          document.getElementById('email-display').textContent = email;
+          document.getElementById('auth-title').textContent = "Reset Link Sent";
+          document.getElementById('auth-sub').textContent = "Please check your inbox to reset your password.";
+        } catch (error) {
+          alert("Failed to send reset link: " + error.message);
+        } finally {
+          btn.textContent = originalText;
+          btn.disabled = false;
+        }
       }
 
       async function handleLogin(event) {
@@ -650,14 +695,26 @@
           return;
         }
 
-        // Simulate Supabase signInWithPassword API call
-        console.log("Logging in with:", { email });
-        
-        // Mock successful login
-        localStorage.setItem("accessToken", "mock_token_123");
-        localStorage.setItem("user", JSON.stringify({ email }));
-        
-        window.location.href = "cova-dashboard.html";
+        const btn = event.target.querySelector('button[type="submit"]');
+        const originalText = btn.textContent;
+        btn.textContent = 'Logging in...';
+        btn.disabled = true;
+
+        try {
+          const { data, error } = await supabaseClient.auth.signInWithPassword({
+            email: email,
+            password: password,
+          });
+
+          if (error) throw error;
+          
+          window.location.href = "cova-dashboard.html";
+        } catch (error) {
+          alert("Login failed: " + error.message);
+        } finally {
+          btn.textContent = originalText;
+          btn.disabled = false;
+        }
       }
       document.addEventListener('DOMContentLoaded', () => {
         if (window.location.hash === '#login' || window.location.hash === '#log-in') {
