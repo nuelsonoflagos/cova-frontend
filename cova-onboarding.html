@@ -899,74 +899,6 @@
           </div>
         </div>
 
-        <div class="form-group">
-          <label>Where should we send your verification code?</label>
-          <div
-            class="login-tabs"
-            style="
-              display: flex;
-              gap: 8px;
-              background: var(--gp);
-              padding: 6px;
-              border-radius: 12px;
-              margin-bottom: 10px;
-            "
-          >
-            <div
-              class="login-tab active"
-              id="tab-opt-phone"
-              onclick="selectOtpMethod('phone')"
-              style="
-                flex: 1;
-                text-align: center;
-                padding: 10px;
-                font-size: 13px;
-                font-weight: 600;
-                cursor: pointer;
-                border-radius: 8px;
-                background: var(--w);
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-              "
-            >
-              WhatsApp
-            </div>
-            <div
-              class="login-tab"
-              id="tab-opt-sms"
-              onclick="selectOtpMethod('sms')"
-              style="
-                flex: 1;
-                text-align: center;
-                padding: 10px;
-                font-size: 13px;
-                font-weight: 600;
-                cursor: pointer;
-                border-radius: 8px;
-                color: var(--inkl);
-              "
-            >
-              Text Message
-            </div>
-            <div
-              class="login-tab"
-              id="tab-opt-email"
-              onclick="selectOtpMethod('email')"
-              style="
-                flex: 1;
-                text-align: center;
-                padding: 10px;
-                font-size: 13px;
-                font-weight: 600;
-                cursor: pointer;
-                border-radius: 8px;
-                color: var(--inkl);
-              "
-            >
-              Email
-            </div>
-          </div>
-        </div>
-
         <button class="btn-primary" onclick="nextStep(1)">Continue →</button>
       </div>
 
@@ -1467,62 +1399,6 @@
         document.querySelector("#slot-" + slot + " .photo-input").click();
       }
 
-      let otpMethod = "phone";
-      function selectOtpMethod(method) {
-        window.otpMethod = method;
-        const tPhone = document.getElementById("tab-opt-phone");
-        const tSms = document.getElementById("tab-opt-sms");
-        const tEmail = document.getElementById("tab-opt-email");
-
-        const activeStyle = { bg: "var(--w)", color: "var(--ink)", shadow: "0 2px 8px rgba(0,0,0,.05)" };
-        const inactiveStyle = { bg: "transparent", color: "var(--inkl)", shadow: "none" };
-
-        if (tPhone) {
-          tPhone.style.background = method === "phone" ? activeStyle.bg : inactiveStyle.bg;
-          tPhone.style.color = method === "phone" ? activeStyle.color : inactiveStyle.color;
-          tPhone.style.boxShadow = method === "phone" ? activeStyle.shadow : inactiveStyle.shadow;
-        }
-        if (tSms) {
-          tSms.style.background = method === "sms" ? activeStyle.bg : inactiveStyle.bg;
-          tSms.style.color = method === "sms" ? activeStyle.color : inactiveStyle.color;
-          tSms.style.boxShadow = method === "sms" ? activeStyle.shadow : inactiveStyle.shadow;
-        }
-        if (tEmail) {
-          tEmail.style.background = method === "email" ? activeStyle.bg : inactiveStyle.bg;
-          tEmail.style.color = method === "email" ? activeStyle.color : inactiveStyle.color;
-          tEmail.style.boxShadow = method === "email" ? activeStyle.shadow : inactiveStyle.shadow;
-        }
-
-        const phoneInput = document.querySelector('input[type="tel"]');
-        const emailInput = document.querySelector('input[type="email"]');
-        if (phoneInput && emailInput) {
-          const phoneGroup = phoneInput.closest('.form-group');
-          const emailGroup = emailInput.closest('.form-group');
-
-          if (method === 'phone' || method === 'sms') {
-            if (phoneGroup) phoneGroup.style.display = 'block';
-            if (emailGroup) { emailGroup.style.display = 'none'; emailGroup.classList.remove('error'); }
-
-            // update label
-            const label = phoneGroup.querySelector('label');
-            if (label) {
-              label.textContent = method === 'sms' ? 'Phone number' : 'WhatsApp number';
-            }
-          } else {
-            if (phoneGroup) { phoneGroup.style.display = 'none'; phoneGroup.classList.remove('error'); }
-            if (emailGroup) emailGroup.style.display = 'block';
-          }
-        }
-      } else {
-            if (phoneGroup) {
-              phoneGroup.style.display = "none";
-              phoneGroup.classList.remove("error");
-            }
-            if (emailGroup) emailGroup.style.display = "block";
-          }
-        }
-      }
-
       function toggleBusinessFields() {
         const type = document.getElementById("account-type").value;
         document.getElementById("business-fields").style.display =
@@ -1600,18 +1476,7 @@
           });
           return ok;
         }
-        if (step === "1b") {
-          let otp = "";
-          document
-            .querySelectorAll("#signup-otp-container input")
-            .forEach((i) => (otp += i.value));
-          if (otp.length < 6) {
-            document.getElementById("fg-otp").classList.add("error");
-            return false;
-          }
-          document.getElementById("fg-otp").classList.remove("error");
-          return true;
-        }
+        
         if (step === 2) {
           let ok = true;
           const brand = document.getElementById("brand").value;
@@ -1644,7 +1509,6 @@
       function nextStep(from) {
         if (!validateStep(from)) return;
         if (from === 1) { goToStep(2); return; }
-        
         if (from === 2) {
           const fn = document.getElementById("firstname").value;
           const ln = document.getElementById("lastname").value;
@@ -1663,6 +1527,17 @@
       }
 
       function prevStep(current) {
+        if (current === 'otp') {
+          document.getElementById("step-otp").classList.remove("active");
+          let lastStep = 6;
+          if (document.getElementById("step-6")) lastStep = 6;
+          else if (document.getElementById("step-5")) lastStep = 5;
+          else if (document.getElementById("step-4")) lastStep = 4;
+          else if (document.getElementById("step-3")) lastStep = 3;
+          document.getElementById("step-" + lastStep).classList.add("active");
+          currentStep = lastStep;
+          return;
+        }
         if (current === 'otp') {
           document.getElementById("step-otp").classList.remove("active");
           document.getElementById("step-6").classList.add("active");
@@ -1702,7 +1577,8 @@
 
       function goBack() {
         if (currentStep === 'otp') { prevStep('otp'); return; }
-        if (currentStep === "1b") prevStep("1b");
+        if (currentStep === 'otp') { prevStep('otp'); return; }
+        
         else if (currentStep > 1) prevStep(currentStep);
         else window.history.back();
       }

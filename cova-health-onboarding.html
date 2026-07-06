@@ -715,188 +715,8 @@
           </div>
         </div>
 
-        <div class="form-group">
-          <label>Where should we send your verification code?</label>
-          <div
-            class="login-tabs"
-            style="
-              display: flex;
-              gap: 8px;
-              background: var(--gp);
-              padding: 6px;
-              border-radius: 12px;
-              margin-bottom: 10px;
-            "
-          >
-            <div
-              class="login-tab active"
-              id="tab-opt-phone"
-              onclick="selectOtpMethod('phone')"
-              style="
-                flex: 1;
-                text-align: center;
-                padding: 10px;
-                font-size: 13px;
-                font-weight: 600;
-                cursor: pointer;
-                border-radius: 8px;
-                background: var(--w);
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-              "
-            >
-              WhatsApp
-            </div>
-            <div
-              class="login-tab"
-              id="tab-opt-sms"
-              onclick="selectOtpMethod('sms')"
-              style="
-                flex: 1;
-                text-align: center;
-                padding: 10px;
-                font-size: 13px;
-                font-weight: 600;
-                cursor: pointer;
-                border-radius: 8px;
-                color: var(--inkl);
-              "
-            >
-              Text Message
-            </div>
-            <div
-              class="login-tab"
-              id="tab-opt-email"
-              onclick="selectOtpMethod('email')"
-              style="
-                flex: 1;
-                text-align: center;
-                padding: 10px;
-                font-size: 13px;
-                font-weight: 600;
-                cursor: pointer;
-                border-radius: 8px;
-                color: var(--inkl);
-              "
-            >
-              Email
-            </div>
-          </div>
-        </div>
-
         <button class="btn-primary" onclick="nextStep(2)">Continue →</button
         ><button class="btn-secondary" onclick="prevStep(2)">← Go back</button>
-      </div>
-
-      <!-- STEP 2b: OTP Verification -->
-      <div class="step-panel" id="step-2b">
-        <div class="step-title">Verify your contact</div>
-        <div class="step-sub">
-          We've sent a 6-digit code to <strong id="otp-destination"></strong>.
-        </div>
-        <div class="form-group" id="fg-otp">
-          <div
-            style="
-              display: flex;
-              gap: 10px;
-              justify-content: space-between;
-              margin: 20px 0;
-            "
-            class="otp-inputs"
-            id="signup-otp-container"
-          >
-            <input
-              type="text"
-              maxlength="1"
-              style="
-                width: 45px;
-                height: 50px;
-                text-align: center;
-                font-size: 20px;
-                font-weight: 700;
-                border-radius: 12px;
-                border: 1.5px solid var(--crd);
-                background: var(--gp);
-              "
-            />
-            <input
-              type="text"
-              maxlength="1"
-              style="
-                width: 45px;
-                height: 50px;
-                text-align: center;
-                font-size: 20px;
-                font-weight: 700;
-                border-radius: 12px;
-                border: 1.5px solid var(--crd);
-                background: var(--gp);
-              "
-            />
-            <input
-              type="text"
-              maxlength="1"
-              style="
-                width: 45px;
-                height: 50px;
-                text-align: center;
-                font-size: 20px;
-                font-weight: 700;
-                border-radius: 12px;
-                border: 1.5px solid var(--crd);
-                background: var(--gp);
-              "
-            />
-            <input
-              type="text"
-              maxlength="1"
-              style="
-                width: 45px;
-                height: 50px;
-                text-align: center;
-                font-size: 20px;
-                font-weight: 700;
-                border-radius: 12px;
-                border: 1.5px solid var(--crd);
-                background: var(--gp);
-              "
-            />
-            <input
-              type="text"
-              maxlength="1"
-              style="
-                width: 45px;
-                height: 50px;
-                text-align: center;
-                font-size: 20px;
-                font-weight: 700;
-                border-radius: 12px;
-                border: 1.5px solid var(--crd);
-                background: var(--gp);
-              "
-            />
-            <input
-              type="text"
-              maxlength="1"
-              style="
-                width: 45px;
-                height: 50px;
-                text-align: center;
-                font-size: 20px;
-                font-weight: 700;
-                border-radius: 12px;
-                border: 1.5px solid var(--crd);
-                background: var(--gp);
-              "
-            />
-          </div>
-          <div class="field-error">Please enter the 6-digit code</div>
-        </div>
-        <button class="btn-primary" onclick="nextStep('2b')">
-          Verify & Continue →
-        </button>
-        <button class="btn-secondary" onclick="prevStep('2b')">
-          ← Go back
-        </button>
       </div>
 
       <div class="step-panel" id="step-3">
@@ -1066,9 +886,9 @@
             ><span class="summary-total-price" id="summary-price">₦45,000</span>
           </div>
         </div>
-        <button class="btn-primary" onclick="submitForm()">
-          Pay securely with Paystack →</button
-        ><button class="btn-secondary" onclick="prevStep(5)">← Go back</button>
+        <button class="btn-primary" onclick="handleBuyPolicy()">
+          Proceed to Payment →
+        </button>
       </div>
       <div class="success-screen" id="success">
         <div class="success-circle">✅</div>
@@ -1099,6 +919,7 @@
       let selectedInsurer = "AIICO";
       let selectedHospital = "Lagos University Teaching Hospital";
       function goBack() {
+        if (currentStep === 'otp') { prevStep('otp'); return; }
         if (currentStep === 'otp') { prevStep('otp'); return; }
         if (currentStep > 1) prevStep(currentStep);
         else window.history.back();
@@ -1173,7 +994,7 @@
         }
         return true;
       }
-      function origNextStep(from) {
+      function nextStep(from) {
         if (!validateStep(from)) return;
         if (from === 2) {
           document.getElementById("summary-cover").textContent = coverType;
@@ -1189,44 +1010,21 @@
         goToStep(from + 1);
       }
 
-      function nextStep(from) {
-        if (from === 2) {
-          // Before moving to OTP, validate contact step
-          // The original nextStep also validates, so let's just use it to validate but NOT route
-          // Wait, original nextStep routes immediately if validation passes.
-          // Instead of calling origNextStep, let's just do validateStep.
-          if (!validateStep(from)) return;
-
-          const dest =
-            (otpMethod === "phone" || otpMethod === "sms") ? document.getElementById("health-phone").value : document.getElementById("health-email").value;
-          const dEl = document.getElementById("otp-destination");
-          if (dEl) dEl.textContent = dest;
-          document.getElementById("step-2").classList.remove("active");
-          document.getElementById("step-2b").classList.add("active");
-          const firstOtp = document.querySelector(
-            "#signup-otp-container input",
-          );
-          if (firstOtp) firstOtp.focus();
-          return;
-        }
-        if (from === "2b") {
-          if (!validateOTP()) return;
-          document.getElementById("step-2b").classList.remove("active");
-          // Now trigger the original nextStep logic for leaving 2
-          // Since origNextStep expects 'from', and it will route to 3
-          // We just call origNextStep(2) and it will do the summary updates and routing!
-          origNextStep(2);
-          return;
-        }
-        origNextStep(from);
-      }
+      
 
       function prevStep(cur) {
-        if (cur === "2b") {
-          document.getElementById("step-2b").classList.remove("active");
-          document.getElementById("step-2").classList.add("active");
+        if (cur === 'otp') {
+          document.getElementById("step-otp").classList.remove("active");
+          let lastStep = 6;
+          if (document.getElementById("step-6")) lastStep = 6;
+          else if (document.getElementById("step-5")) lastStep = 5;
+          else if (document.getElementById("step-4")) lastStep = 4;
+          else if (document.getElementById("step-3")) lastStep = 3;
+          document.getElementById("step-" + lastStep).classList.add("active");
+          currentStep = lastStep;
           return;
         }
+        
         if (cur === 3) {
           document.getElementById("step-3").classList.remove("active");
           document.getElementById("step-2b").classList.add("active");
@@ -1249,70 +1047,6 @@
         window.scrollTo({ top: 0, behavior: "smooth" });
       }
 
-      let otpMethod = "phone";
-      function selectOtpMethod(method) {
-        window.otpMethod = method;
-        const tPhone = document.getElementById("tab-opt-phone");
-        const tSms = document.getElementById("tab-opt-sms");
-        const tEmail = document.getElementById("tab-opt-email");
-
-        const activeStyle = { bg: "var(--w)", color: "var(--ink)", shadow: "0 2px 8px rgba(0,0,0,.05)" };
-        const inactiveStyle = { bg: "transparent", color: "var(--inkl)", shadow: "none" };
-
-        if (tPhone) {
-          tPhone.style.background = method === "phone" ? activeStyle.bg : inactiveStyle.bg;
-          tPhone.style.color = method === "phone" ? activeStyle.color : inactiveStyle.color;
-          tPhone.style.boxShadow = method === "phone" ? activeStyle.shadow : inactiveStyle.shadow;
-        }
-        if (tSms) {
-          tSms.style.background = method === "sms" ? activeStyle.bg : inactiveStyle.bg;
-          tSms.style.color = method === "sms" ? activeStyle.color : inactiveStyle.color;
-          tSms.style.boxShadow = method === "sms" ? activeStyle.shadow : inactiveStyle.shadow;
-        }
-        if (tEmail) {
-          tEmail.style.background = method === "email" ? activeStyle.bg : inactiveStyle.bg;
-          tEmail.style.color = method === "email" ? activeStyle.color : inactiveStyle.color;
-          tEmail.style.boxShadow = method === "email" ? activeStyle.shadow : inactiveStyle.shadow;
-        }
-
-        const phoneInput = document.querySelector('input[type="tel"]');
-        const emailInput = document.querySelector('input[type="email"]');
-        if (phoneInput && emailInput) {
-          const phoneGroup = phoneInput.closest('.form-group');
-          const emailGroup = emailInput.closest('.form-group');
-
-          if (method === 'phone' || method === 'sms') {
-            if (phoneGroup) phoneGroup.style.display = 'block';
-            if (emailGroup) { emailGroup.style.display = 'none'; emailGroup.classList.remove('error'); }
-
-            // update label
-            const label = phoneGroup.querySelector('label');
-            if (label) {
-              label.textContent = method === 'sms' ? 'Phone number' : 'WhatsApp number';
-            }
-          } else {
-            if (phoneGroup) { phoneGroup.style.display = 'none'; phoneGroup.classList.remove('error'); }
-            if (emailGroup) emailGroup.style.display = 'block';
-          }
-        }
-      } else {
-            if (phoneGroup) { phoneGroup.style.display = 'none'; phoneGroup.classList.remove('error'); }
-            if (emailGroup) emailGroup.style.display = 'block';
-          }
-        }
-      } else {
-          if (tEmail) {
-            tEmail.style.background = "var(--w)";
-            tEmail.style.color = "var(--ink)";
-            tEmail.style.boxShadow = "0 2px 8px rgba(0,0,0,.05)";
-          }
-          if (tPhone) {
-            tPhone.style.background = "transparent";
-            tPhone.style.color = "var(--inkl)";
-            tPhone.style.boxShadow = "none";
-          }
-        }
-      }
       function toggleBusinessFields() {
         const type = document.getElementById("account-type");
         const bf = document.getElementById("business-fields");
@@ -1362,18 +1096,44 @@
         });
       }
       document.addEventListener("DOMContentLoaded", setupOTPInputs);
-      function validateOTP() {
-        let otp = "";
-        document
-          .querySelectorAll("#signup-otp-container input")
-          .forEach((i) => (otp += i.value));
-        const grp = document.getElementById("fg-otp");
-        if (otp.length < 6) {
-          if (grp) grp.classList.add("error");
-          return false;
+      
+
+      
+      let phone_verified = false;
+      function handleBuyPolicy() {
+        if (!phone_verified) {
+          const destInput = document.querySelector('input[type="tel"]'); const dest = destInput ? destInput.value : "";
+          document.getElementById("otp-destination").textContent = dest;
+          const steps = [6, 5, 4, 3];
+          for (let s of steps) {
+            const el = document.getElementById("step-" + s);
+            if (el && el.classList.contains("active")) {
+              el.classList.remove("active");
+              break;
+            }
+          }
+          document.getElementById("step-otp").classList.add("active");
+          currentStep = "otp";
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        } else {
+          const submitFn = typeof submitPolicy === "function" ? submitPolicy : (typeof submitForm === "function" ? submitForm : null);
+          if(submitFn) submitFn();
         }
-        if (grp) grp.classList.remove("error");
-        return true;
+      }
+      function verifyPurchaseOTP() {
+        let otp = "";
+        document.querySelectorAll("#purchase-otp-container input").forEach((i) => (otp += i.value));
+        if (otp.length < 6) {
+          const fg = document.getElementById("fg-otp");
+          if(fg) fg.classList.add("error");
+          return;
+        }
+        const fg = document.getElementById("fg-otp");
+        if(fg) fg.classList.remove("error");
+        phone_verified = true;
+        document.getElementById("step-otp").classList.remove("active");
+        const submitFn = typeof submitPolicy === "function" ? submitPolicy : (typeof submitForm === "function" ? submitForm : window.submitPolicy);
+        if(submitFn) submitFn();
       }
 
       function submitForm() {

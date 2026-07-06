@@ -631,187 +631,8 @@
           </div>
         </div>
 
-        <div class="form-group">
-          <label>Where should we send your verification code?</label>
-          <div
-            class="login-tabs"
-            style="
-              display: flex;
-              gap: 8px;
-              background: var(--gp);
-              padding: 6px;
-              border-radius: 12px;
-              margin-bottom: 10px;
-            "
-          >
-            <div
-              class="login-tab active"
-              id="tab-opt-phone"
-              onclick="selectOtpMethod('phone')"
-              style="
-                flex: 1;
-                text-align: center;
-                padding: 10px;
-                font-size: 13px;
-                font-weight: 600;
-                cursor: pointer;
-                border-radius: 8px;
-                background: var(--w);
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-              "
-            >
-              WhatsApp
-            </div>
-            <div
-              class="login-tab"
-              id="tab-opt-sms"
-              onclick="selectOtpMethod('sms')"
-              style="
-                flex: 1;
-                text-align: center;
-                padding: 10px;
-                font-size: 13px;
-                font-weight: 600;
-                cursor: pointer;
-                border-radius: 8px;
-                color: var(--inkl);
-              "
-            >
-              Text Message
-            </div>
-            <div
-              class="login-tab"
-              id="tab-opt-email"
-              onclick="selectOtpMethod('email')"
-              style="
-                flex: 1;
-                text-align: center;
-                padding: 10px;
-                font-size: 13px;
-                font-weight: 600;
-                cursor: pointer;
-                border-radius: 8px;
-                color: var(--inkl);
-              "
-            >
-              Email
-            </div>
-          </div>
-        </div>
         <button class="btn-primary" onclick="nextStep('1a')">Continue →</button>
         <button class="btn-secondary" onclick="prevStep('1a')">
-          ← Go back
-        </button>
-      </div>
-
-      <!-- STEP 1b: OTP Verification -->
-      <div class="step-panel" id="step-1b">
-        <div class="step-title">Verify your contact</div>
-        <div class="step-sub">
-          We've sent a 6-digit code to <strong id="otp-destination"></strong>.
-        </div>
-        <div class="form-group" id="fg-otp">
-          <div
-            style="
-              display: flex;
-              gap: 10px;
-              justify-content: space-between;
-              margin: 20px 0;
-            "
-            class="otp-inputs"
-            id="signup-otp-container"
-          >
-            <input
-              type="text"
-              maxlength="1"
-              style="
-                width: 45px;
-                height: 50px;
-                text-align: center;
-                font-size: 20px;
-                font-weight: 700;
-                border-radius: 12px;
-                border: 1.5px solid var(--crd);
-                background: var(--gp);
-              "
-            />
-            <input
-              type="text"
-              maxlength="1"
-              style="
-                width: 45px;
-                height: 50px;
-                text-align: center;
-                font-size: 20px;
-                font-weight: 700;
-                border-radius: 12px;
-                border: 1.5px solid var(--crd);
-                background: var(--gp);
-              "
-            />
-            <input
-              type="text"
-              maxlength="1"
-              style="
-                width: 45px;
-                height: 50px;
-                text-align: center;
-                font-size: 20px;
-                font-weight: 700;
-                border-radius: 12px;
-                border: 1.5px solid var(--crd);
-                background: var(--gp);
-              "
-            />
-            <input
-              type="text"
-              maxlength="1"
-              style="
-                width: 45px;
-                height: 50px;
-                text-align: center;
-                font-size: 20px;
-                font-weight: 700;
-                border-radius: 12px;
-                border: 1.5px solid var(--crd);
-                background: var(--gp);
-              "
-            />
-            <input
-              type="text"
-              maxlength="1"
-              style="
-                width: 45px;
-                height: 50px;
-                text-align: center;
-                font-size: 20px;
-                font-weight: 700;
-                border-radius: 12px;
-                border: 1.5px solid var(--crd);
-                background: var(--gp);
-              "
-            />
-            <input
-              type="text"
-              maxlength="1"
-              style="
-                width: 45px;
-                height: 50px;
-                text-align: center;
-                font-size: 20px;
-                font-weight: 700;
-                border-radius: 12px;
-                border: 1.5px solid var(--crd);
-                background: var(--gp);
-              "
-            />
-          </div>
-          <div class="field-error">Please enter the 6-digit code</div>
-        </div>
-        <button class="btn-primary" onclick="nextStep('1b')">
-          Verify & Continue →
-        </button>
-        <button class="btn-secondary" onclick="prevStep('1b')">
           ← Go back
         </button>
       </div>
@@ -1057,9 +878,9 @@
             <option value="1">One-off annual payment</option>
           </select>
         </div>
-        <button class="btn-primary" onclick="submitForm()">
-          Pay securely with Paystack →</button
-        ><button class="btn-secondary" onclick="prevStep(5)">← Go back</button>
+        <button class="btn-primary" onclick="handleBuyPolicy()">
+          Proceed to Payment →
+        </button>
       </div>
       <div class="success-screen" id="success">
         <div class="success-circle">✅</div>
@@ -1098,119 +919,62 @@
       function selectInsurer(name){selectedInsurer=name;['ins-1','ins-2','ins-3'].forEach(id=>document.getElementById(id).classList.toggle('selected',document.getElementById(id).id==='ins-'+(name==='AIICO'?'1':name==='Leadway'?'2':'3')));document.getElementById('summary-insurer').textContent=name;}
       function parseNumber(id){return Math.max(0,parseFloat(document.getElementById(id).value)||0);}
       function updateLivePremium(){const payroll=parseNumber('annual-payroll');const life=productState.groupLife?payroll*0.005:0;const workmen=productState.workmen?payroll*0.01:0;const gpa=productState.gpa?payroll*0.003:0;document.getElementById('live-life').textContent='₦'+Math.round(life).toLocaleString('en-NG');document.getElementById('live-workmen').textContent='₦'+Math.round(workmen).toLocaleString('en-NG');document.getElementById('live-gpa').textContent='₦'+Math.round(gpa).toLocaleString('en-NG');document.getElementById('live-total').textContent='₦'+Math.round(life+workmen+gpa).toLocaleString('en-NG');updateSummary();}
-      function updateSummary(){const payroll=parseNumber('annual-payroll');const life=productState.groupLife?payroll*0.005:0;const workmen=productState.workmen?payroll*0.01:0;const gpa=productState.gpa?payroll*0.003:0;const total=Math.round(life+workmen+gpa);document.getElementById('summary-payroll').textContent='₦'+Math.round(payroll).toLocaleString('en-NG');document.getElementById('summary-premium').textContent='₦'+total.toLocaleString('en-NG');document.getElementById('summary-riders').textContent=(riders.spouse||riders.children)?Object.keys(riders).filter(k=>riders[k]).map(k=>k.charAt(0).toUpperCase()+k.slice(1)).join(', '):'None';document.getElementById('summary-insurer').textContent=selectedInsurer;document.getElementById('summary-company').textContent=document.getElementById('company-name').value||'—';document.getElementById('summary-employees').textContent=document.getElementById('employee-count').value||0;document.getElementById('summary-products').textContent=Object.entries(productState).filter(([_,v])=>v).map(([k])=>k==='groupLife'?'Group Life':k==='workmen'?'Workmen's Compensation':'Group Personal Accident').join(', ')||'None';document.getElementById('summary-annual').textContent='₦'+total.toLocaleString('en-NG');updateMonthly();}
+      function updateSummary(){const payroll=parseNumber('annual-payroll');const life=productState.groupLife?payroll*0.005:0;const workmen=productState.workmen?payroll*0.01:0;const gpa=productState.gpa?payroll*0.003:0;const total=Math.round(life+workmen+gpa);document.getElementById('summary-payroll').textContent='₦'+Math.round(payroll).toLocaleString('en-NG');document.getElementById('summary-premium').textContent='₦'+total.toLocaleString('en-NG');document.getElementById('summary-riders').textContent=(riders.spouse||riders.children)?Object.keys(riders).filter(k=>riders[k]).map(k=>k.charAt(0).toUpperCase()+k.slice(1)).join(', '):'None';document.getElementById('summary-insurer').textContent=selectedInsurer;document.getElementById('summary-company').textContent=document.getElementById('company-name').value||'—';document.getElementById('summary-employees').textContent=document.getElementById('employee-count').value||0;document.getElementById('summary-products').textContent=Object.entries(productState).filter(([_,v])=>v).map(([k])=>k==='groupLife'?'Group Life':k==='workmen'?"Workmen's Compensation":'Group Personal Accident').join(', ')||'None';document.getElementById('summary-annual').textContent='₦'+total.toLocaleString('en-NG');updateMonthly();}
       function updateMonthly(){const total=parseNumber('summary-value')||0; const annual=Number(document.getElementById('summary-annual').textContent.replace(/[^0-9]/g,''))||0; const frequency=Number(document.getElementById('payment-frequency').value);const instalment=frequency?Math.round(annual/frequency):annual;document.getElementById('summary-monthly').textContent='₦'+instalment.toLocaleString('en-NG');}
       function validateStep(step){if(step===1){const valid=Object.values(productState).some(Boolean);if(!valid){alert('Select at least one product to continue.');}return valid;} if(step===2){let ok=true;[['company-name','Please enter a company name'],['company-rc','Please enter your RC number'],['company-state','Select a state'],['annual-payroll','Enter the payroll estimate']].forEach(([id,msg])=>{const el=document.getElementById(id);const grp=document.getElementById('fg-'+id.replace(/-/g,'')); if(!el.value.trim()){grp.classList.add('error');ok=false;} else grp.classList.remove('error');}); return ok;} return true;}
-      function nextStep(from){if(!validateStep(from))return; if(from===2)updateLivePremium(); if(from===4)updateSummary(); goToStep(from+1);} function prevStep(cur){
-        if(cur === '1a') {
-          document.getElementById('step-1a').classList.remove('active');
-          document.getElementById('step-1').classList.add('active');
-          return;
-        }
-        if(cur === '1b') {
-          document.getElementById('step-1b').classList.remove('active');
+      
+      function nextStep(from) {
+        if (!validateStep(from)) return;
+        if (from === 1) { 
+          document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
           document.getElementById('step-1a').classList.add('active');
-          return;
+          currentStep = '1a';
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          return; 
         }
-        if(cur === 2) {
-          document.getElementById('step-2').classList.remove('active');
-          document.getElementById('step-1b').classList.add('active');
-          return;
-        }
-      goToStep(cur-1);} function goToStep(n){document.querySelectorAll('.step-panel').forEach(p=>p.classList.remove('active'));document.getElementById('step-'+n).classList.add('active');for(let i=1;i<=5;i++){const prog=document.getElementById('prog-'+i);prog.classList.remove('active','done');if(i<n)prog.classList.add('done');if(i===n)prog.classList.add('active')}currentStep=n;window.scrollTo({top:0,behavior:'smooth'});}
-        if(from === 1){
-          document.getElementById('step-1').classList.remove('active');
-          document.getElementById('step-1a').classList.add('active');
-          return;
-        }
-        if(from === '1a'){
-          if(!validateContact()) return;
-          const dest = otpMethod === 'phone' ? document.getElementById('phone').value : document.getElementById('email').value;
-          const dEl = document.getElementById('otp-destination');
-          if(dEl) dEl.textContent = dest;
-          document.getElementById('step-1a').classList.remove('active');
-          document.getElementById('step-1b').classList.add('active');
-          const firstOtp = document.querySelector('#signup-otp-container input');
-          if(firstOtp) firstOtp.focus();
-          return;
-        }
-        if(from === '1b'){
-          if(!validateOTP()) return;
-          document.getElementById('step-1b').classList.remove('active');
-          document.getElementById('step-2').classList.add('active');
-          if(typeof updateProgress === 'function') updateProgress(2);
-          else if(typeof goToStep === 'function') {
-              currentStep = 2;
-              for(let i=1; i<=6; i++) {
-                 let pr = document.getElementById('prog-'+i);
-                 if(pr){
-                    pr.classList.remove('active', 'done');
-                    if(i<2) pr.classList.add('done');
-                    if(i===2) pr.classList.add('active');
-                 }
-              }
-          }
-          return;
-        }
-
-
-      let otpMethod = 'phone';
-      function selectOtpMethod(method) {
-        window.otpMethod = method;
-        const tPhone = document.getElementById("tab-opt-phone");
-        const tSms = document.getElementById("tab-opt-sms");
-        const tEmail = document.getElementById("tab-opt-email");
-
-        const activeStyle = { bg: "var(--w)", color: "var(--ink)", shadow: "0 2px 8px rgba(0,0,0,.05)" };
-        const inactiveStyle = { bg: "transparent", color: "var(--inkl)", shadow: "none" };
-
-        if (tPhone) {
-          tPhone.style.background = method === "phone" ? activeStyle.bg : inactiveStyle.bg;
-          tPhone.style.color = method === "phone" ? activeStyle.color : inactiveStyle.color;
-          tPhone.style.boxShadow = method === "phone" ? activeStyle.shadow : inactiveStyle.shadow;
-        }
-        if (tSms) {
-          tSms.style.background = method === "sms" ? activeStyle.bg : inactiveStyle.bg;
-          tSms.style.color = method === "sms" ? activeStyle.color : inactiveStyle.color;
-          tSms.style.boxShadow = method === "sms" ? activeStyle.shadow : inactiveStyle.shadow;
-        }
-        if (tEmail) {
-          tEmail.style.background = method === "email" ? activeStyle.bg : inactiveStyle.bg;
-          tEmail.style.color = method === "email" ? activeStyle.color : inactiveStyle.color;
-          tEmail.style.boxShadow = method === "email" ? activeStyle.shadow : inactiveStyle.shadow;
-        }
-
-        const phoneInput = document.querySelector('input[type="tel"]');
-        const emailInput = document.querySelector('input[type="email"]');
-        if (phoneInput && emailInput) {
-          const phoneGroup = phoneInput.closest('.form-group');
-          const emailGroup = emailInput.closest('.form-group');
-
-          if (method === 'phone' || method === 'sms') {
-            if (phoneGroup) phoneGroup.style.display = 'block';
-            if (emailGroup) { emailGroup.style.display = 'none'; emailGroup.classList.remove('error'); }
-
-            // update label
-            const label = phoneGroup.querySelector('label');
-            if (label) {
-              label.textContent = method === 'sms' ? 'Phone number' : 'WhatsApp number';
-            }
-          } else {
-            if (phoneGroup) { phoneGroup.style.display = 'none'; phoneGroup.classList.remove('error'); }
-            if (emailGroup) emailGroup.style.display = 'block';
-          }
-        }
-      } else {
-            if (phoneGroup) { phoneGroup.style.display = 'none'; phoneGroup.classList.remove('error'); }
-            if (emailGroup) emailGroup.style.display = 'block';
-          }
-        }
-      } else {
-          if(tEmail) { tEmail.style.background = 'var(--w)'; tEmail.style.color = 'var(--ink)'; tEmail.style.boxShadow = '0 2px 8px rgba(0,0,0,.05)'; }
-          if(tPhone) { tPhone.style.background = 'transparent'; tPhone.style.color = 'var(--inkl)'; tPhone.style.boxShadow = 'none'; }
-        }
+        if (from === '1a') { goToStep(2); return; }
+        if (from === 2) updateLivePremium();
+        if (from === 4) updateSummary();
+        goToStep(from + 1);
       }
-      function toggleBusinessFields(){
+      function prevStep(cur) {
+        if (cur === 'otp') {
+          document.getElementById("step-otp").classList.remove("active");
+          document.getElementById("step-4").classList.add("active");
+          currentStep = 4;
+          return;
+        }
+        if (cur === 2) {
+          document.getElementById("step-2").classList.remove("active");
+          document.getElementById("step-1a").classList.add("active");
+          currentStep = '1a';
+          if(typeof updateProgress === 'function') updateProgress(1);
+          return;
+        }
+        if (cur === '1a') {
+          document.getElementById("step-1a").classList.remove("active");
+          document.getElementById("step-1").classList.add("active");
+          currentStep = 1;
+          if(typeof updateProgress === 'function') updateProgress(1);
+          return;
+        }
+        goToStep(cur - 1);
+      }
+      function goToStep(n) {
+        document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+        document.getElementById('step-' + n).classList.add('active');
+        for (let i = 1; i <= 5; i++) {
+          const prog = document.getElementById('prog-' + i);
+          if (prog) {
+            prog.classList.remove('active', 'done');
+            if (i < n) prog.classList.add('done');
+            if (i === n) prog.classList.add('active');
+          }
+        }
+        currentStep = n;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    function toggleBusinessFields(){
         const type = document.getElementById('account-type');
         const bf = document.getElementById('business-fields');
         if(type && bf) bf.style.display = type.value === 'business' ? 'block' : 'none';
@@ -1276,6 +1040,44 @@
         return true;
       }
 
+
+      
+      let phone_verified = false;
+      function handleBuyPolicy() {
+        if (!phone_verified) {
+          const destInput = document.querySelector('input[type="tel"]'); const dest = destInput ? destInput.value : "";
+          document.getElementById("otp-destination").textContent = dest;
+          const steps = [6, 5, 4, 3];
+          for (let s of steps) {
+            const el = document.getElementById("step-" + s);
+            if (el && el.classList.contains("active")) {
+              el.classList.remove("active");
+              break;
+            }
+          }
+          document.getElementById("step-otp").classList.add("active");
+          currentStep = "otp";
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        } else {
+          const submitFn = typeof submitPolicy === "function" ? submitPolicy : (typeof submitForm === "function" ? submitForm : null);
+          if(submitFn) submitFn();
+        }
+      }
+      function verifyPurchaseOTP() {
+        let otp = "";
+        document.querySelectorAll("#purchase-otp-container input").forEach((i) => (otp += i.value));
+        if (otp.length < 6) {
+          const fg = document.getElementById("fg-otp");
+          if(fg) fg.classList.add("error");
+          return;
+        }
+        const fg = document.getElementById("fg-otp");
+        if(fg) fg.classList.remove("error");
+        phone_verified = true;
+        document.getElementById("step-otp").classList.remove("active");
+        const submitFn = typeof submitPolicy === "function" ? submitPolicy : (typeof submitForm === "function" ? submitForm : window.submitPolicy);
+        if(submitFn) submitFn();
+      }
 
       function submitForm(){
         const emailEl = document.getElementById('email');
