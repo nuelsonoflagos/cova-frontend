@@ -866,7 +866,73 @@
           </div>
         </div>
 
-        
+        <div class="form-group">
+          <label>Where should we send your verification code?</label>
+          <div
+            class="login-tabs"
+            style="
+              display: flex;
+              gap: 8px;
+              background: var(--gp);
+              padding: 6px;
+              border-radius: 12px;
+              margin-bottom: 10px;
+            "
+          >
+            <div
+              class="login-tab active"
+              id="tab-opt-phone"
+              onclick="selectOtpMethod('phone')"
+              style="
+                flex: 1;
+                text-align: center;
+                padding: 10px;
+                font-size: 13px;
+                font-weight: 600;
+                cursor: pointer;
+                border-radius: 8px;
+                background: var(--w);
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+              "
+            >
+              WhatsApp
+            </div>
+            <div
+              class="login-tab"
+              id="tab-opt-sms"
+              onclick="selectOtpMethod('sms')"
+              style="
+                flex: 1;
+                text-align: center;
+                padding: 10px;
+                font-size: 13px;
+                font-weight: 600;
+                cursor: pointer;
+                border-radius: 8px;
+                color: var(--inkl);
+              "
+            >
+              Text Message
+            </div>
+            <div
+              class="login-tab"
+              id="tab-opt-email"
+              onclick="selectOtpMethod('email')"
+              style="
+                flex: 1;
+                text-align: center;
+                padding: 10px;
+                font-size: 13px;
+                font-weight: 600;
+                cursor: pointer;
+                border-radius: 8px;
+                color: var(--inkl);
+              "
+            >
+              Email
+            </div>
+          </div>
+        </div>
 
         <div class="form-row">
           <div class="form-group">
@@ -1691,11 +1757,10 @@
       function validateStep(step) {
         if (step === 1) {
           let ok = true;
-          const typeEl = document.getElementById("account-type");
-          const type = typeEl ? typeEl.value : null;
+          const type = document.getElementById("account-type").value;
           const fields = [
-            ["fg-fn", "fn", (v) => v.trim().length > 0],
-            ["fg-ln", "ln", (v) => v.trim().length > 0],
+            ["fg-fn", "fn", (v) => v.trim().length > 1],
+            ["fg-ln", "ln", (v) => v.trim().length > 1],
             ["fg-phone", "phone", (v) => v.replace(/\D/g, "").length >= 10],
             ["fg-email", "email", (v) => /\S+@\S+\.\S+/.test(v)],
           ];
@@ -1708,15 +1773,10 @@
           }
           fields.forEach(([g, f, fn]) => {
             const grp = document.getElementById(g);
-            const input = document.getElementById(f);
-            if (grp && input) {
-              if (!fn(input.value)) {
-                grp.classList.add("error");
-                ok = false;
-              } else {
-                grp.classList.remove("error");
-              }
-            }
+            if (!fn(document.getElementById(f).value)) {
+              grp.classList.add("error");
+              ok = false;
+            } else grp.classList.remove("error");
           });
           return ok;
         }

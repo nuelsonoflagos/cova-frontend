@@ -715,7 +715,73 @@
           </div>
         </div>
 
-        
+        <div class="form-group">
+          <label>Where should we send your verification code?</label>
+          <div
+            class="login-tabs"
+            style="
+              display: flex;
+              gap: 8px;
+              background: var(--gp);
+              padding: 6px;
+              border-radius: 12px;
+              margin-bottom: 10px;
+            "
+          >
+            <div
+              class="login-tab active"
+              id="tab-opt-phone"
+              onclick="selectOtpMethod('phone')"
+              style="
+                flex: 1;
+                text-align: center;
+                padding: 10px;
+                font-size: 13px;
+                font-weight: 600;
+                cursor: pointer;
+                border-radius: 8px;
+                background: var(--w);
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+              "
+            >
+              WhatsApp
+            </div>
+            <div
+              class="login-tab"
+              id="tab-opt-sms"
+              onclick="selectOtpMethod('sms')"
+              style="
+                flex: 1;
+                text-align: center;
+                padding: 10px;
+                font-size: 13px;
+                font-weight: 600;
+                cursor: pointer;
+                border-radius: 8px;
+                color: var(--inkl);
+              "
+            >
+              Text Message
+            </div>
+            <div
+              class="login-tab"
+              id="tab-opt-email"
+              onclick="selectOtpMethod('email')"
+              style="
+                flex: 1;
+                text-align: center;
+                padding: 10px;
+                font-size: 13px;
+                font-weight: 600;
+                cursor: pointer;
+                border-radius: 8px;
+                color: var(--inkl);
+              "
+            >
+              Email
+            </div>
+          </div>
+        </div>
 
         <button class="btn-primary" onclick="nextStep(2)">Continue →</button
         ><button class="btn-secondary" onclick="prevStep(2)">← Go back</button>
@@ -1107,7 +1173,7 @@
         }
         return true;
       }
-      function nextStep(from) {
+      function origNextStep(from) {
         if (!validateStep(from)) return;
         if (from === 2) {
           document.getElementById("summary-cover").textContent = coverType;
@@ -1123,11 +1189,49 @@
         goToStep(from + 1);
       }
 
-      
+      function nextStep(from) {
+        if (from === 2) {
+          // Before moving to OTP, validate contact step
+          // The original nextStep also validates, so let's just use it to validate but NOT route
+          // Wait, original nextStep routes immediately if validation passes.
+          // Instead of calling origNextStep, let's just do validateStep.
+          if (!validateStep(from)) return;
+
+          const dest =
+            (otpMethod === "phone" || otpMethod === "sms") ? document.getElementById("health-phone").value : document.getElementById("health-email").value;
+          const dEl = document.getElementById("otp-destination");
+          if (dEl) dEl.textContent = dest;
+          document.getElementById("step-2").classList.remove("active");
+          document.getElementById("step-2b").classList.add("active");
+          const firstOtp = document.querySelector(
+            "#signup-otp-container input",
+          );
+          if (firstOtp) firstOtp.focus();
+          return;
+        }
+        if (from === "2b") {
+          if (!validateOTP()) return;
+          document.getElementById("step-2b").classList.remove("active");
+          // Now trigger the original nextStep logic for leaving 2
+          // Since origNextStep expects 'from', and it will route to 3
+          // We just call origNextStep(2) and it will do the summary updates and routing!
+          origNextStep(2);
+          return;
+        }
+        origNextStep(from);
+      }
 
       function prevStep(cur) {
-        
-        
+        if (cur === "2b") {
+          document.getElementById("step-2b").classList.remove("active");
+          document.getElementById("step-2").classList.add("active");
+          return;
+        }
+        if (cur === 3) {
+          document.getElementById("step-3").classList.remove("active");
+          document.getElementById("step-2b").classList.add("active");
+          return;
+        }
         goToStep(cur - 1);
       }
       function goToStep(n) {
