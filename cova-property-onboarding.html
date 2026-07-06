@@ -782,7 +782,6 @@
                 border: 1.5px solid var(--crd);
                 background: var(--gp);
               "
-              onkeyup="moveToNext(this, event)"
             />
             <input
               type="text"
@@ -797,7 +796,6 @@
                 border: 1.5px solid var(--crd);
                 background: var(--gp);
               "
-              onkeyup="moveToNext(this, event)"
             />
             <input
               type="text"
@@ -812,7 +810,6 @@
                 border: 1.5px solid var(--crd);
                 background: var(--gp);
               "
-              onkeyup="moveToNext(this, event)"
             />
             <input
               type="text"
@@ -827,7 +824,6 @@
                 border: 1.5px solid var(--crd);
                 background: var(--gp);
               "
-              onkeyup="moveToNext(this, event)"
             />
             <input
               type="text"
@@ -842,7 +838,6 @@
                 border: 1.5px solid var(--crd);
                 background: var(--gp);
               "
-              onkeyup="moveToNext(this, event)"
             />
             <input
               type="text"
@@ -857,7 +852,6 @@
                 border: 1.5px solid var(--crd);
                 background: var(--gp);
               "
-              onkeyup="moveToNext(this, event)"
             />
           </div>
           <div class="field-error">Please enter the 6-digit code</div>
@@ -1377,13 +1371,49 @@
         if (type && bf)
           bf.style.display = type.value === "business" ? "block" : "none";
       }
-      function moveToNext(el, event) {
-        if (event.key === "Backspace") {
-          if (el.previousElementSibling) el.previousElementSibling.focus();
-        } else if (el.value.length === 1) {
-          if (el.nextElementSibling) el.nextElementSibling.focus();
-        }
+      function setupOTPInputs() {
+        document.querySelectorAll(".otp-inputs").forEach((container) => {
+          const inputs = container.querySelectorAll("input");
+          inputs.forEach((input, index) => {
+            input.addEventListener("paste", (e) => {
+              e.preventDefault();
+              const pastedData = (e.clipboardData || window.clipboardData)
+                .getData("text")
+                .replace(/[^0-9]/g, "");
+              if (!pastedData) return;
+              let currIndex = index;
+              for (
+                let i = 0;
+                i < pastedData.length && currIndex < inputs.length;
+                i++
+              ) {
+                inputs[currIndex].value = pastedData[i];
+                currIndex++;
+              }
+              if (currIndex < inputs.length) {
+                inputs[currIndex].focus();
+              } else {
+                inputs[inputs.length - 1].focus();
+              }
+            });
+
+            input.addEventListener("input", (e) => {
+              input.value = input.value.replace(/[^0-9]/g, "");
+              if (input.value.length === 1 && index < inputs.length - 1) {
+                inputs[index + 1].focus();
+              }
+            });
+
+            input.addEventListener("keydown", (e) => {
+              if (e.key === "Backspace" && !input.value && index > 0) {
+                inputs[index - 1].focus();
+                inputs[index - 1].value = "";
+              }
+            });
+          });
+        });
       }
+      document.addEventListener("DOMContentLoaded", setupOTPInputs);
       function validateContact() {
         let ok = true;
         [
