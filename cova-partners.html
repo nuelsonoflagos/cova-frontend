@@ -1427,7 +1427,7 @@
           style="height: 48px; width: auto; display: block"
       /></a>
       <div class="nav-center">
-                <div class="nav-dropdown">
+                        <div class="nav-dropdown">
           <button class="nav-dropdown-button">Products ▾</button>
           <div class="dropdown-menu" style="padding: 12px; width: 340px;">
             
@@ -1470,6 +1470,189 @@
               </div>
             </div>
 
+            <div class="dropdown-group" style="margin-bottom: 0;">
+              <div class="dropdown-label" style="padding-left: 12px; margin-bottom: 8px;">Business Products</div>
+              
+              <a class="dropdown-item" href="cova-business.html" style="padding: 8px 12px;">
+                <strong>All business cover</strong>
+                <span style="font-size: 12px;">View business solutions and SME plans</span>
+              </a>
+              <a class="dropdown-item" href="cova-onboarding.html" style="padding: 8px 12px;">
+                <strong>Electronic fleet</strong>
+                <span style="font-size: 12px;">Smart device cover for teams</span>
+              </a>
+              <a class="dropdown-item" href="cova-motor-onboarding.html" style="padding: 8px 12px;">
+                <strong>Motor fleet</strong>
+                <span style="font-size: 12px;">Commercial vehicle protection</span>
+              </a>
+              
+              <button class="dropdown-item" style="width: 100%; text-align: left; background: none; border: none; font-weight: 700; cursor: pointer; display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; margin-top: 4px; color: var(--green);" onclick="let isHidden = this.nextElementSibling.style.display === 'none'; this.nextElementSibling.style.display = isHidden ? 'block' : 'none'; this.querySelector('span').textContent = isHidden ? '-' : '+';">
+                More offerings <span style="font-size: 16px;">+</span>
+              </button>
+              <div class="dropdown-submenu" style="display: none; padding-left: 12px; border-left: 2px solid var(--border); margin: 4px 0 4px 12px;">
+                <a class="dropdown-item" href="cova-group-onboarding.html" style="padding: 8px 12px;">
+                  <strong>Group life</strong>
+                  <span style="font-size: 12px;">Employee life protection for staff</span>
+                </a>
+                <a class="dropdown-item" href="cova-group-onboarding.html" style="padding: 8px 12px;">
+                  <strong>Group health</strong>
+                  <span style="font-size: 12px;">Healthcare for your workforce</span>
+                </a>
+                <a class="dropdown-item" href="cova-fire-onboarding.html" style="padding: 8px 12px;">
+                  <strong>Fire & special perils</strong>
+                  <span style="font-size: 12px;">Property and stock protection</span>
+                </a>
+                <a class="dropdown-item" href="cova-fire-onboarding.html" style="padding: 8px 12px;">
+                  <strong>Workmen's compensation</strong>
+                  <span style="font-size: 12px;">Staff injury and liability cover</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <a class="nav-link" href="cova-about.html">About us</a>
+        <a class="nav-link" href="#how">How it works</a>
+        <a class="nav-link" href="cova-partners.html">Our Partners</a>
+        <a class="nav-link" href="cova-contact.html">Contact us</a>
+      </div>
+      <div class="nav-actions">
+        <a class="btn-secondary" href="cova-personal.html">Personal cover</a>
+        <a class="btn-primary" href="cova-business.html">Business cover</a>
+      </div>
+      <button class="mobile-toggle" onclick="toggleMobileMenu()">☰</button>
+    </nav>
+    <div class="mobile-menu" id="mobileMenu">
+      <div class="mobile-menu-header">
+        <a class="logo" href="index.html"
+          ><img
+            src="cova-logo.png"
+            alt="Cova"
+            style="height: 48px; width: auto; display: block"
+        /></a>
+        <button
+          style="
+            background: none;
+            border: none;
+            font-size: 32px;
+            cursor: pointer;
+            color: var(--ink);
+          "
+          onclick="toggleMobileMenu()"
+        >
+          ✕
+        </button>
+      </div>
+      <div class="mobile-links">
+        <div
+          class="mobile-link"
+          onclick="
+            toggleMobileMenu();
+            window.location = 'cova-personal.html';
+          "
+        >
+          Personal cover
+        </div>
+        <div
+          class="mobile-link"
+          onclick="
+            toggleMobileMenu();
+            window.location = 'cova-business.html';
+          "
+        >
+          Business cover
+        </div>
+        <div class="mobile-section-title">Products</div>
+        <a
+          class="mobile-link"
+          href="cova-personal.html"
+          onclick="toggleMobileMenu()"
+          >Life</a
+        >
+        <a
+          class="mobile-link"
+          href="cova-personal.html"
+          onclick="toggleMobileMenu()"
+          >Health</a
+        >
+        <a
+          class="mobile-link"
+          href="cova-personal.html"
+          onclick="toggleMobileMenu()"
+          >Motor</a
+        >
+        <a
+          class="mobile-link"
+          href="cova-personal.html"
+          onclick="toggleMobileMenu()"
+          >Travel</a
+        >
+        <a
+          class="mobile-link"
+          href="cova-personal.html"
+          onclick="toggleMobileMenu()"
+          >Property</a
+        >
+        <a
+          class="mobile-link"
+          href="cova-personal.html"
+          onclick="toggleMobileMenu()"
+          >Devices</a
+        >
+        <a
+          class="mobile-link"
+          href="cova-business.html"
+          onclick="toggleMobileMenu()"
+          >Electronic fleet</a
+        >
+        <a
+          class="mobile-link"
+          href="cova-business.html"
+          onclick="toggleMobileMenu()"
+          >Motor fleet</a
+        >
+        <a
+          class="mobile-link"
+          href="cova-business.html"
+          onclick="toggleMobileMenu()"
+          >Group life</a
+        >
+        <a
+          class="mobile-link"
+          href="cova-business.html"
+          onclick="toggleMobileMenu()"
+          >Group health</a
+        >
+        <a
+          class="mobile-link"
+          href="cova-business.html"
+          onclick="toggleMobileMenu()"
+          >Fire & perils</a
+        >
+        <a class="mobile-link" href="cova-business.html"
+          >Workmen's compensation</a
+        >
+        <div class="mobile-section-title">Company</div>
+        <a
+          class="mobile-link"
+          href="cova-about.html"
+          onclick="toggleMobileMenu()"
+          >About us</a
+        >
+        <a class="mobile-link" href="#how" onclick="toggleMobileMenu()"
+          >How it works</a
+        >
+        <a class="mobile-link" href="cova-partners.html" onclick="toggleMobileMenu()"
+          >Our Partners</a
+        >
+        <a
+          class="mobile-link"
+          href="cova-contact.html"
+          onclick="toggleMobileMenu()"
+          >Contact us</a
+        >
+      </div>
+    </div>
+
     <section class="section" style="padding-top: 120px; padding-bottom: 40px; text-align: center;">
       <div class="container-inner">
         <div class="section-label">Our Partners</div>
@@ -1480,14 +1663,14 @@
       </div>
     </section>
 
-    <section class="section" style="padding-top: 0;">
+    <section class="section" style="padding-top: 0; padding-bottom: 80px;">
       <div class="container-inner" style="max-width: 1200px; margin: 0 auto;">
         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px;">
           
           <div style="background: var(--white); border: 1px solid var(--border); border-radius: 24px; padding: 24px;">
             <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
               <div style="width: 48px; height: 48px; background: var(--green-soft); display: grid; place-items: center; border-radius: 12px; font-weight: 800; color: var(--green); font-size: 12px;">AXA</div>
-              <div style="font-size: 20px; font-weight: 700; letter-spacing: -0.02em;">AXA Mansard</div>
+              <div style="font-size: 20px; font-weight: 700; letter-spacing: -0.02em; color: var(--ink);">AXA Mansard</div>
             </div>
             <div style="font-size: 14px; color: var(--green); font-weight: 600; margin-bottom: 4px;">A+ rated</div>
             <div style="font-size: 14px; color: var(--ink-light);">General, Life & Health</div>
@@ -1496,7 +1679,7 @@
           <div style="background: var(--white); border: 1px solid var(--border); border-radius: 24px; padding: 24px;">
             <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
               <div style="width: 48px; height: 48px; background: var(--green-soft); display: grid; place-items: center; border-radius: 12px; font-weight: 800; color: var(--green); font-size: 12px;">LWA</div>
-              <div style="font-size: 20px; font-weight: 700; letter-spacing: -0.02em;">Leadway Assurance</div>
+              <div style="font-size: 20px; font-weight: 700; letter-spacing: -0.02em; color: var(--ink);">Leadway Assurance</div>
             </div>
             <div style="font-size: 14px; color: var(--green); font-weight: 600; margin-bottom: 4px;">A+ rated</div>
             <div style="font-size: 14px; color: var(--ink-light);">General & Life</div>
@@ -1505,7 +1688,7 @@
           <div style="background: var(--white); border: 1px solid var(--border); border-radius: 24px; padding: 24px;">
             <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
               <div style="width: 48px; height: 48px; background: var(--green-soft); display: grid; place-items: center; border-radius: 12px; font-weight: 800; color: var(--green); font-size: 12px;">AII</div>
-              <div style="font-size: 20px; font-weight: 700; letter-spacing: -0.02em;">AIICO Insurance</div>
+              <div style="font-size: 20px; font-weight: 700; letter-spacing: -0.02em; color: var(--ink);">AIICO Insurance</div>
             </div>
             <div style="font-size: 14px; color: var(--green); font-weight: 600; margin-bottom: 4px;">A rated</div>
             <div style="font-size: 14px; color: var(--ink-light);">General, Life & Health</div>
@@ -1514,7 +1697,7 @@
           <div style="background: var(--white); border: 1px solid var(--border); border-radius: 24px; padding: 24px;">
             <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
               <div style="width: 48px; height: 48px; background: var(--green-soft); display: grid; place-items: center; border-radius: 12px; font-weight: 800; color: var(--green); font-size: 12px;">MUT</div>
-              <div style="font-size: 20px; font-weight: 700; letter-spacing: -0.02em;">Mutual Benefits</div>
+              <div style="font-size: 20px; font-weight: 700; letter-spacing: -0.02em; color: var(--ink);">Mutual Benefits</div>
             </div>
             <div style="font-size: 14px; color: var(--green); font-weight: 600; margin-bottom: 4px;">A rated</div>
             <div style="font-size: 14px; color: var(--ink-light);">General & Life</div>
@@ -1523,7 +1706,7 @@
           <div style="background: var(--white); border: 1px solid var(--border); border-radius: 24px; padding: 24px;">
             <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
               <div style="width: 48px; height: 48px; background: var(--green-soft); display: grid; place-items: center; border-radius: 12px; font-weight: 800; color: var(--green); font-size: 12px;">CUS</div>
-              <div style="font-size: 20px; font-weight: 700; letter-spacing: -0.02em;">Custodian Insurance</div>
+              <div style="font-size: 20px; font-weight: 700; letter-spacing: -0.02em; color: var(--ink);">Custodian Insurance</div>
             </div>
             <div style="font-size: 14px; color: var(--green); font-weight: 600; margin-bottom: 4px;">A+ rated</div>
             <div style="font-size: 14px; color: var(--ink-light);">General & Life</div>
@@ -1532,7 +1715,7 @@
           <div style="background: var(--white); border: 1px solid var(--border); border-radius: 24px; padding: 24px;">
             <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
               <div style="width: 48px; height: 48px; background: var(--green-soft); display: grid; place-items: center; border-radius: 12px; font-weight: 800; color: var(--green); font-size: 12px;">NEM</div>
-              <div style="font-size: 20px; font-weight: 700; letter-spacing: -0.02em;">NEM Insurance</div>
+              <div style="font-size: 20px; font-weight: 700; letter-spacing: -0.02em; color: var(--ink);">NEM Insurance</div>
             </div>
             <div style="font-size: 14px; color: var(--green); font-weight: 600; margin-bottom: 4px;">A rated</div>
             <div style="font-size: 14px; color: var(--ink-light);">General Insurance</div>
@@ -1541,7 +1724,7 @@
           <div style="background: var(--white); border: 1px solid var(--border); border-radius: 24px; padding: 24px;">
             <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
               <div style="width: 48px; height: 48px; background: var(--green-soft); display: grid; place-items: center; border-radius: 12px; font-weight: 800; color: var(--green); font-size: 12px;">COR</div>
-              <div style="font-size: 20px; font-weight: 700; letter-spacing: -0.02em;">Cornerstone Insurance</div>
+              <div style="font-size: 20px; font-weight: 700; letter-spacing: -0.02em; color: var(--ink);">Cornerstone Insurance</div>
             </div>
             <div style="font-size: 14px; color: var(--green); font-weight: 600; margin-bottom: 4px;">A rated</div>
             <div style="font-size: 14px; color: var(--ink-light);">General & Life</div>
@@ -1550,7 +1733,7 @@
           <div style="background: var(--white); border: 1px solid var(--border); border-radius: 24px; padding: 24px;">
             <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
               <div style="width: 48px; height: 48px; background: var(--green-soft); display: grid; place-items: center; border-radius: 12px; font-weight: 800; color: var(--green); font-size: 12px;">LIN</div>
-              <div style="font-size: 20px; font-weight: 700; letter-spacing: -0.02em;">Linkage Assurance</div>
+              <div style="font-size: 20px; font-weight: 700; letter-spacing: -0.02em; color: var(--ink);">Linkage Assurance</div>
             </div>
             <div style="font-size: 14px; color: var(--green); font-weight: 600; margin-bottom: 4px;">A rated</div>
             <div style="font-size: 14px; color: var(--ink-light);">General Insurance</div>
@@ -1559,7 +1742,7 @@
           <div style="background: var(--white); border: 1px solid var(--border); border-radius: 24px; padding: 24px;">
             <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
               <div style="width: 48px; height: 48px; background: var(--green-soft); display: grid; place-items: center; border-radius: 12px; font-weight: 800; color: var(--green); font-size: 12px;">HEI</div>
-              <div style="font-size: 20px; font-weight: 700; letter-spacing: -0.02em;">Heirs Insurance</div>
+              <div style="font-size: 20px; font-weight: 700; letter-spacing: -0.02em; color: var(--ink);">Heirs Insurance</div>
             </div>
             <div style="font-size: 14px; color: var(--green); font-weight: 600; margin-bottom: 4px;">A rated</div>
             <div style="font-size: 14px; color: var(--ink-light);">General & Life</div>
@@ -1568,7 +1751,7 @@
           <div style="background: var(--white); border: 1px solid var(--border); border-radius: 24px; padding: 24px;">
             <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
               <div style="width: 48px; height: 48px; background: var(--green-soft); display: grid; place-items: center; border-radius: 12px; font-weight: 800; color: var(--green); font-size: 12px;">ZEN</div>
-              <div style="font-size: 20px; font-weight: 700; letter-spacing: -0.02em;">Zenith Insurance</div>
+              <div style="font-size: 20px; font-weight: 700; letter-spacing: -0.02em; color: var(--ink);">Zenith Insurance</div>
             </div>
             <div style="font-size: 14px; color: var(--green); font-weight: 600; margin-bottom: 4px;">A rated</div>
             <div style="font-size: 14px; color: var(--ink-light);">General Insurance</div>
@@ -1577,7 +1760,7 @@
           <div style="background: var(--white); border: 1px solid var(--border); border-radius: 24px; padding: 24px;">
             <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
               <div style="width: 48px; height: 48px; background: var(--green-soft); display: grid; place-items: center; border-radius: 12px; font-weight: 800; color: var(--green); font-size: 12px;">SOV</div>
-              <div style="font-size: 20px; font-weight: 700; letter-spacing: -0.02em;">Sovereign Trust</div>
+              <div style="font-size: 20px; font-weight: 700; letter-spacing: -0.02em; color: var(--ink);">Sovereign Trust</div>
             </div>
             <div style="font-size: 14px; color: var(--green); font-weight: 600; margin-bottom: 4px;">A rated</div>
             <div style="font-size: 14px; color: var(--ink-light);">General Insurance</div>
@@ -1586,7 +1769,7 @@
           <div style="background: var(--white); border: 1px solid var(--border); border-radius: 24px; padding: 24px;">
             <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
               <div style="width: 48px; height: 48px; background: var(--green-soft); display: grid; place-items: center; border-radius: 12px; font-weight: 800; color: var(--green); font-size: 12px;">REL</div>
-              <div style="font-size: 20px; font-weight: 700; letter-spacing: -0.02em;">Reliance HMO</div>
+              <div style="font-size: 20px; font-weight: 700; letter-spacing: -0.02em; color: var(--ink);">Reliance HMO</div>
             </div>
             <div style="font-size: 14px; color: var(--green); font-weight: 600; margin-bottom: 4px;">A rated</div>
             <div style="font-size: 14px; color: var(--ink-light);">Health Insurance</div>
@@ -1595,7 +1778,7 @@
           <div style="background: var(--white); border: 1px solid var(--border); border-radius: 24px; padding: 24px;">
             <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
               <div style="width: 48px; height: 48px; background: var(--green-soft); display: grid; place-items: center; border-radius: 12px; font-weight: 800; color: var(--green); font-size: 12px;">HYG</div>
-              <div style="font-size: 20px; font-weight: 700; letter-spacing: -0.02em;">Hygeia HMO</div>
+              <div style="font-size: 20px; font-weight: 700; letter-spacing: -0.02em; color: var(--ink);">Hygeia HMO</div>
             </div>
             <div style="font-size: 14px; color: var(--green); font-weight: 600; margin-bottom: 4px;">A+ rated</div>
             <div style="font-size: 14px; color: var(--ink-light);">Health Insurance</div>
@@ -1604,7 +1787,7 @@
           <div style="background: var(--white); border: 1px solid var(--border); border-radius: 24px; padding: 24px;">
             <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
               <div style="width: 48px; height: 48px; background: var(--green-soft); display: grid; place-items: center; border-radius: 12px; font-weight: 800; color: var(--green); font-size: 12px;">LWH</div>
-              <div style="font-size: 20px; font-weight: 700; letter-spacing: -0.02em;">Leadway Health</div>
+              <div style="font-size: 20px; font-weight: 700; letter-spacing: -0.02em; color: var(--ink);">Leadway Health</div>
             </div>
             <div style="font-size: 14px; color: var(--green); font-weight: 600; margin-bottom: 4px;">A+ rated</div>
             <div style="font-size: 14px; color: var(--ink-light);">Health Insurance</div>
@@ -1613,7 +1796,7 @@
           <div style="background: var(--white); border: 1px solid var(--border); border-radius: 24px; padding: 24px;">
             <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
               <div style="width: 48px; height: 48px; background: var(--green-soft); display: grid; place-items: center; border-radius: 12px; font-weight: 800; color: var(--green); font-size: 12px;">COR</div>
-              <div style="font-size: 20px; font-weight: 700; letter-spacing: -0.02em;">Coronation Insurance</div>
+              <div style="font-size: 20px; font-weight: 700; letter-spacing: -0.02em; color: var(--ink);">Coronation Insurance</div>
             </div>
             <div style="font-size: 14px; color: var(--green); font-weight: 600; margin-bottom: 4px;">A rated</div>
             <div style="font-size: 14px; color: var(--ink-light);">General & Life</div>
