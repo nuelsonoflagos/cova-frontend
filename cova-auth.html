@@ -562,6 +562,41 @@
       let loginMethod = "phone";
       let identifierValue = "";
 
+
+      function formatPhoneForTermii(phone) {
+        if (!phone) return phone;
+        let clean = phone.replace(/\D/g, '');
+        if (clean.startsWith('0')) {
+          return '234' + clean.substring(1);
+        }
+        return clean;
+      }
+      function sendOTP(event) {
+        event.preventDefault();
+        identifierValue =
+          (loginMethod === "phone" || loginMethod === "sms")
+            ? document.getElementById("phone").value.trim()
+            : document.getElementById("email").value.trim();
+
+        if (!identifierValue) {
+          alert(
+            "Please enter your " +
+              (loginMethod === "phone" ? "WhatsApp number" : loginMethod === "sms" ? "Phone number" : "Email address"),
+          );
+          return;
+        }
+
+        if (loginMethod === "phone" || loginMethod === "sms") {
+          identifierValue = formatPhoneForTermii(identifierValue);
+        }
+
+        document.getElementById("sent-to").textContent = identifierValue;
+        document.getElementById("step-identifier").classList.remove("active");
+        document.getElementById("step-verify").classList.add("active");
+        document.getElementById("login-tabs").style.display = "none";
+
+        document.querySelector(".otp-inputs input").focus();
+      }
       function switchLoginMethod(method) {
         loginMethod = method;
         const tabs = document.querySelectorAll(".login-tab");
