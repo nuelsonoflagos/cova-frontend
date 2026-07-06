@@ -66,9 +66,9 @@
     const supabaseAnonKey = 'your_anon_key_here'; // Must be replaced with real key in production
     
     // We will initialize it gracefully in case the key is invalid
-    let supabase;
+    let supabaseClient;
     try {
-      supabase = supabase.createClient(supabaseUrl, supabaseAnonKey);
+      supabaseClient = supabase.createClient(supabaseUrl, supabaseAnonKey);
     } catch(e) {
       console.warn("Supabase not fully configured yet.");
     }
@@ -103,9 +103,9 @@
       const phone = sessionStorage.getItem('cova_phone');
       
       try {
-        if (supabase && supabaseAnonKey !== 'your_anon_key_here') {
+        if (supabaseClient && supabaseAnonKey !== 'your_anon_key_here') {
           // Actual Supabase Signup
-          const { data, error } = await supabase.auth.signUp({
+          const { data, error } = await supabaseClient.auth.signUp({
             email: email,
             password: password,
             options: {
