@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cova — Risk Profile</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <div class="progress-container">
+    <div class="progress-bar" style="width: 80%"></div>
+  </div>
+
+  <header class="onboarding-header">
+    <button class="back-btn" onclick="window.location.href='cova-onboarding-personal-step4.html'">
+      <span>←</span> Back
+    </button>
+    <a href="index.html" class="logo">
+      <img src="cova-logo.png" alt="Cova" style="height: 40px; width: auto; display: block;">
+    </a>
+  </header>
+
+  <main class="onboarding-main">
+    <div class="onboarding-card">
+      <h1 class="onboarding-title">How do you view risk?</h1>
+      <p class="onboarding-desc">This helps us balance coverage limits with deductibles to match your comfort level.</p>
+
+      <div class="selection-grid">
+        <label class="selection-card" onclick="selectRisk('low')">
+          <input type="radio" name="risk" value="low">
+          <div class="radio-custom"></div>
+          <div class="selection-content">
+            <div class="selection-title">Play it safe</div>
+            <div class="selection-desc">I want maximum coverage and zero surprises, even if it costs more monthly.</div>
+          </div>
+        </label>
+
+        <label class="selection-card" onclick="selectRisk('medium')">
+          <input type="radio" name="risk" value="medium">
+          <div class="radio-custom"></div>
+          <div class="selection-content">
+            <div class="selection-title">Balanced approach</div>
+            <div class="selection-desc">I want standard coverage but am willing to pay a moderate deductible.</div>
+          </div>
+        </label>
+
+        <label class="selection-card" onclick="selectRisk('high')">
+          <input type="radio" name="risk" value="high">
+          <div class="radio-custom"></div>
+          <div class="selection-content">
+            <div class="selection-title">Cost-conscious</div>
+            <div class="selection-desc">I prefer the lowest monthly cost and accept higher out-of-pocket costs if something happens.</div>
+          </div>
+        </label>
+      </div>
+
+      <button id="next-btn" class="btn-primary" disabled onclick="submitOnboarding()">Create Account</button>
+    </div>
+  </main>
+
+  <script>
+    // Initialize Supabase using environment variables or placeholders if not available
+    // Replace these with your actual Supabase URL and Anon Key
+    const supabaseUrl = 'https://sipbkoxamzsurjsojsov.supabase.co'; // Based on previous project context
+    const supabaseAnonKey = 'your_anon_key_here'; // Must be replaced with real key in production
+    
+    // We will initialize it gracefully in case the key is invalid
+    let supabase;
+    try {
+      supabase = supabase.createClient(supabaseUrl, supabaseAnonKey);
+    } catch(e) {
+      console.warn("Supabase not fully configured yet.");
+    }
+
+    const stored = sessionStorage.getItem('cova_risk');
+    if (stored) {
+      document.querySelectorAll('.selection-card').forEach(card => {
+        if (card.querySelector('input').value === stored) {
+          card.classList.add('selected');
+          document.getElementById('next-btn').disabled = false;
+        }
+      });
+    }
+
+    function selectRisk(value) {
+      document.querySelectorAll('.selection-card').forEach(card => card.classList.remove('selected'));
+      event.currentTarget.classList.add('selected');
+      document.getElementById('next-btn').disabled = false;
+      sessionStorage.setItem('cova_risk', value);
+    }
+
+    async function submitOnboarding() {
+      const btn = document.getElementById('next-btn');
+      btn.textContent = 'Processing...';
+      btn.disabled = true;
+
+      const email = sessionStorage.getItem('cova_email');
+      const password = Math.random().toString(36).slice(-8) + 'A1!'; // Generate a secure temp password or you'd normally collect this
+      const firstName = sessionStorage.getItem('cova_firstName');
+      const lastName = sessionStorage.getItem('cova_lastName');
+      const phone = sessionStorage.getItem('cova_phone');
+      
+      try {
+        if (supabase && supabaseAnonKey !== 'your_anon_key_here') {
+          // Actual Supabase Signup
+          const { data, error } = await supabase.auth.signUp({
+            email: email,
+            password: password,
+            options: {
+              data: {
+                first_name: firstName,
+                last_name: lastName,
+                phone: phone,
+                account_type: sessionStorage.getItem('cova_account_type'),
+                interests: JSON.parse(sessionStorage.getItem('cova_interests') || '[]'),
+                budget: sessionStorage.getItem('cova_budget'),
+                risk_profile: sessionStorage.getItem('cova_risk')
+              }
+            }
+          });
+
+          if (error) throw error;
+        } else {
+          // Simulate network delay for demo
+          await new Promise(resolve => setTimeout(resolve, 1500));
+          console.log("Mock signup successful. Data:", sessionStorage);
+        }
+
+        // Move to verification/recommendations
+        window.location.href = 'cova-onboarding-verify.html';
+        
+      } catch (error) {
+        console.error("Signup error:", error);
+        alert("There was an error creating your account: " + error.message);
+        btn.textContent = 'Create Account';
+        btn.disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>

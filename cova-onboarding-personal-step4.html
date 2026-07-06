@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cova — Budget</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="progress-container">
+    <div class="progress-bar" style="width: 60%"></div>
+  </div>
+
+  <header class="onboarding-header">
+    <button class="back-btn" onclick="window.location.href='cova-onboarding-personal-step3.html'">
+      <span>←</span> Back
+    </button>
+    <a href="index.html" class="logo">
+      <img src="cova-logo.png" alt="Cova" style="height: 40px; width: auto; display: block;">
+    </a>
+  </header>
+
+  <main class="onboarding-main">
+    <div class="onboarding-card">
+      <h1 class="onboarding-title">What is your monthly budget?</h1>
+      <p class="onboarding-desc">This helps us find plans that fit comfortably within your financial goals.</p>
+
+      <div class="selection-grid">
+        <label class="selection-card" onclick="selectBudget('under_10k')">
+          <input type="radio" name="budget" value="under_10k">
+          <div class="radio-custom"></div>
+          <div class="selection-content">
+            <div class="selection-title">Under ₦10,000 / month</div>
+          </div>
+        </label>
+
+        <label class="selection-card" onclick="selectBudget('10k_50k')">
+          <input type="radio" name="budget" value="10k_50k">
+          <div class="radio-custom"></div>
+          <div class="selection-content">
+            <div class="selection-title">₦10,000 - ₦50,000 / month</div>
+          </div>
+        </label>
+
+        <label class="selection-card" onclick="selectBudget('50k_150k')">
+          <input type="radio" name="budget" value="50k_150k">
+          <div class="radio-custom"></div>
+          <div class="selection-content">
+            <div class="selection-title">₦50,000 - ₦150,000 / month</div>
+          </div>
+        </label>
+
+        <label class="selection-card" onclick="selectBudget('over_150k')">
+          <input type="radio" name="budget" value="over_150k">
+          <div class="radio-custom"></div>
+          <div class="selection-content">
+            <div class="selection-title">Over ₦150,000 / month</div>
+          </div>
+        </label>
+      </div>
+
+      <button id="next-btn" class="btn-primary" disabled onclick="nextStep()">Continue</button>
+    </div>
+  </main>
+
+  <script>
+    const stored = sessionStorage.getItem('cova_budget');
+    if (stored) {
+      document.querySelectorAll('.selection-card').forEach(card => {
+        if (card.querySelector('input').value === stored) {
+          card.classList.add('selected');
+          document.getElementById('next-btn').disabled = false;
+        }
+      });
+    }
+
+    function selectBudget(value) {
+      document.querySelectorAll('.selection-card').forEach(card => card.classList.remove('selected'));
+      event.currentTarget.classList.add('selected');
+      document.getElementById('next-btn').disabled = false;
+      sessionStorage.setItem('cova_budget', value);
+    }
+
+    function nextStep() {
+      window.location.href = 'cova-onboarding-personal-step5.html';
+    }
+  </script>
+</body>
+</html>

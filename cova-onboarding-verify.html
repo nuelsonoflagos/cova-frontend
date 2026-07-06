@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cova — Verify & Recommendations</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .verify-icon {
+      font-size: 64px;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+    
+    .recommendation-list {
+      margin-top: 32px;
+      border-top: 1px solid var(--border);
+      padding-top: 32px;
+    }
+    
+    .rec-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 20px;
+      padding: 20px;
+      background: rgba(29, 158, 117, 0.05);
+      border-radius: 16px;
+      border: 1px solid rgba(29, 158, 117, 0.1);
+    }
+    
+    .rec-icon {
+      font-size: 24px;
+      background: white;
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      flex-shrink: 0;
+    }
+    
+    .rec-content h3 {
+      font-size: 16px;
+      color: var(--ink);
+      margin-bottom: 4px;
+    }
+    
+    .rec-content p {
+      font-size: 14px;
+      color: var(--ink-light);
+      line-height: 1.5;
+    }
+    
+    .email-display {
+      font-weight: 700;
+      color: var(--ink);
+    }
+  </style>
+</head>
+<body>
+  <div class="progress-container">
+    <div class="progress-bar" style="width: 100%"></div>
+  </div>
+
+  <header class="onboarding-header">
+    <div></div> <!-- Empty div for flex spacing -->
+    <a href="index.html" class="logo">
+      <img src="cova-logo.png" alt="Cova" style="height: 40px; width: auto; display: block;">
+    </a>
+  </header>
+
+  <main class="onboarding-main">
+    <div class="onboarding-card">
+      <div class="verify-icon">✉️</div>
+      <h1 class="onboarding-title" style="text-align: center;">Check your inbox</h1>
+      <p class="onboarding-desc" style="text-align: center;">
+        We've sent a verification link to <br>
+        <span class="email-display" id="display-email">your email</span>.
+      </p>
+
+      <div class="recommendation-list" id="recommendations">
+        <h2 style="font-family: var(--fd); font-size: 20px; margin-bottom: 20px;">Your tailored recommendations</h2>
+        <!-- Recommendations injected here -->
+      </div>
+
+      <button class="btn-primary" onclick="window.location.href='index.html'">Return to Homepage</button>
+    </div>
+  </main>
+
+  <script>
+    const email = sessionStorage.getItem('cova_email') || 'your email';
+    document.getElementById('display-email').textContent = email;
+
+    // Generate recommendations based on session storage
+    const interestsStr = sessionStorage.getItem('cova_interests');
+    const risk = sessionStorage.getItem('cova_risk') || 'medium';
+    
+    const recContainer = document.getElementById('recommendations');
+    
+    if (interestsStr) {
+      const interests = JSON.parse(interestsStr);
+      let html = '';
+      
+      const riskText = risk === 'low' ? 'Comprehensive coverage with zero deductible' 
+                     : risk === 'high' ? 'Essential coverage with high deductible for lower premiums' 
+                     : 'Balanced coverage with standard deductibles';
+
+      if (interests.includes('health')) {
+        html += `
+          <div class="rec-item">
+            <div class="rec-icon">🏥</div>
+            <div class="rec-content">
+              <h3>Cova Health Premium</h3>
+              <p>Full medical access. ${riskText}.</p>
+            </div>
+          </div>
+        `;
+      }
+      
+      if (interests.includes('auto')) {
+        html += `
+          <div class="rec-item">
+            <div class="rec-icon">🚗</div>
+            <div class="rec-content">
+              <h3>Cova Auto Shield</h3>
+              <p>Comprehensive vehicle protection. ${riskText}.</p>
+            </div>
+          </div>
+        `;
+      }
+
+      if (interests.includes('life')) {
+        html += `
+          <div class="rec-item">
+            <div class="rec-icon">👨‍👩‍👧</div>
+            <div class="rec-content">
+              <h3>Cova Life Assurance</h3>
+              <p>Term life policy customized for your family's future.</p>
+            </div>
+          </div>
+        `;
+      }
+
+      if (interests.includes('property')) {
+        html += `
+          <div class="rec-item">
+            <div class="rec-icon">🏠</div>
+            <div class="rec-content">
+              <h3>Cova Property Guard</h3>
+              <p>Protection against fire, theft, and damage. ${riskText}.</p>
+            </div>
+          </div>
+        `;
+      }
+      
+      if (html === '') {
+        html = '<p style="color: var(--ink-light); font-size: 14px;">We are preparing your custom quotes.</p>';
+      }
+      
+      recContainer.innerHTML += html;
+    }
+  </script>
+</body>
+</html>

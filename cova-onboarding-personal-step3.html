@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cova — What to Protect</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="progress-container">
+    <div class="progress-bar" style="width: 45%"></div>
+  </div>
+
+  <header class="onboarding-header">
+    <button class="back-btn" onclick="window.location.href='cova-onboarding-personal-step2.html'">
+      <span>←</span> Back
+    </button>
+    <a href="index.html" class="logo">
+      <img src="cova-logo.png" alt="Cova" style="height: 40px; width: auto; display: block;">
+    </a>
+  </header>
+
+  <main class="onboarding-main">
+    <div class="onboarding-card">
+      <h1 class="onboarding-title">What do you want to protect?</h1>
+      <p class="onboarding-desc">Select all the areas where you need coverage. We'll tailor your quotes based on this.</p>
+
+      <div class="selection-grid">
+        <label class="selection-card" onclick="toggleSelection(this, 'health')">
+          <input type="checkbox" value="health">
+          <div class="checkbox-custom"></div>
+          <div class="selection-content">
+            <div class="selection-title">Health</div>
+            <div class="selection-desc">Medical bills, hospital stays, and wellness.</div>
+          </div>
+        </label>
+
+        <label class="selection-card" onclick="toggleSelection(this, 'auto')">
+          <input type="checkbox" value="auto">
+          <div class="checkbox-custom"></div>
+          <div class="selection-content">
+            <div class="selection-title">Vehicle</div>
+            <div class="selection-desc">Car, motorcycle, or commercial fleet.</div>
+          </div>
+        </label>
+
+        <label class="selection-card" onclick="toggleSelection(this, 'life')">
+          <input type="checkbox" value="life">
+          <div class="checkbox-custom"></div>
+          <div class="selection-content">
+            <div class="selection-title">Life & Family</div>
+            <div class="selection-desc">Financial protection for your loved ones.</div>
+          </div>
+        </label>
+
+        <label class="selection-card" onclick="toggleSelection(this, 'property')">
+          <input type="checkbox" value="property">
+          <div class="checkbox-custom"></div>
+          <div class="selection-content">
+            <div class="selection-title">Property</div>
+            <div class="selection-desc">Home, renters, or commercial real estate.</div>
+          </div>
+        </label>
+      </div>
+
+      <button id="next-btn" class="btn-primary" disabled onclick="nextStep()">Continue</button>
+    </div>
+  </main>
+
+  <script>
+    let selectedInterests = [];
+
+    // Pre-fill if returning
+    const stored = sessionStorage.getItem('cova_interests');
+    if (stored) {
+      selectedInterests = JSON.parse(stored);
+      document.querySelectorAll('.selection-card').forEach(card => {
+        const val = card.querySelector('input').value;
+        if (selectedInterests.includes(val)) {
+          card.classList.add('selected');
+        }
+      });
+      checkButtonState();
+    }
+
+    function toggleSelection(element, value) {
+      // Prevent default to handle custom logic
+      event.preventDefault();
+      
+      const index = selectedInterests.indexOf(value);
+      if (index === -1) {
+        selectedInterests.push(value);
+        element.classList.add('selected');
+      } else {
+        selectedInterests.splice(index, 1);
+        element.classList.remove('selected');
+      }
+      
+      checkButtonState();
+    }
+
+    function checkButtonState() {
+      document.getElementById('next-btn').disabled = selectedInterests.length === 0;
+    }
+
+    function nextStep() {
+      sessionStorage.setItem('cova_interests', JSON.stringify(selectedInterests));
+      window.location.href = 'cova-onboarding-personal-step4.html';
+    }
+  </script>
+</body>
+</html>

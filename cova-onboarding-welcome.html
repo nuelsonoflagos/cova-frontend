@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cova — Onboarding</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="progress-container">
+    <div class="progress-bar" style="width: 15%"></div>
+  </div>
+
+  <header class="onboarding-header">
+    <button class="back-btn" onclick="window.location.href='index.html'">
+      <span>←</span> Back to home
+    </button>
+    <a href="index.html" class="logo">
+      <img src="cova-logo.png" alt="Cova" style="height: 40px; width: auto; display: block;">
+    </a>
+  </header>
+
+  <main class="onboarding-main">
+    <div class="onboarding-card">
+      <h1 class="onboarding-title">Welcome to Cova. Let's get started.</h1>
+      <p class="onboarding-desc">Are you looking for insurance for yourself or your business?</p>
+
+      <div class="selection-grid">
+        <label class="selection-card" onclick="selectType('personal')">
+          <input type="radio" name="account_type" value="personal">
+          <div class="radio-custom"></div>
+          <div class="selection-content">
+            <div class="selection-title">Personal Cover</div>
+            <div class="selection-desc">Health, auto, life, and travel insurance for individuals.</div>
+          </div>
+        </label>
+
+        <label class="selection-card" onclick="selectType('business')">
+          <input type="radio" name="account_type" value="business">
+          <div class="radio-custom"></div>
+          <div class="selection-content">
+            <div class="selection-title">Business Cover</div>
+            <div class="selection-desc">Liability, property, and group health for companies.</div>
+          </div>
+        </label>
+      </div>
+
+      <button id="next-btn" class="btn-primary" disabled onclick="nextStep()">Continue</button>
+    </div>
+  </main>
+
+  <script>
+    // Initialize session storage
+    sessionStorage.clear(); // Clear any previous onboarding data
+    
+    function selectType(type) {
+      document.querySelectorAll('.selection-card').forEach(card => card.classList.remove('selected'));
+      event.currentTarget.classList.add('selected');
+      document.getElementById('next-btn').disabled = false;
+      sessionStorage.setItem('cova_account_type', type);
+    }
+
+    function nextStep() {
+      const type = sessionStorage.getItem('cova_account_type');
+      if (type === 'personal') {
+        window.location.href = 'cova-onboarding-personal-step2.html';
+      } else {
+        // Assuming business goes to a different flow, but for now we route to step 2 as requested
+        // Or we just route to step 2 for both and handle logic later.
+        window.location.href = 'cova-onboarding-personal-step2.html';
+      }
+    }
+  </script>
+</body>
+</html>
