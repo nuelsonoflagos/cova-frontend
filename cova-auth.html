@@ -528,10 +528,11 @@
 
             <!-- SUCCESS MESSAGE -->
             <div id="success-message" class="otp-step" style="text-align: center; padding: 20px 0;">
-              <div style="font-size: 40px; margin-bottom: 10px;">✉️</div>
+              <div style="font-size: 40px; margin-bottom: 10px;">✅</div>
               <h3 style="font-family: var(--fd); font-size: 20px; color: var(--ink); margin-bottom: 10px;">Check your email</h3>
               <p style="font-size: 14px; color: var(--inkl); line-height: 1.6;">
-                We've sent a verification link to your email address. Click the link to activate your account.
+                Verification email sent to <strong id="email-display" style="color: var(--ink);"></strong>.<br>
+                Check your inbox and click the link to verify.
               </p>
               <button type="button" class="btn-primary" style="margin-top: 20px;" onclick="switchAuthMode('login')">Return to Log In</button>
             </div>
@@ -590,6 +591,7 @@
         document.getElementById('signup-form').classList.remove("active");
         document.getElementById('auth-tabs').style.display = "none";
         document.getElementById('success-message').classList.add("active");
+        document.getElementById('email-display').textContent = email;
         document.getElementById('auth-title').textContent = "Verification Sent";
         document.getElementById('auth-sub').textContent = "Please check your inbox.";
       }
