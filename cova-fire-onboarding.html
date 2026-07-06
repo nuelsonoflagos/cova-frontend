@@ -1448,18 +1448,31 @@
         otpMethod = method;
         const tPhone = document.getElementById("tab-opt-phone");
         const tEmail = document.getElementById("tab-opt-email");
-        if (method === "phone") {
-          if (tPhone) {
-            tPhone.style.background = "var(--w)";
-            tPhone.style.color = "var(--ink)";
-            tPhone.style.boxShadow = "0 2px 8px rgba(0,0,0,.05)";
+        if (tPhone) {
+          tPhone.style.background = method === "phone" ? "var(--w)" : "transparent";
+          tPhone.style.color = method === "phone" ? "var(--ink)" : "var(--inkl)";
+          tPhone.style.boxShadow = method === "phone" ? "0 2px 8px rgba(0,0,0,.05)" : "none";
+        }
+        if (tEmail) {
+          tEmail.style.background = method === "email" ? "var(--w)" : "transparent";
+          tEmail.style.color = method === "email" ? "var(--ink)" : "var(--inkl)";
+          tEmail.style.boxShadow = method === "email" ? "0 2px 8px rgba(0,0,0,.05)" : "none";
+        }
+
+        const phoneInput = document.querySelector('input[type="tel"]');
+        const emailInput = document.querySelector('input[type="email"]');
+        if (phoneInput && emailInput) {
+          const phoneGroup = phoneInput.closest('.form-group');
+          const emailGroup = emailInput.closest('.form-group');
+          if (method === 'phone') {
+            if (phoneGroup) phoneGroup.style.display = 'block';
+            if (emailGroup) { emailGroup.style.display = 'none'; emailGroup.classList.remove('error'); }
+          } else {
+            if (phoneGroup) { phoneGroup.style.display = 'none'; phoneGroup.classList.remove('error'); }
+            if (emailGroup) emailGroup.style.display = 'block';
           }
-          if (tEmail) {
-            tEmail.style.background = "transparent";
-            tEmail.style.color = "var(--inkl)";
-            tEmail.style.boxShadow = "none";
-          }
-        } else {
+        }
+      } else {
           if (tEmail) {
             tEmail.style.background = "var(--w)";
             tEmail.style.color = "var(--ink)";
@@ -1764,6 +1777,68 @@
       function toggleFaq(element) {
         if (element) element.classList.toggle("open");
       }
+    </script>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const labels = Array.from(document.querySelectorAll("label"));
+        const methodLabel = labels.find((l) =>
+          l.textContent.includes("Where should we send your verification code"),
+        );
+        if (methodLabel) {
+          const methodGroup = methodLabel.closest(".form-group");
+          const phoneInput = document.querySelector('input[type="tel"]');
+          if (methodGroup && phoneInput) {
+            const phoneGroup = phoneInput.closest(".form-group");
+            if (phoneGroup && methodGroup !== phoneGroup) {
+              phoneGroup.parentNode.insertBefore(methodGroup, phoneGroup);
+            }
+          }
+        }
+
+        if (typeof window.validateStep === "function") {
+          const originalValidateStep = window.validateStep;
+          window.validateStep = function (step) {
+            const phoneInput = document.querySelector('input[type="tel"]');
+            const emailInput = document.querySelector('input[type="email"]');
+            let origPhone = null,
+              origEmail = null;
+
+            if (
+              phoneInput &&
+              phoneInput.closest(".form-group") &&
+              phoneInput.closest(".form-group").style.display === "none"
+            ) {
+              origPhone = phoneInput.value;
+              phoneInput.value = "08000000000";
+            }
+            if (
+              emailInput &&
+              emailInput.closest(".form-group") &&
+              emailInput.closest(".form-group").style.display === "none"
+            ) {
+              origEmail = emailInput.value;
+              emailInput.value = "dummy@example.com";
+            }
+
+            const result = originalValidateStep(step);
+
+            if (origPhone !== null) {
+              phoneInput.value = origPhone;
+              phoneInput.closest(".form-group").classList.remove("error");
+            }
+            if (origEmail !== null) {
+              emailInput.value = origEmail;
+              emailInput.closest(".form-group").classList.remove("error");
+            }
+            return result;
+          };
+        }
+
+        if (typeof window.selectOtpMethod === "function") {
+          window.selectOtpMethod(window.otpMethod || "phone");
+        }
+      });
     </script>
   </body>
 </html>
