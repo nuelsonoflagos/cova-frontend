@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>About Us — Cova</title>
+    <title>How it works — Cova</title>
     <script src="api-client.js"></script>
     <link
       href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&display=swap"
@@ -1657,60 +1657,52 @@
 
     <section class="hero-split" style="min-height: 50vh">
       <div class="hero-left">
-        <div class="hero-tag">ABOUT COVA</div>
-        <h1 class="hero-title-split">
-          We are simplifying insurance for every Nigerian.
-        </h1>
+        <div class="hero-tag">HOW IT WORKS</div>
+        <h1 class="hero-title-split">A simple broker experience.</h1>
         <p class="hero-copy-split">
-          Cova is an independent insurance broker on a mission to make buying
-          insurance easy, comparing policies transparent, and managing claims
-          stress-free through WhatsApp.
+          Answer a few questions, compare multiple insurers, buy online, and
+          claim on WhatsApp with a dedicated handler.
         </p>
       </div>
       <div class="hero-right">
         <div
           class="shape-img img-1"
-          style="
-            background-image: url(&quot;img-2.jpg&quot;);
-            top: 50px;
-            left: 20px;
-          "
+          style="background-image: url('img-1.jpg'); top: 20px"
         ></div>
       </div>
     </section>
 
-    <section class="section section-green" id="mission">
+    <section class="section section-green" id="how">
       <div class="container-inner" style="max-width: 1080px">
-        <div class="section-label">Our Mission</div>
-        <h2 class="section-title light">Insurance built around the claim.</h2>
-        <p class="section-sub light">
-          For too long, insurance has been complicated to buy and impossible to
-          claim. We're changing that. We compare the best insurers, so you don't
-          have to, and we stand by your side when things go wrong.
-        </p>
-
-        <div class="why-grid">
-          <div class="why-card">
-            <div class="why-icon">🤝</div>
-            <div class="why-title">Independent & Unbiased</div>
-            <div class="why-desc">
-              We work for you, not the insurer. We recommend what fits your
-              needs best.
+        <div class="how-grid">
+          <div class="how-card">
+            <div class="how-step">Step 1</div>
+            <div class="how-title">Tell us what you need</div>
+            <div class="how-desc">
+              Share your details and risk profile so Cova can compare the best
+              policies.
             </div>
           </div>
-          <div class="why-card">
-            <div class="why-icon">💬</div>
-            <div class="why-title">Tech-Enabled</div>
-            <div class="why-desc">
-              Buy online in minutes and manage everything through WhatsApp.
+          <div class="how-card">
+            <div class="how-step">Step 2</div>
+            <div class="how-title">Compare top insurers</div>
+            <div class="how-desc">
+              We review multiple quotes and recommend the strongest cover.
             </div>
           </div>
-          <div class="why-card">
-            <div class="why-icon">🛡️</div>
-            <div class="why-title">Licensed Experts</div>
-            <div class="why-desc">
-              Fully licensed by NAICOM to provide professional brokering
-              services.
+          <div class="how-card">
+            <div class="how-step">Step 3</div>
+            <div class="how-title">Buy in minutes</div>
+            <div class="how-desc">
+              Choose payment terms and get your policy issued instantly online.
+            </div>
+          </div>
+          <div class="how-card">
+            <div class="how-step">Step 4</div>
+            <div class="how-title">Claim on WhatsApp</div>
+            <div class="how-desc">
+              Send a message to your handler, and we manage the claim end to
+              end.
             </div>
           </div>
         </div>
@@ -1718,24 +1710,65 @@
     </section>
 
     <section class="section">
-      <div class="container-inner">
-        <div class="split-cta">
-          <div class="cta-panel left">
-            <h3>Individual and family cover</h3>
-            <p>Life, health, motor, travel, property and device protection.</p>
-            <a class="btn-white" href="cova-personal.html"
-              >Get personal cover</a
-            >
+      <div class="container-inner" style="max-width: 800px; margin: 0 auto">
+        <div class="section-label">Send a message</div>
+        <h2 class="section-title">Get in touch</h2>
+        <div
+          style="
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-top: 32px;
+          "
+        >
+          <div class="modal-group">
+            <label>Name</label>
+            <input
+              type="text"
+              placeholder="Your name"
+              style="
+                padding: 16px;
+                border-radius: 18px;
+                border: 1px solid var(--border);
+                width: 100%;
+              "
+            />
           </div>
-          <div class="cta-panel right">
-            <h3>Business and SME cover</h3>
-            <p>
-              Fleet, group health, fire, liability and workplace protection.
-            </p>
-            <a class="btn-white" href="cova-business.html"
-              >Get business cover</a
-            >
+          <div class="modal-group">
+            <label>Email Address</label>
+            <input
+              type="email"
+              placeholder="you@example.com"
+              style="
+                padding: 16px;
+                border-radius: 18px;
+                border: 1px solid var(--border);
+                width: 100%;
+              "
+            />
           </div>
+          <div class="modal-group">
+            <label>Message</label>
+            <textarea
+              placeholder="How can we help you?"
+              rows="5"
+              style="
+                padding: 16px;
+                border-radius: 18px;
+                border: 1px solid var(--border);
+                width: 100%;
+                font-family: inherit;
+                resize: vertical;
+              "
+            ></textarea>
+          </div>
+          <button
+            class="btn-primary"
+            style="width: max-content; margin-top: 10px"
+            onclick="alert('Message sent!')"
+          >
+            Send Message
+          </button>
         </div>
       </div>
     </section>
