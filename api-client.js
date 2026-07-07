@@ -8,7 +8,7 @@ const supabaseAnonKey = 'sb_publishable_K5waOlfDMf1e7nwO7CkTmQ_fMyB5E5x';
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // API Configuration
-const API_URL = 'http://localhost:3000';
+const API_URL = 'https://getcova.ng';
 
 // Generic API call function
 async function apiCall(endpoint, method = 'GET', data = null) {
