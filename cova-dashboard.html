@@ -4,28 +4,47 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Cova — My Dashboard</title>
-    <script src="api-client.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
+      const supabaseUrl = 'https://sipbkoxamzsurjsojsov.supabase.co';
+      const supabaseAnonKey = 'sb_publishable_K5waOlfDMf1e7nwO7CkTmQ_fMyB5E5x';
+      const supabaseClient = supabase.createClient(supabaseUrl, supabaseAnonKey);
+
       // Load policies when page loads
       window.addEventListener("DOMContentLoaded", async () => {
-        const token = localStorage.getItem("accessToken");
+        // Check session via Supabase
+        const { data: { session } } = await supabaseClient.auth.getSession();
 
-        // If no token, redirect to login
-        if (!token) {
-          window.location.href = "cova-auth.html";
+        // If no session, redirect to login
+        if (!session) {
+          window.location.href = "cova-auth.html#login";
           return;
         }
 
-        // Fetch user's policies
-        const result = await getUserPolicies();
-
-        if (result.ok) {
-          const policies = result.data.policies || [];
-          displayPolicies(policies);
-        } else {
-          console.error("Failed to fetch policies:", result.data.error);
-          alert("Error loading policies");
+        // Set user name in UI if available
+        const userNameElem = document.querySelector('.user-name');
+        if (userNameElem && session.user.user_metadata?.first_name) {
+          userNameElem.textContent = session.user.user_metadata.first_name + ' ' + (session.user.user_metadata.last_name || '');
+        } else if (userNameElem) {
+          userNameElem.textContent = session.user.email.split('@')[0];
         }
+
+        // Fetch user's policies from Supabase
+        let policies = [];
+        try {
+          const { data, error } = await supabaseClient
+            .from('policies')
+            .select('*')
+            .eq('user_id', session.user.id);
+            
+          if (!error && data) {
+            policies = data;
+          }
+        } catch (err) {
+          console.warn("Could not fetch policies", err);
+        }
+        
+        displayPolicies(policies);
       });
 
       function displayPolicies(policies) {

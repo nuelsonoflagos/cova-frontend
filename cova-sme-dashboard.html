@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Cova — SME Dashboard</title>
-    <script src="api-client.js"></script>
+    <script type="module" src="api-client.js"></script>
     <link
       href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap"
       rel="stylesheet"
@@ -1142,24 +1142,45 @@
       </main>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
+      const supabaseUrl = 'https://sipbkoxamzsurjsojsov.supabase.co';
+      const supabaseAnonKey = 'sb_publishable_K5waOlfDMf1e7nwO7CkTmQ_fMyB5E5x';
+      const supabaseClient = supabase.createClient(supabaseUrl, supabaseAnonKey);
+
       // Fetch company policies on page load
       window.addEventListener("DOMContentLoaded", async () => {
-        const token = localStorage.getItem("accessToken");
+        const { data: { session } } = await supabaseClient.auth.getSession();
 
-        if (!token) {
-          window.location.href = "cova-auth.html";
+        if (!session) {
+          window.location.href = "cova-auth.html#login";
           return;
         }
 
-        const result = await getUserPolicies();
-
-        if (result.ok) {
-          const policies = result.data.policies || [];
-          displaySmePolicies(policies);
-        } else {
-          console.error("Failed to fetch policies:", result.data.error);
+        // Set user name in UI if available
+        const userNameElem = document.querySelector('.user-name');
+        if (userNameElem && session.user.user_metadata?.first_name) {
+          userNameElem.textContent = session.user.user_metadata.first_name + ' ' + (session.user.user_metadata.last_name || '');
+        } else if (userNameElem) {
+          userNameElem.textContent = session.user.email.split('@')[0];
         }
+
+        // Fetch company policies from Supabase
+        let policies = [];
+        try {
+          const { data, error } = await supabaseClient
+            .from('policies')
+            .select('*')
+            .eq('user_id', session.user.id);
+            
+          if (!error && data) {
+            policies = data;
+          }
+        } catch (err) {
+          console.warn("Could not fetch policies", err);
+        }
+
+        displaySmePolicies(policies);
       });
 
       function displaySmePolicies(policies) {
