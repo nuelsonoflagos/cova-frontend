@@ -90,104 +90,48 @@
     </div>
   </main>
 
+  <script src="recommendation-engine.js"></script>
   <script>
     const email = sessionStorage.getItem('cova_email') || 'your email';
     document.getElementById('display-email').textContent = email;
 
-    // Generate recommendations based on session storage
-    const interestsStr = sessionStorage.getItem('cova_interests');
-    const risk = sessionStorage.getItem('cova_risk') || 'medium';
-    const employment = sessionStorage.getItem('cova_employment');
-    const housing = sessionStorage.getItem('cova_housing');
+    // Generate recommendations using CovaPAI
+    const engine = new CovaPAI();
     
+    const userData = {
+      account_type: sessionStorage.getItem('cova_account_type') || 'personal',
+      selected_needs: JSON.parse(sessionStorage.getItem('cova_interests') || '[]'),
+      insurance_budget: sessionStorage.getItem('cova_budget'),
+      risk_profile: sessionStorage.getItem('cova_risk') || 'medium'
+    };
+
+    const recommendations = engine.recommend(userData);
     const recContainer = document.getElementById('recommendations');
     
-    if (interestsStr) {
-      const interests = JSON.parse(interestsStr);
-      let html = '';
-      
-      const riskText = risk === 'low' ? 'Comprehensive coverage with zero deductible' 
-                     : risk === 'high' ? 'Essential coverage with high deductible for lower premiums' 
-                     : 'Balanced coverage with standard deductibles';
-
-      if (interests.includes('health')) {
+    let html = '';
+    if (recommendations.length > 0) {
+      recommendations.forEach(rec => {
         html += `
           <div class="rec-item">
-            <div class="rec-icon">🏥</div>
+            <div class="rec-icon">${rec.icon}</div>
             <div class="rec-content">
-              <h3>Cova Health Premium</h3>
-              <p>Full medical access. ${riskText}.</p>
+              <h3>${rec.name}</h3>
+              <p>${rec.description}</p>
+              <p style="font-size: 12px; margin-top: 6px; color: var(--g); font-weight: 600;">
+                ${rec.price} • ${rec.explanation}
+              </p>
             </div>
           </div>
         `;
-      }
-      
-      if (interests.includes('auto')) {
-        html += `
-          <div class="rec-item">
-            <div class="rec-icon">🚗</div>
-            <div class="rec-content">
-              <h3>Cova Auto Shield</h3>
-              <p>Comprehensive vehicle protection. ${riskText}.</p>
-            </div>
-          </div>
-        `;
-      }
-
-      if (interests.includes('life')) {
-        html += `
-          <div class="rec-item">
-            <div class="rec-icon">👨‍👩‍👧</div>
-            <div class="rec-content">
-              <h3>Cova Life Assurance</h3>
-              <p>Term life policy customized for your family's future.</p>
-            </div>
-          </div>
-        `;
-      }
-
-      if (interests.includes('property')) {
-        if (housing === 'rent') {
-          html += `
-            <div class="rec-item">
-              <div class="rec-icon">🛋️</div>
-              <div class="rec-content">
-                <h3>Cova Renter's Guard</h3>
-                <p>Protection for your personal belongings and liability in your rented space. ${riskText}.</p>
-              </div>
-            </div>
-          `;
-        } else {
-          html += `
-            <div class="rec-item">
-              <div class="rec-icon">🏠</div>
-              <div class="rec-content">
-                <h3>Cova Homeowner's Premium</h3>
-                <p>Comprehensive protection against fire, theft, and damage. ${riskText}.</p>
-              </div>
-            </div>
-          `;
-        }
-      }
-      
-      if (employment === 'self_employed' || employment === 'business_owner') {
-          html += `
-            <div class="rec-item">
-              <div class="rec-icon">💼</div>
-              <div class="rec-content">
-                <h3>Cova Income Protection</h3>
-                <p>Because you work for yourself, ensure your income continues even if you can't work due to illness or injury.</p>
-              </div>
-            </div>
-          `;
-      }
-      
-      if (html === '') {
-        html = '<p style="color: var(--ink-light); font-size: 14px;">We are preparing your custom quotes.</p>';
-      }
-      
-      recContainer.innerHTML += html;
+      });
+    } else {
+      html = '<p>No specific recommendations found. Please contact support.</p>';
     }
+    
+    // Create wrapper div for injected HTML
+    const recList = document.createElement('div');
+    recList.innerHTML = html;
+    recContainer.appendChild(recList);
   </script>
 </body>
 </html>
