@@ -664,7 +664,7 @@
 
         try {
           const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
-            redirectTo: window.location.origin + '/cova-update-password.html',
+            redirectTo: 'https://getcova.ng/cova-update-password.html',
           });
 
           if (error) throw error;
