@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cova Insurance Assistant</title>
+    <link
+      rel="preconnect"
+      href="https://fonts.googleapis.com"
+    />
+    <link
+      rel="preconnect"
+      href="https://fonts.gstatic.com"
+      crossorigin
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Syne:wght@700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      :root {
+        --green-900: #0a5c45;
+        --green-800: #137a5c;
+        --green-100: #e6f5f0;
+        --cream: #f7f4ee;
+        --ink: #0f1a14;
+        --muted: #5a6e63;
+        --line: #d9e5df;
+        --white: #ffffff;
+      }
+
+      body {
+        font-family: "DM Sans", sans-serif;
+        background: linear-gradient(135deg, var(--green-900) 0%, var(--green-800) 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+
+      .chat-container {
+        width: 100%;
+        max-width: 560px;
+        height: min(720px, calc(100vh - 40px));
+        background: var(--white);
+        border-radius: 24px;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.22);
+        overflow: hidden;
+      }
+
+      .chat-header {
+        background: linear-gradient(135deg, var(--green-900) 0%, var(--green-800) 100%);
+        color: var(--white);
+        padding: 24px 22px 18px;
+      }
+
+      .chat-header h1 {
+        font-family: "Syne", sans-serif;
+        font-size: 24px;
+        line-height: 1.1;
+        margin-bottom: 6px;
+      }
+
+      .chat-header p {
+        font-size: 14px;
+        opacity: 0.92;
+      }
+
+      .chat-status {
+        margin-top: 12px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.12);
+        font-size: 12px;
+      }
+
+      .chat-status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #84f1b2;
+      }
+
+      .chat-messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px;
+        background: var(--cream);
+      }
+
+      .message {
+        margin-bottom: 16px;
+        display: flex;
+        animation: slideIn 0.25s ease;
+      }
+
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .message.user {
+        justify-content: flex-end;
+      }
+
+      .message.bot {
+        justify-content: flex-start;
+      }
+
+      .message-stack {
+        max-width: 78%;
+      }
+
+      .message-content {
+        padding: 14px 16px;
+        border-radius: 18px;
+        font-size: 14px;
+        line-height: 1.6;
+        white-space: pre-wrap;
+      }
+
+      .user .message-content {
+        background: var(--green-900);
+        color: var(--white);
+        border-bottom-right-radius: 6px;
+      }
+
+      .bot .message-content {
+        background: var(--white);
+        color: var(--ink);
+        border: 1px solid var(--line);
+        border-bottom-left-radius: 6px;
+      }
+
+      .recommendation-list {
+        display: grid;
+        gap: 12px;
+        margin-top: 12px;
+      }
+
+      .recommendation {
+        background: linear-gradient(135deg, var(--green-100) 0%, var(--cream) 100%);
+        border: 1px solid rgba(10, 92, 69, 0.18);
+        border-radius: 16px;
+        padding: 16px;
+      }
+
+      .recommendation-top {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        margin-bottom: 8px;
+      }
+
+      .recommendation-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--white);
+        border: 1px solid rgba(10, 92, 69, 0.14);
+        font-size: 20px;
+        flex-shrink: 0;
+      }
+
+      .recommendation h3 {
+        color: var(--green-900);
+        font-size: 15px;
+        line-height: 1.35;
+        margin-bottom: 4px;
+      }
+
+      .recommendation .meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 8px;
+      }
+
+      .recommendation .tag {
+        display: inline-flex;
+        align-items: center;
+        padding: 5px 10px;
+        border-radius: 999px;
+        background: rgba(10, 92, 69, 0.1);
+        color: var(--green-900);
+        font-size: 12px;
+        font-weight: 600;
+      }
+
+      .recommendation p {
+        font-size: 13px;
+        color: var(--muted);
+        line-height: 1.55;
+      }
+
+      .chat-input-area {
+        padding: 16px;
+        border-top: 1px solid var(--line);
+        background: var(--white);
+      }
+
+      .input-form {
+        display: flex;
+        gap: 10px;
+      }
+
+      #chat-input {
+        flex: 1;
+        min-width: 0;
+        padding: 14px 16px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        font-family: "DM Sans", sans-serif;
+        font-size: 14px;
+        color: var(--ink);
+        outline: none;
+        transition: border-color 0.2s, box-shadow 0.2s;
+      }
+
+      #chat-input:focus {
+        border-color: var(--green-900);
+        box-shadow: 0 0 0 4px rgba(10, 92, 69, 0.08);
+      }
+
+      .send-btn {
+        background: var(--green-900);
+        color: var(--white);
+        border: none;
+        padding: 0 20px;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 700;
+        font-family: "DM Sans", sans-serif;
+        transition: background-color 0.2s, transform 0.2s;
+      }
+
+      .send-btn:hover {
+        background: #094c3a;
+        transform: translateY(-1px);
+      }
+
+      .send-btn:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .typing-indicator {
+        display: flex;
+        gap: 4px;
+        padding: 4px 2px;
+      }
+
+      .typing-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--green-900);
+        animation: typing 1.4s infinite;
+      }
+
+      .typing-dot:nth-child(2) {
+        animation-delay: 0.2s;
+      }
+
+      .typing-dot:nth-child(3) {
+        animation-delay: 0.4s;
+      }
+
+      @keyframes typing {
+        0%,
+        60%,
+        100% {
+          opacity: 0.4;
+          transform: translateY(0);
+        }
+        30% {
+          opacity: 1;
+          transform: translateY(-2px);
+        }
+      }
+
+      @media (max-width: 640px) {
+        body {
+          padding: 0;
+        }
+
+        .chat-container {
+          max-width: none;
+          height: 100vh;
+          border-radius: 0;
+        }
+
+        .message-stack {
+          max-width: 88%;
+        }
+
+        .input-form {
+          align-items: stretch;
+        }
+
+        .send-btn {
+          padding: 0 16px;
+        }
+      }
+    </style>
+    <script>
+      if (new URLSearchParams(window.location.search).get('widget') === 'true') {
+        document.documentElement.style.height = '100%';
+        const style = document.createElement('style');
+        style.innerHTML = `
+          body {
+            padding: 0 !important;
+            background: transparent !important;
+            height: 100vh !important;
+            min-height: 100vh !important;
+          }
+          .chat-container {
+            max-width: 100% !important;
+            height: 100% !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+          }
+        `;
+        document.head.appendChild(style);
+      }
+    </script>
+  </head>
+  <body>
+    <div class="chat-container">
+      <div class="chat-header">
+        <h1>Cova Insurance Assistant</h1>
+        <p>Tell us what you want to protect and we will guide you to the right cover.</p>
+        <div class="chat-status">
+          <span class="chat-status-dot"></span>
+          <span id="chat-status-text">Smart recommendations active</span>
+        </div>
+      </div>
+
+      <div
+        class="chat-messages"
+        id="chat-messages"
+        aria-live="polite"
+      ></div>
+
+      <div class="chat-input-area">
+        <form
+          class="input-form"
+          id="chat-form"
+        >
+          <input
+            type="text"
+            id="chat-input"
+            placeholder="Tell me about your insurance needs..."
+            autocomplete="off"
+          />
+          <button
+            type="submit"
+            class="send-btn"
+            id="send-btn"
+          >
+            Send
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <script src="recommendation-engine.js"></script>
+    <script>
+      const chatMessages = document.getElementById("chat-messages");
+      const chatForm = document.getElementById("chat-form");
+      const chatInput = document.getElementById("chat-input");
+      const sendBtn = document.getElementById("send-btn");
+      const chatStatusText = document.getElementById("chat-status-text");
+
+      const conversationHistory = [];
+      const recommendationEngine =
+        typeof window.CovaPAI === "function" ? new window.CovaPAI() : null;
+
+      let userProfile = {
+        account_type: "",
+        selected_needs: [],
+        concerns: [],
+        insurance_budget: "",
+        income: "",
+        risk_profile: "",
+        business_type: ""
+      };
+
+      function initializeChat() {
+        addBotMessage(
+          "Hi there. I am Cova's insurance assistant.\n\nAre you looking for personal insurance or business insurance?"
+        );
+      }
+
+      chatForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const userMessage = chatInput.value.trim();
+
+        if (!userMessage) {
+          return;
+        }
+
+        addUserMessage(userMessage);
+        chatInput.value = "";
+        showTypingIndicator();
+        sendBtn.disabled = true;
+
+        const botResponse = await getAssistantResponse(userMessage);
+
+        removeTypingIndicator();
+        addBotMessage(botResponse.message, botResponse.recommendations || []);
+        sendBtn.disabled = false;
+        chatInput.focus();
+      });
+
+      async function getAssistantResponse(userMessage) {
+        conversationHistory.push({
+          role: "user",
+          content: userMessage
+        });
+
+        mergeProfile(extractProfileFromMessage(userMessage));
+
+        const remoteResponse = await getRemoteResponse(userMessage);
+        if (remoteResponse) {
+          conversationHistory.push({
+            role: "assistant",
+            content: remoteResponse.message
+          });
+
+          if (remoteResponse.userProfile) {
+            mergeProfile(remoteResponse.userProfile);
+          }
+
+          return remoteResponse;
+        }
+
+        chatStatusText.textContent = "Using local recommendation mode";
+        const localResponse = buildLocalResponse();
+
+        conversationHistory.push({
+          role: "assistant",
+          content: localResponse.message
+        });
+
+        return localResponse;
+      }
+
+      async function getRemoteResponse(userMessage) {
+        try {
+          const response = await fetch("https://sipbkoxamzsurjsojsov.supabase.co/functions/v1/chatbot", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": "Bearer sb_publishable_K5waOlfDMf1e7nwO7CkTmQ_fMyB5E5x"
+            },
+            body: JSON.stringify({
+              message: userMessage,
+              history: conversationHistory,
+              userProfile: userProfile
+            })
+          });
+
+          if (!response.ok) {
+            return null;
+          }
+
+          const data = await response.json();
+          if (!data || typeof data.response !== "string") {
+            return null;
+          }
+
+          return {
+            message: data.response,
+            recommendations: Array.isArray(data.recommendations) ? data.recommendations : [],
+            userProfile: data.userProfile || null
+          };
+        } catch (error) {
+          return null;
+        }
+      }
+
+      function buildLocalResponse() {
+        if (!userProfile.account_type) {
+          return {
+            message:
+              "Thanks. First, tell me whether you need personal insurance or business insurance.",
+            recommendations: []
+          };
+        }
+
+        if (!userProfile.selected_needs.length) {
+          return {
+            message:
+              userProfile.account_type === "business"
+                ? "What do you want to protect in your business? You can mention equipment, vehicles, health cover for staff, property, fire, or theft."
+                : "What do you want to protect? You can mention devices, car, health, life, travel, or property.",
+            recommendations: []
+          };
+        }
+
+        const recommendations = recommendationEngine
+          ? recommendationEngine.recommend(userProfile)
+          : [];
+
+        if (!userProfile.insurance_budget) {
+          return {
+            message:
+              "I already have enough to start narrowing things down. Tell me your budget range too, for example under 10k, 10k to 50k, 50k to 150k, or over 150k.",
+            recommendations: recommendations.slice(0, 2)
+          };
+        }
+
+        if (!recommendations.length) {
+          return {
+            message:
+              "I could not find a strong match yet. Tell me a bit more about what matters most to you, such as theft, health, family protection, fire, or comprehensive cover.",
+            recommendations: []
+          };
+        }
+
+        return {
+          message:
+            "Based on what you shared, these are the Cova cover options that fit you best.",
+          recommendations: recommendations
+        };
+      }
+
+      function extractProfileFromMessage(message) {
+        const text = message.toLowerCase();
+        const update = {
+          selected_needs: []
+        };
+
+        if (/\b(personal|myself|me|family)\b/.test(text)) {
+          update.account_type = "personal";
+        }
+
+        if (/\b(business|company|office|shop|startup|store|staff)\b/.test(text)) {
+          update.account_type = "business";
+        }
+
+        const needsMap = [
+          { keys: ["device", "devices", "phone", "laptop", "camera", "gadget"], value: "devices" },
+          { keys: ["car", "auto", "vehicle", "motor"], value: "car" },
+          { keys: ["health", "medical", "hospital"], value: "health" },
+          { keys: ["life", "family", "death"], value: "life" },
+          { keys: ["travel", "trip", "flight"], value: "travel" },
+          { keys: ["property", "house", "home", "rent", "apartment"], value: "property" }
+        ];
+
+        needsMap.forEach((entry) => {
+          if (entry.keys.some((key) => text.includes(key))) {
+            update.selected_needs.push(entry.value);
+          }
+        });
+
+        if (/\b(retail|shop|store)\b/.test(text)) {
+          update.business_type = "retail";
+        } else if (/\b(tech|software|saas|startup)\b/.test(text)) {
+          update.business_type = "tech";
+        } else if (/\b(logistics|delivery|fleet|transport)\b/.test(text)) {
+          update.business_type = "logistics";
+        } else if (/\b(factory|manufacturing|warehouse)\b/.test(text)) {
+          update.business_type = "manufacturing";
+        }
+
+        if (/\bunder\s?10k\b|\bbelow\s?10k\b|\bcheap\b|\bbasic\b/.test(text)) {
+          update.insurance_budget = "under_10k";
+          update.risk_profile = update.risk_profile || "low";
+        } else if (/\b10k\b.*\b50k\b|\b10k to 50k\b|\b10-50k\b/.test(text)) {
+          update.insurance_budget = "10k_50k";
+        } else if (/\b50k\b.*\b150k\b|\b50k to 150k\b|\b50-150k\b/.test(text)) {
+          update.insurance_budget = "50k_150k";
+        } else if (/\bover\s?150k\b|\babove\s?150k\b|\bpremium\b/.test(text)) {
+          update.insurance_budget = "over_150k";
+        }
+
+        if (/\b(comprehensive|premium|full cover|full protection)\b/.test(text)) {
+          update.risk_profile = "high";
+        } else if (/\b(balanced|standard|mid)\b/.test(text)) {
+          update.risk_profile = "medium";
+        } else if (/\b(basic|minimal|third party)\b/.test(text)) {
+          update.risk_profile = "low";
+        }
+
+        return update;
+      }
+
+      function mergeProfile(update) {
+        if (!update) {
+          return;
+        }
+
+        userProfile = {
+          ...userProfile,
+          ...Object.fromEntries(
+            Object.entries(update).filter(([, value]) => value !== "" && value !== null && value !== undefined)
+          ),
+          selected_needs: Array.from(
+            new Set([...(userProfile.selected_needs || []), ...(update.selected_needs || [])])
+          )
+        };
+      }
+
+      function addUserMessage(message) {
+        const wrapper = document.createElement("div");
+        wrapper.className = "message user";
+
+        const stack = document.createElement("div");
+        stack.className = "message-stack";
+
+        const content = document.createElement("div");
+        content.className = "message-content";
+        content.textContent = message;
+
+        stack.appendChild(content);
+        wrapper.appendChild(stack);
+        chatMessages.appendChild(wrapper);
+        scrollToBottom();
+      }
+
+      function addBotMessage(message, recommendations) {
+        const wrapper = document.createElement("div");
+        wrapper.className = "message bot";
+
+        const stack = document.createElement("div");
+        stack.className = "message-stack";
+
+        const content = document.createElement("div");
+        content.className = "message-content";
+        content.textContent = message;
+
+        stack.appendChild(content);
+
+        if (Array.isArray(recommendations) && recommendations.length) {
+          const recommendationList = document.createElement("div");
+          recommendationList.className = "recommendation-list";
+
+          recommendations.forEach((item) => {
+            recommendationList.appendChild(createRecommendationCard(item));
+          });
+
+          stack.appendChild(recommendationList);
+        }
+
+        wrapper.appendChild(stack);
+        chatMessages.appendChild(wrapper);
+        scrollToBottom();
+      }
+
+      function createRecommendationCard(item) {
+        const card = document.createElement("div");
+        card.className = "recommendation";
+
+        const top = document.createElement("div");
+        top.className = "recommendation-top";
+
+        const icon = document.createElement("div");
+        icon.className = "recommendation-icon";
+        icon.textContent = item.icon || "C";
+
+        const headingWrap = document.createElement("div");
+
+        const title = document.createElement("h3");
+        title.textContent = item.name || "Recommended cover";
+
+        const meta = document.createElement("div");
+        meta.className = "meta";
+
+        if (item.price) {
+          const priceTag = document.createElement("span");
+          priceTag.className = "tag";
+          priceTag.textContent = item.price;
+          meta.appendChild(priceTag);
+        }
+
+        if (item.coverage) {
+          const coverTag = document.createElement("span");
+          coverTag.className = "tag";
+          coverTag.textContent = item.coverage;
+          meta.appendChild(coverTag);
+        }
+
+        headingWrap.appendChild(title);
+        headingWrap.appendChild(meta);
+
+        top.appendChild(icon);
+        top.appendChild(headingWrap);
+
+        const description = document.createElement("p");
+        description.textContent = item.description || "";
+
+        const explanation = document.createElement("p");
+        explanation.textContent = item.explanation || "";
+
+        card.appendChild(top);
+        if (item.description) {
+          card.appendChild(description);
+        }
+        if (item.explanation) {
+          card.appendChild(explanation);
+        }
+
+        return card;
+      }
+
+      function showTypingIndicator() {
+        const wrapper = document.createElement("div");
+        wrapper.className = "message bot";
+        wrapper.id = "typing-indicator";
+
+        const stack = document.createElement("div");
+        stack.className = "message-stack";
+
+        const content = document.createElement("div");
+        content.className = "message-content";
+
+        const typing = document.createElement("div");
+        typing.className = "typing-indicator";
+
+        for (let i = 0; i < 3; i += 1) {
+          const dot = document.createElement("div");
+          dot.className = "typing-dot";
+          typing.appendChild(dot);
+        }
+
+        content.appendChild(typing);
+        stack.appendChild(content);
+        wrapper.appendChild(stack);
+        chatMessages.appendChild(wrapper);
+        scrollToBottom();
+      }
+
+      function removeTypingIndicator() {
+        const indicator = document.getElementById("typing-indicator");
+        if (indicator) {
+          indicator.remove();
+        }
+      }
+
+      function scrollToBottom() {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+
+      initializeChat();
+    </script>
+  </body>
+</html>
