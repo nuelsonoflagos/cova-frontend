@@ -903,15 +903,32 @@
           We need accurate details to generate your quote. All information is
           verified against FRSC records.
         </div>
+        <div class="form-group" id="fg-body-type">
+          <label>Vehicle body type</label>
+          <select id="body-type">
+            <option value="">Select body type...</option>
+            <option value="Saloon">Saloon</option>
+            <option value="SUV">SUV</option>
+            <option value="Hatchback">Hatchback</option>
+            <option value="Pickup/Truck">Pickup/Truck</option>
+            <option value="Minivan">Minivan</option>
+            <option value="Bus">Bus</option>
+          </select>
+          <div class="field-error">Required</div>
+        </div>
         <div class="form-row">
           <div class="form-group" id="fg-make">
-            <label>Vehicle make</label
-            ><input type="text" id="make" placeholder="Toyota" />
+            <label>Vehicle make</label>
+            <select id="make" onchange="populateModels()">
+              <option value="">Select make...</option>
+            </select>
             <div class="field-error">Required</div>
           </div>
           <div class="form-group" id="fg-model">
-            <label>Model</label
-            ><input type="text" id="vmodel" placeholder="Camry SE" />
+            <label>Model</label>
+            <select id="vmodel" disabled>
+              <option value="">Select model...</option>
+            </select>
             <div class="field-error">Required</div>
           </div>
         </div>
@@ -924,8 +941,10 @@
             <div class="field-error">Required</div>
           </div>
           <div class="form-group" id="fg-color">
-            <label>Vehicle colour</label
-            ><input type="text" id="color" placeholder="Silver" />
+            <label>Vehicle colour</label>
+            <select id="color">
+              <option value="">Select colour...</option>
+            </select>
             <div class="field-error">Required</div>
           </div>
         </div>
@@ -1448,6 +1467,75 @@
     </div>
 
     <script>
+      const carData = {
+        "Toyota": ["Camry", "Corolla", "Highlander", "RAV4", "Prado", "Land Cruiser", "Hilux", "Sienna", "Yaris", "Avalon", "Tacoma", "4Runner", "Venza"],
+        "Mercedes-Benz": ["C-Class", "E-Class", "S-Class", "G-Class", "GLE", "GLC", "GLA", "ML350", "CLA", "A-Class", "GLB", "GLS"],
+        "Lexus": ["RX", "ES", "GX", "IS", "LX", "NX", "LS", "GS", "UX", "RC"],
+        "Honda": ["Accord", "Civic", "CR-V", "Pilot", "Odyssey", "HR-V", "Fit", "Ridgeline"],
+        "Ford": ["Edge", "Explorer", "Escape", "F-150", "Mustang", "Focus", "Expedition", "Ranger"],
+        "Hyundai": ["Elantra", "Sonata", "Tucson", "Santa Fe", "Accent", "Kona", "Palisade"],
+        "Kia": ["Rio", "Optima", "Sportage", "Sorento", "Cerato", "Picanto", "Telluride", "Carnival"],
+        "Nissan": ["Altima", "Sentra", "Rogue", "Pathfinder", "Maxima", "Murano", "Armada", "Frontier", "Xterra"],
+        "BMW": ["3 Series", "5 Series", "7 Series", "X3", "X5", "X6", "X1", "X4", "X7", "M3", "M5"],
+        "Volkswagen": ["Golf", "Jetta", "Passat", "Tiguan", "Touareg", "Polo", "Atlas"],
+        "Land Rover": ["Range Rover", "Range Rover Sport", "Range Rover Evoque", "Range Rover Velar", "Discovery", "Defender"],
+        "Peugeot": ["C3", "3008", "508", "5008", "2008"],
+        "Mazda": ["CX-5", "Mazda3", "Mazda6", "CX-9", "CX-3", "CX-30"],
+        "Mitsubishi": ["Outlander", "Pajero", "Lancer", "ASX", "Eclipse Cross"],
+        "Chevrolet": ["Corolla", "Cruze", "Equinox", "Traverse", "Tahoe", "Suburban", "Silverado"],
+        "Other": ["Other"]
+      };
+
+      const colorsList = ["Black", "White", "Silver", "Grey", "Red", "Blue", "Brown", "Green", "Gold", "Beige", "Burgundy", "Orange", "Yellow", "Purple", "Other"];
+
+      document.addEventListener("DOMContentLoaded", () => {
+        // Populate Make
+        const makeSelect = document.getElementById("make");
+        Object.keys(carData).sort().forEach(make => {
+          const option = document.createElement("option");
+          option.value = make;
+          option.textContent = make;
+          makeSelect.appendChild(option);
+        });
+
+        // Populate Colors
+        const colorSelect = document.getElementById("color");
+        colorsList.sort().forEach(color => {
+          const option = document.createElement("option");
+          option.value = color;
+          option.textContent = color;
+          colorSelect.appendChild(option);
+        });
+
+        // Populate Years (current year down to 1990)
+        const yearSelect = document.getElementById("year");
+        const currentYear = new Date().getFullYear();
+        for (let y = currentYear; y >= 1990; y--) {
+          const option = document.createElement("option");
+          option.value = y;
+          option.textContent = y;
+          yearSelect.appendChild(option);
+        }
+      });
+
+      function populateModels() {
+        const make = document.getElementById("make").value;
+        const modelSelect = document.getElementById("vmodel");
+        modelSelect.innerHTML = '<option value="">Select model...</option>';
+        
+        if (make && carData[make]) {
+          carData[make].sort().forEach(model => {
+            const option = document.createElement("option");
+            option.value = model;
+            option.textContent = model;
+            modelSelect.appendChild(option);
+          });
+          modelSelect.disabled = false;
+        } else {
+          modelSelect.disabled = true;
+        }
+      }
+
       let currentStep = 1;
       let selectedCover = "comp";
       let selectedFreq = "annual";
@@ -1668,10 +1756,11 @@
         if (step === 2) {
           let ok = true;
           [
-            ["fg-make", "make", (v) => v.trim().length > 1],
-            ["fg-model", "vmodel", (v) => v.trim().length > 1],
+            ["fg-body-type", "body-type", (v) => v !== ""],
+            ["fg-make", "make", (v) => v !== ""],
+            ["fg-model", "vmodel", (v) => v !== ""],
             ["fg-year", "year", (v) => v !== ""],
-            ["fg-color", "color", (v) => v.trim().length > 1],
+            ["fg-color", "color", (v) => v !== ""],
             ["fg-plate", "plate", (v) => v.trim().length > 4],
             ["fg-chassis", "chassis", (v) => v.trim().length > 5],
             ["fg-engine", "engine", (v) => v.trim().length > 3],
