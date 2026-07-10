@@ -445,16 +445,25 @@
 
         const remoteResponse = await getRemoteResponse(userMessage);
         if (remoteResponse) {
+          if (remoteResponse.userProfile) {
+            mergeProfile(remoteResponse.userProfile);
+          }
+
+          let recs = remoteResponse.recommendations || [];
+          // Auto-generate recommendations if Claude didn't send them but we have enough data
+          if (recs.length === 0 && userProfile.account_type && userProfile.selected_needs.length > 0) {
+            recs = recommendationEngine ? recommendationEngine.recommend(userProfile) : [];
+          }
+
           conversationHistory.push({
             role: "assistant",
             content: remoteResponse.message
           });
 
-          if (remoteResponse.userProfile) {
-            mergeProfile(remoteResponse.userProfile);
-          }
-
-          return remoteResponse;
+          return {
+            message: remoteResponse.message,
+            recommendations: recs
+          };
         }
 
         chatStatusText.textContent = "Using local recommendation mode";
@@ -502,6 +511,8 @@
         }
       }
 
+      let budgetAskCount = 0;
+
       function buildLocalResponse() {
         if (!userProfile.account_type) {
           return {
@@ -526,6 +537,15 @@
           : [];
 
         if (!userProfile.insurance_budget) {
+          budgetAskCount++;
+          if (budgetAskCount > 1) {
+             // If we already asked for budget and they replied something we didn't understand, just proceed
+             userProfile.insurance_budget = "50k_150k"; // Default to a mid-range budget to proceed
+             return {
+               message: "Got it! Based on what you shared, these are the best Cova cover options for you.",
+               recommendations: recommendations
+             };
+          }
           return {
             message:
               "I already have enough to start narrowing things down. Tell me your budget range too, for example under 10k, 10k to 50k, 50k to 150k, or over 150k.",
@@ -723,6 +743,36 @@
         if (item.explanation) {
           card.appendChild(explanation);
         }
+
+        const btnGroup = document.createElement("div");
+        btnGroup.className = "btn-group";
+        btnGroup.style.marginTop = "12px";
+        
+        const btn = document.createElement("button");
+        btn.className = "send-btn";
+        btn.style.width = "100%";
+        btn.style.padding = "10px";
+        btn.style.fontSize = "13px";
+        btn.textContent = "Get this cover";
+        btn.onclick = () => {
+          const need = item.forNeeds && item.forNeeds[0] ? item.forNeeds[0] : 'personal';
+          // map specific needs to their onboarding pages
+          let page = 'cova-onboarding.html';
+          if (need === 'car') page = 'cova-motor-onboarding.html';
+          else if (need === 'health') page = 'cova-health-onboarding.html';
+          else if (need === 'life') page = 'cova-life-onboarding.html';
+          else if (need === 'travel') page = 'cova-travel-onboarding.html';
+          else if (need === 'property') page = 'cova-property-onboarding.html';
+          else if (need === 'devices') page = 'cova-sme-devices.html';
+
+          if (window.parent && window.parent !== window) {
+            window.parent.location.href = page;
+          } else {
+            window.location.href = page;
+          }
+        };
+        btnGroup.appendChild(btn);
+        card.appendChild(btnGroup);
 
         return card;
       }
