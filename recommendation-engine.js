@@ -193,6 +193,14 @@ class CovaPAI {
       const needsMatch = product.forNeeds?.some(need => needs.includes(need));
       if (needsMatch) score += 50;
 
+      // Only recommend products that actually match a selected need.
+      // Previously, products with no need match could still clear the threshold
+      // via budget + priority bonuses (e.g. typing "device" surfaced motor
+      // insurance too). If the user has stated needs, exclude off-topic products.
+      if (needs.length > 0 && !needsMatch) {
+        return;
+      }
+
       // 2. Risk profile adjustments (analogous to main_concern)
       if (risk === 'high' && (product.name.includes('Comprehensive') || product.name.includes('Silver') || product.name.includes('Life'))) {
         score += 30;
@@ -218,8 +226,10 @@ class CovaPAI {
         }
       }
 
-      // Only recommend products that have at least some relevance (like matching a need or high score)
-      if (score > 20) {
+      // Include products that match a need (score already includes the +50).
+      // If the user hasn't specified any needs yet, fall back to score > 20 so
+      // the engine can still suggest broadly relevant cover.
+      if (needs.length > 0 ? needsMatch : score > 20) {
         recommendations.push({
           ...product,
           score: score,

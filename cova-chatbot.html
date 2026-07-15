@@ -153,6 +153,40 @@
         border-bottom-left-radius: 6px;
       }
 
+      .quick-replies {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 12px;
+      }
+
+      .quick-reply {
+        background: var(--white);
+        color: var(--green-900);
+        border: 1.5px solid var(--green-900);
+        border-radius: 999px;
+        padding: 8px 16px;
+        font-family: inherit;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
+      }
+
+      .quick-reply:hover {
+        background: var(--green-900);
+        color: var(--white);
+      }
+
+      .quick-reply:active {
+        transform: scale(0.96);
+      }
+
+      .quick-reply:disabled {
+        opacity: 0.55;
+        cursor: default;
+      }
+
       .recommendation-list {
         display: grid;
         gap: 12px;
@@ -413,30 +447,39 @@
 
       function initializeChat() {
         addBotMessage(
-          "Hi there. I am Cova's insurance assistant.\n\nAre you looking for personal insurance or business insurance?"
+          "Hi there. I am Cova's insurance assistant.\n\nAre you looking for personal insurance or business insurance?",
+          [],
+          ["Personal insurance", "Business insurance"]
         );
       }
 
       chatForm.addEventListener("submit", async (event) => {
         event.preventDefault();
         const userMessage = chatInput.value.trim();
-
         if (!userMessage) {
           return;
         }
-
-        addUserMessage(userMessage);
         chatInput.value = "";
+        await sendUserMessage(userMessage);
+      });
+
+      // Shared by both the text input and the quick-reply chips.
+      async function sendUserMessage(userMessage) {
+        addUserMessage(userMessage);
         showTypingIndicator();
         sendBtn.disabled = true;
 
         const botResponse = await getAssistantResponse(userMessage);
 
         removeTypingIndicator();
-        addBotMessage(botResponse.message, botResponse.recommendations || []);
+        addBotMessage(
+          botResponse.message,
+          botResponse.recommendations || [],
+          botResponse.quickReplies
+        );
         sendBtn.disabled = false;
         chatInput.focus();
-      });
+      }
 
       async function getAssistantResponse(userMessage) {
         conversationHistory.push({
@@ -536,17 +579,21 @@
           return {
             message:
               "Thanks. First, tell me whether you need personal insurance or business insurance.",
-            recommendations: []
+            recommendations: [],
+            quickReplies: ["Personal insurance", "Business insurance"]
           };
         }
 
         if (!userProfile.selected_needs.length) {
+          const isBusiness = userProfile.account_type === "business";
           return {
-            message:
-              userProfile.account_type === "business"
-                ? "What do you want to protect in your business? You can mention equipment, vehicles, health cover for staff, property, fire, or theft."
-                : "What do you want to protect? You can mention devices, car, health, life, travel, or property.",
-            recommendations: []
+            message: isBusiness
+              ? "What do you want to protect in your business? Pick one or tell me in your own words."
+              : "What do you want to protect? Pick one or tell me in your own words.",
+            recommendations: [],
+            quickReplies: isBusiness
+              ? ["Equipment", "Vehicles", "Staff health", "Property", "Fire", "Theft"]
+              : ["Devices", "Car", "Health", "Life", "Travel", "Property"]
           };
         }
 
@@ -601,12 +648,12 @@
         }
 
         const needsMap = [
-          { keys: ["device", "devices", "phone", "laptop", "camera", "gadget"], value: "devices" },
-          { keys: ["car", "auto", "vehicle", "motor"], value: "car" },
+          { keys: ["device", "devices", "phone", "laptop", "camera", "gadget", "equipment", "electronic", "electronics", "computer"], value: "devices" },
+          { keys: ["car", "auto", "vehicle", "vehicles", "motor", "fleet"], value: "car" },
           { keys: ["health", "medical", "hospital"], value: "health" },
           { keys: ["life", "family", "death"], value: "life" },
           { keys: ["travel", "trip", "flight"], value: "travel" },
-          { keys: ["property", "house", "home", "rent", "apartment"], value: "property" }
+          { keys: ["property", "house", "home", "rent", "apartment", "theft", "burglary", "fire"], value: "property" }
         ];
 
         needsMap.forEach((entry) => {
@@ -680,7 +727,7 @@
         scrollToBottom();
       }
 
-      function addBotMessage(message, recommendations) {
+      function addBotMessage(message, recommendations, quickReplies) {
         const wrapper = document.createElement("div");
         wrapper.className = "message bot";
 
@@ -702,6 +749,32 @@
           });
 
           stack.appendChild(recommendationList);
+        }
+
+        if (Array.isArray(quickReplies) && quickReplies.length) {
+          const repliesRow = document.createElement("div");
+          repliesRow.className = "quick-replies";
+
+          quickReplies.forEach((reply) => {
+            // reply may be a string ("Devices") or { label, value }.
+            const label = typeof reply === "string" ? reply : reply.label;
+            const value = typeof reply === "string" ? reply : reply.value;
+
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "quick-reply";
+            btn.textContent = label;
+            // Clicking a chip behaves exactly like the user typing the value:
+            // it goes through the full getAssistantResponse flow.
+            btn.addEventListener("click", () => {
+              // Disable all chips in this row so each is used once.
+              repliesRow.querySelectorAll(".quick-reply").forEach((b) => (b.disabled = true));
+              sendUserMessage(value);
+            });
+            repliesRow.appendChild(btn);
+          });
+
+          stack.appendChild(repliesRow);
         }
 
         wrapper.appendChild(stack);
