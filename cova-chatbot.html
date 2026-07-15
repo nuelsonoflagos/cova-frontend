@@ -781,7 +781,9 @@
           else if (need === 'life') page = 'cova-life-onboarding.html';
           else if (need === 'travel') page = 'cova-travel-onboarding.html';
           else if (need === 'property') page = 'cova-property-onboarding.html';
-          else if (need === 'devices') page = 'cova-sme-devices.html';
+          // 'devices' is handled by cova-onboarding.html (the personal device
+          // flow). cova-sme-devices.html is an SME *staff device management*
+          // dashboard, NOT a purchase page.
 
           if (window.parent && window.parent !== window) {
             window.parent.location.href = page;
