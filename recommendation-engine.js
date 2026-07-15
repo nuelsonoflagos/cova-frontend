@@ -4,7 +4,7 @@ class CovaPAI {
   }
 
   initializeProducts() {
-    return {
+    var products = {
       // PERSONAL PRODUCTS
       devices: {
         name: 'Device Protection',
@@ -35,26 +35,6 @@ class CovaPAI {
         forNeeds: ['car'],
         priority: 1,
         icon: '🚘'
-      },
-      health_bronze: {
-        name: 'Health Insurance (Bronze)',
-        price: '₦5,000/month',
-        coverage: '₦100K annual limit',
-        description: 'Basic health coverage - hospital & consultations',
-        category: 'personal',
-        forNeeds: ['health'],
-        priority: 2,
-        icon: '🏥'
-      },
-      health_silver: {
-        name: 'Health Insurance (Silver)',
-        price: '₦10,000/month',
-        coverage: '₦500K annual limit',
-        description: 'Good coverage - hospital, surgeries, medications',
-        category: 'personal',
-        forNeeds: ['health'],
-        priority: 1,
-        icon: '⚕️'
       },
       life_basic: {
         name: 'Life Insurance',
@@ -166,6 +146,56 @@ class CovaPAI {
         icon: '👥'
       }
     };
+
+    // Inject REAL health plans from the shared data module when available.
+    // Falls back to placeholder health products if cova-health-plans.js isn't
+    // loaded (so the engine never breaks standalone).
+    var healthPlans = (typeof window !== 'undefined' && window.CovaHealthPlans) ? window.CovaHealthPlans : [];
+    if (healthPlans.length > 0) {
+      // Pick 3 representative plans across price tiers for the chatbot/chooser.
+      var sorted = healthPlans.slice().sort(function (a, b) { return a.priceAnnual - b.priceAnnual; });
+      var budget = sorted[0];                                                         // cheapest
+      var mid = sorted[Math.floor(sorted.length * 0.45)] || sorted[0];                // mid-range
+      var premium = sorted[Math.floor(sorted.length * 0.75)] || sorted[sorted.length - 1]; // premium
+
+      [[budget, 'health_budget', 2], [mid, 'health_mid', 1], [premium, 'health_premium', 2]].forEach(function (entry) {
+        var plan = entry[0], key = entry[1], priority = entry[2];
+        products[key] = {
+          name: plan.provider + ' — ' + plan.planName,
+          price: '₦' + plan.priceMonthly.toLocaleString('en-NG') + '/month',
+          coverage: plan.annualLimit ? (plan.annualLimit >= 1000000 ? '₦' + (plan.annualLimit / 1000000) + 'M annual limit' : '₦' + (plan.annualLimit / 1000) + 'K annual limit') : (plan.networkSize + ' hospitals'),
+          description: plan.highlights.join(' · '),
+          category: 'personal',
+          forNeeds: ['health'],
+          priority: priority,
+          icon: '🏥'
+        };
+      });
+    } else {
+      // Fallback placeholders (kept so the engine works without the data module).
+      products.health_bronze = {
+        name: 'Health Insurance (Bronze)',
+        price: '₦3,750/month',
+        coverage: '₦500K annual limit',
+        description: 'Basic health coverage - hospital & consultations',
+        category: 'personal',
+        forNeeds: ['health'],
+        priority: 2,
+        icon: '🏥'
+      };
+      products.health_silver = {
+        name: 'Health Insurance (Silver)',
+        price: '₦7,917/month',
+        coverage: '₦500K annual limit',
+        description: 'Good coverage - hospital, surgeries, medications',
+        category: 'personal',
+        forNeeds: ['health'],
+        priority: 1,
+        icon: '⚕️'
+      };
+    }
+
+    return products;
   }
 
   // Main recommendation function

@@ -423,6 +423,7 @@
       </div>
     </div>
 
+    <script src="cova-health-plans.js"></script>
     <script src="recommendation-engine.js"></script>
     <script>
       const chatMessages = document.getElementById("chat-messages");
@@ -865,6 +866,30 @@
           }
         };
         btnGroup.appendChild(btn);
+
+        // For health, add a secondary "compare all plans" link.
+        const need = item.forNeeds && item.forNeeds[0];
+        if (need === 'health') {
+          const compareBtn = document.createElement("button");
+          compareBtn.className = "send-btn";
+          compareBtn.style.width = "100%";
+          compareBtn.style.padding = "10px";
+          compareBtn.style.fontSize = "13px";
+          compareBtn.style.background = "transparent";
+          compareBtn.style.color = "#0a5c45";
+          compareBtn.style.border = "1.5px solid rgba(10,92,69,0.2)";
+          compareBtn.style.marginTop = "8px";
+          compareBtn.textContent = "⚖️ Compare all 24 health plans →";
+          compareBtn.onclick = () => {
+            const page = 'cova-compare-health.html';
+            if (window.parent && window.parent !== window) {
+              window.parent.location.href = page;
+            } else {
+              window.location.href = page;
+            }
+          };
+          btnGroup.appendChild(compareBtn);
+        }
         card.appendChild(btnGroup);
 
         return card;

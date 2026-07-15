@@ -1,0 +1,1070 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cova — Compare Health Insurance in Nigeria</title>
+    <meta
+      name="description"
+      content="Compare health insurance plans from Nigeria's top HMOs side by side. Filter by budget, coverage, and benefits. Find the plan that fits you."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      :root {
+        --g: #0a5c45;
+        --gm: #137a5c;
+        --gl: #1d9e75;
+        --gp: #e6f5f0;
+        --gpp: #d0ede4;
+        --cream: #f7f4ee;
+        --crd: #e8e4db;
+        --ink: #0f1a14;
+        --inkm: #2d3e35;
+        --inkl: #5a6e63;
+        --inkf: #9aada3;
+        --w: #fff;
+        --r: #c0392b;
+        --rp: #fdecea;
+        --am: #d4860a;
+        --amp: #fef3e2;
+        --blue: #3b5bdb;
+        --bluep: #eef3ff;
+        --fd: "Syne", sans-serif;
+        --fb: "DM Sans", sans-serif;
+        --rad: 16px;
+        --rads: 10px;
+        --radsm: 8px;
+        --shadow: 0 2px 12px rgba(10, 92, 69, 0.08);
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        font-family: var(--fb);
+        background: var(--cream);
+        color: var(--ink);
+        line-height: 1.6;
+        min-height: 100vh;
+      }
+
+      /* ── Nav ───────────────────────────────────────────── */
+      nav {
+        padding: 0 24px;
+        height: 72px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: var(--w);
+        border-bottom: 1px solid var(--crd);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+      .nav-logo {
+        font-family: var(--fd);
+        font-weight: 800;
+        font-size: 22px;
+        color: var(--g);
+        text-decoration: none;
+        letter-spacing: -0.5px;
+      }
+      .nav-back {
+        font-family: var(--fd);
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--g);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      /* ── Layout ────────────────────────────────────────── */
+      .hero {
+        background: linear-gradient(135deg, var(--g) 0%, var(--gm) 100%);
+        color: var(--w);
+        padding: 56px 5vw 72px;
+        text-align: center;
+      }
+      .hero-eyebrow {
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        color: var(--gpp);
+        margin-bottom: 14px;
+      }
+      .hero h1 {
+        font-family: var(--fd);
+        font-size: clamp(28px, 4vw, 44px);
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        margin-bottom: 14px;
+        line-height: 1.15;
+      }
+      .hero p {
+        font-size: 16px;
+        color: rgba(255, 255, 255, 0.85);
+        max-width: 600px;
+        margin: 0 auto;
+      }
+
+      .container {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 0 5vw;
+      }
+
+      /* ── "Help me choose" panel ────────────────────────── */
+      .chooser {
+        background: var(--w);
+        border: 1px solid var(--crd);
+        border-radius: var(--rad);
+        padding: 28px;
+        margin: -48px auto 0;
+        max-width: 760px;
+        position: relative;
+        box-shadow: 0 12px 40px rgba(10, 92, 69, 0.1);
+      }
+      .chooser-title {
+        font-family: var(--fd);
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--ink);
+        margin-bottom: 4px;
+        text-align: center;
+      }
+      .chooser-sub {
+        font-size: 14px;
+        color: var(--inkl);
+        text-align: center;
+        margin-bottom: 24px;
+      }
+      .chooser-q {
+        margin-bottom: 20px;
+      }
+      .chooser-label {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--inkm);
+        margin-bottom: 10px;
+        display: block;
+      }
+      .chip-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .chip {
+        background: var(--w);
+        color: var(--g);
+        border: 1.5px solid var(--crd);
+        border-radius: 999px;
+        padding: 9px 18px;
+        font-family: var(--fb);
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.15s ease;
+      }
+      .chip:hover {
+        border-color: var(--gl);
+      }
+      .chip.selected {
+        background: var(--g);
+        color: var(--w);
+        border-color: var(--g);
+      }
+      .chooser-reset {
+        display: block;
+        margin: 16px auto 0;
+        background: none;
+        border: none;
+        font-family: var(--fd);
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--inkl);
+        cursor: pointer;
+        text-decoration: underline;
+      }
+
+      /* ── Filter bar ────────────────────────────────────── */
+      .filter-section {
+        padding: 40px 0 0;
+      }
+      .filter-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+      .filter-select {
+        font-family: var(--fb);
+        font-size: 14px;
+        color: var(--ink);
+        background: var(--w);
+        border: 1.5px solid var(--crd);
+        border-radius: 12px;
+        padding: 10px 14px;
+        cursor: pointer;
+        min-width: 150px;
+      }
+      .filter-select:focus {
+        outline: none;
+        border-color: var(--gl);
+        box-shadow: 0 0 0 3px rgba(29, 158, 117, 0.1);
+      }
+      .view-toggle {
+        display: inline-flex;
+        background: var(--w);
+        border: 1.5px solid var(--crd);
+        border-radius: 12px;
+        overflow: hidden;
+        margin-left: auto;
+      }
+      .view-toggle button {
+        font-family: var(--fd);
+        font-size: 13px;
+        font-weight: 600;
+        padding: 10px 16px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: var(--inkl);
+        transition: all 0.15s;
+      }
+      .view-toggle button.active {
+        background: var(--g);
+        color: var(--w);
+      }
+      .results-count {
+        font-size: 14px;
+        color: var(--inkl);
+        margin-bottom: 20px;
+      }
+      .results-count strong {
+        color: var(--ink);
+      }
+
+      /* ── Plan cards grid ───────────────────────────────── */
+      .plans-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 18px;
+      }
+      .plan-card {
+        background: var(--w);
+        border: 1px solid var(--crd);
+        border-radius: 24px;
+        padding: 24px;
+        transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+      }
+      .plan-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 36px rgba(10, 92, 69, 0.1);
+        border-color: var(--gl);
+      }
+      .plan-card.best-match {
+        border: 2px solid var(--gl);
+        box-shadow: 0 8px 30px rgba(29, 158, 117, 0.15);
+      }
+      .plan-badge {
+        position: absolute;
+        top: -10px;
+        left: 20px;
+        font-family: var(--fd);
+        font-size: 11px;
+        font-weight: 700;
+        padding: 4px 12px;
+        border-radius: 999px;
+        background: var(--gl);
+        color: var(--w);
+        letter-spacing: 0.02em;
+      }
+      .plan-badge.best-for {
+        background: var(--am);
+      }
+      .plan-provider {
+        font-family: var(--fd);
+        font-size: 17px;
+        font-weight: 800;
+        color: var(--ink);
+        margin-bottom: 2px;
+      }
+      .plan-tier {
+        font-size: 14px;
+        color: var(--inkl);
+        margin-bottom: 14px;
+      }
+      .plan-price {
+        font-family: var(--fd);
+        font-size: 24px;
+        font-weight: 800;
+        color: var(--g);
+        margin-bottom: 2px;
+      }
+      .plan-price-sub {
+        font-size: 13px;
+        color: var(--inkl);
+        margin-bottom: 14px;
+      }
+      .plan-limit {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 12px;
+        font-weight: 600;
+        padding: 4px 10px;
+        border-radius: 10px;
+        background: var(--gp);
+        color: var(--g);
+        margin-bottom: 16px;
+      }
+      .plan-highlights {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-bottom: 16px;
+      }
+      .highlight-chip {
+        font-size: 11px;
+        font-weight: 600;
+        padding: 3px 9px;
+        border-radius: 8px;
+        background: var(--cream);
+        border: 1px solid var(--crd);
+        color: var(--inkm);
+      }
+      .plan-network {
+        font-size: 12px;
+        color: var(--inkl);
+        margin-bottom: 14px;
+      }
+      .plan-details-btn {
+        font-family: var(--fd);
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--g);
+        background: none;
+        border: 1.5px solid rgba(10, 92, 69, 0.2);
+        border-radius: var(--radsm);
+        padding: 11px;
+        cursor: pointer;
+        transition: all 0.15s;
+        margin-top: auto;
+        width: 100%;
+      }
+      .plan-details-btn:hover {
+        background: var(--gp);
+        border-color: var(--g);
+      }
+      .plan-expand {
+        display: none;
+        margin-top: 16px;
+        padding-top: 16px;
+        border-top: 1px solid var(--crd);
+      }
+      .plan-expand.show {
+        display: block;
+      }
+      .benefit-list {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px 12px;
+        margin-bottom: 14px;
+      }
+      .benefit-item {
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--inkm);
+      }
+      .benefit-item .ic {
+        font-weight: 700;
+        width: 16px;
+        text-align: center;
+      }
+      .benefit-item.yes .ic {
+        color: var(--gl);
+      }
+      .benefit-item.no .ic {
+        color: var(--inkf);
+      }
+      .benefit-item.no {
+        color: var(--inkf);
+      }
+      .plan-waiting {
+        font-size: 12px;
+        color: var(--inkl);
+        background: var(--amp);
+        padding: 8px 12px;
+        border-radius: var(--radsm);
+        margin-bottom: 10px;
+      }
+      .plan-source {
+        font-size: 11px;
+        color: var(--inkf);
+      }
+      .plan-source a {
+        color: var(--gl);
+        text-decoration: none;
+      }
+      .plan-notes {
+        font-size: 12px;
+        color: var(--inkl);
+        font-style: italic;
+        margin-top: 8px;
+      }
+
+      /* ── Comparison table view ─────────────────────────── */
+      .table-wrap {
+        display: none;
+        overflow-x: auto;
+        border: 1px solid var(--crd);
+        border-radius: var(--rad);
+        background: var(--w);
+      }
+      .compare-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+        min-width: 600px;
+      }
+      .compare-table th,
+      .compare-table td {
+        padding: 14px 16px;
+        text-align: left;
+        border-bottom: 1px solid var(--crd);
+        vertical-align: top;
+      }
+      .compare-table th {
+        background: var(--gp);
+        font-family: var(--fd);
+        font-weight: 700;
+        color: var(--g);
+        position: sticky;
+        top: 0;
+      }
+      .compare-table .row-label {
+        font-weight: 600;
+        color: var(--inkm);
+        background: var(--cream);
+        white-space: nowrap;
+      }
+      .compare-table td.yes {
+        color: var(--gl);
+        font-weight: 700;
+      }
+      .compare-table td.no {
+        color: var(--inkf);
+      }
+
+      /* ── Education hub ─────────────────────────────────── */
+      .edu-section {
+        padding: 72px 0 80px;
+      }
+      .edu-eyebrow {
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        color: var(--gl);
+        margin-bottom: 12px;
+        text-align: center;
+      }
+      .edu-title {
+        font-family: var(--fd);
+        font-size: clamp(26px, 3vw, 36px);
+        font-weight: 800;
+        color: var(--ink);
+        text-align: center;
+        margin-bottom: 40px;
+        letter-spacing: -0.5px;
+      }
+      .edu-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 18px;
+      }
+      .edu-card {
+        background: var(--w);
+        border: 1px solid var(--crd);
+        border-radius: 24px;
+        padding: 28px;
+        transition: transform 0.2s;
+      }
+      .edu-card:hover {
+        transform: translateY(-3px);
+      }
+      .edu-icon {
+        font-size: 28px;
+        margin-bottom: 14px;
+      }
+      .edu-card h3 {
+        font-family: var(--fd);
+        font-size: 17px;
+        font-weight: 700;
+        color: var(--ink);
+        margin-bottom: 10px;
+      }
+      .edu-card p {
+        font-size: 14px;
+        color: var(--inkl);
+        line-height: 1.65;
+      }
+
+      /* ── Disclaimer ────────────────────────────────────── */
+      .disclaimer {
+        text-align: center;
+        font-size: 13px;
+        color: var(--inkl);
+        padding: 24px;
+        background: var(--gp);
+        border-radius: var(--rad);
+        margin-bottom: 40px;
+      }
+
+      /* ── Responsive ────────────────────────────────────── */
+      @media (max-width: 900px) {
+        .plans-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .edu-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+      @media (max-width: 600px) {
+        .plans-grid {
+          grid-template-columns: 1fr;
+        }
+        .edu-grid {
+          grid-template-columns: 1fr;
+        }
+        .filter-bar {
+          flex-direction: column;
+          align-items: stretch;
+        }
+        .view-toggle {
+          margin-left: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <nav>
+      <a href="index.html" class="nav-logo">Cova</a>
+      <a href="index.html" class="nav-back">← Back to home</a>
+    </nav>
+
+    <!-- ── Hero ──────────────────────────────────────────── -->
+    <section class="hero">
+      <div class="hero-eyebrow">Health Insurance</div>
+      <h1>Compare health plans from Nigeria's top HMOs</h1>
+      <p>
+        Real prices, real benefits, side by side. Filter by what matters to you —
+        and let Cova guide you to the plan that fits.
+      </p>
+    </section>
+
+    <!-- ── Help me choose ────────────────────────────────── -->
+    <div class="container">
+      <div class="chooser" id="chooser">
+        <div class="chooser-title">Not sure where to start?</div>
+        <div class="chooser-sub">Answer a few questions and we'll highlight your best matches.</div>
+
+        <div class="chooser-q">
+          <span class="chooser-label">Who needs cover?</span>
+          <div class="chip-row" data-question="audience">
+            <button class="chip" data-value="individual">Just me</button>
+            <button class="chip" data-value="family">Me &amp; my family</button>
+          </div>
+        </div>
+
+        <div class="chooser-q">
+          <span class="chooser-label">What's your budget per year?</span>
+          <div class="chip-row" data-question="budget">
+            <button class="chip" data-value="under50k">Under ₦50k</button>
+            <button class="chip" data-value="50to150k">₦50k – ₦150k</button>
+            <button class="chip" data-value="over150k">Over ₦150k</button>
+          </div>
+        </div>
+
+        <div class="chooser-q">
+          <span class="chooser-label">What matters most?</span>
+          <div class="chip-row" data-question="priority">
+            <button class="chip" data-value="value">Best value for money</button>
+            <button class="chip" data-value="coverage">Highest coverage limit</button>
+            <button class="chip" data-value="surgery">Must cover surgery</button>
+            <button class="chip" data-value="maternity">Must cover maternity</button>
+          </div>
+        </div>
+
+        <button class="chooser-reset" id="chooserReset" style="display: none">
+          Clear my answers
+        </button>
+      </div>
+    </div>
+
+    <!-- ── Filters + results ─────────────────────────────── -->
+    <section class="container filter-section" id="results">
+      <div class="filter-bar">
+        <select class="filter-select" id="filterBudget">
+          <option value="">All budgets</option>
+          <option value="under50k">Under ₦50k/yr</option>
+          <option value="50to150k">₦50k – ₦150k/yr</option>
+          <option value="over150k">Over ₦150k/yr</option>
+        </select>
+
+        <select class="filter-select" id="filterBenefit">
+          <option value="">All benefits</option>
+          <option value="surgery">Must cover surgery</option>
+          <option value="maternity">Must cover maternity</option>
+          <option value="dental">Must cover dental</option>
+          <option value="optical">Must cover optical</option>
+          <option value="chronic">Must cover chronic care</option>
+        </select>
+
+        <select class="filter-select" id="sortBy">
+          <option value="value">Sort: Best value</option>
+          <option value="priceAsc">Sort: Lowest price</option>
+          <option value="limitDesc">Sort: Highest coverage</option>
+          <option value="provider">Sort: Provider A–Z</option>
+        </select>
+
+        <div class="view-toggle">
+          <button id="viewCards" class="active">Cards</button>
+          <button id="viewTable">Table</button>
+        </div>
+      </div>
+
+      <div class="results-count" id="resultsCount"></div>
+
+      <!-- Cards view -->
+      <div class="plans-grid" id="plansGrid"></div>
+
+      <!-- Table view -->
+      <div class="table-wrap" id="tableWrap">
+        <table class="compare-table" id="compareTable"></table>
+      </div>
+    </section>
+
+    <!-- ── Education hub ─────────────────────────────────── -->
+    <section class="container edu-section" id="learn">
+      <div class="edu-eyebrow">Learn the basics</div>
+      <h2 class="edu-title">Health insurance, explained simply</h2>
+      <div class="edu-grid">
+        <div class="edu-card">
+          <div class="edu-icon">🏥</div>
+          <h3>What is an HMO?</h3>
+          <p>
+            A Health Maintenance Organisation (HMO) is a company that provides
+            health coverage for a regular fee. You pay annually or monthly, and
+            when you need care you visit a hospital in their network — often
+            paying little or nothing at the point of care.
+          </p>
+        </div>
+        <div class="edu-card">
+          <div class="edu-icon">💰</div>
+          <h3>What does "annual limit" mean?</h3>
+          <p>
+            The annual limit is the maximum the HMO will pay out for your care in
+            a year. A ₦1M limit means once claims reach ₦1M, you cover the rest
+            until the next year. Higher limits cost more but protect against big bills.
+          </p>
+        </div>
+        <div class="edu-card">
+          <div class="edu-icon">⏳</div>
+          <h3>Understanding waiting periods</h3>
+          <p>
+            Most plans don't cover everything from day one. Surgery, dental, and
+            optical typically have a 6–12 month wait. Maternity usually needs
+            9–12 months. Pre-existing conditions often wait 12 months. Always
+            check before you buy.
+          </p>
+        </div>
+        <div class="edu-card">
+          <div class="edu-icon">🚫</div>
+          <h3>What's usually NOT covered</h3>
+          <p>
+            Cosmetic surgery, fertility treatments, self-inflicted injuries, and
+            experimental treatments are almost always excluded. If you're already
+            pregnant when you enrol, maternity won't be covered for that pregnancy.
+          </p>
+        </div>
+        <div class="edu-card">
+          <div class="edu-icon">👨‍👩‍👧</div>
+          <h3>Individual vs family plans</h3>
+          <p>
+            Family plans cover you, a spouse, and children for one price — usually
+            far cheaper than buying separate individual plans. A family of four
+            can save 40–60% versus four individual policies. Compare the family
+            rate against individuals before deciding.
+          </p>
+        </div>
+        <div class="edu-card">
+          <div class="edu-icon">📞</div>
+          <h3>Network size matters</h3>
+          <p>
+            A bigger hospital network means more choice and easier access. Hygeia
+            has 2,000+ facilities; Reliance and AXA have 1,000–1,500. Check that
+            hospitals near you are in-network before you pick a plan — not all
+            hospitals accept every HMO.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Disclaimer ────────────────────────────────────── -->
+    <div class="container">
+      <div class="disclaimer">
+        Prices verified July 2026 from provider websites and public sources. HMO
+        prices in Nigeria change frequently and vary by age, location, and family
+        size — always confirm the current price and benefits with the provider
+        before purchasing. Each plan links to its source for verification.
+      </div>
+    </div>
+
+    <!-- ── Scripts ───────────────────────────────────────── -->
+    <script src="cova-health-plans.js"></script>
+    <script>
+      (function () {
+        var ALL_PLANS = window.CovaHealthPlans || [];
+        var naira = window.CovaHealthPlansFormat.naira;
+
+        // Benefit labels for display
+        var BENEFIT_LABELS = {
+          gpConsult: "GP consultations",
+          specialist: "Specialist consults",
+          surgery: "Surgery",
+          maternity: "Maternity",
+          dental: "Dental",
+          optical: "Optical",
+          emergency: "Emergency & ambulance",
+          chronic: "Chronic / pre-existing",
+          inpatient: "Hospitalization",
+          pharmacy: "Pharmacy / medications",
+        };
+
+        // Current filter/sort state
+        var state = {
+          audience: "",
+          budget: "",
+          priority: "",
+          filterBudget: "",
+          filterBenefit: "",
+          sortBy: "value",
+          view: "cards",
+        };
+
+        var grid = document.getElementById("plansGrid");
+        var tableWrap = document.getElementById("tableWrap");
+        var table = document.getElementById("compareTable");
+        var countEl = document.getElementById("resultsCount");
+
+        // ── Filtering logic ──────────────────────────────────
+        function getFilteredPlans() {
+          var plans = ALL_PLANS.slice();
+
+          // Budget filter (from filter bar)
+          var fb = state.filterBudget;
+          if (fb === "under50k") plans = plans.filter(function (p) { return p.priceAnnual < 50000; });
+          else if (fb === "50to150k") plans = plans.filter(function (p) { return p.priceAnnual >= 50000 && p.priceAnnual <= 150000; });
+          else if (fb === "over150k") plans = plans.filter(function (p) { return p.priceAnnual > 150000; });
+
+          // Must-have benefit filter
+          var bf = state.filterBenefit;
+          if (bf && BENEFIT_LABELS[bf]) {
+            plans = plans.filter(function (p) { return p.benefits[bf] === true; });
+          }
+
+          // Sort
+          var s = state.sortBy;
+          if (s === "priceAsc") plans.sort(function (a, b) { return a.priceAnnual - b.priceAnnual; });
+          else if (s === "limitDesc") plans.sort(function (a, b) { return (b.annualLimit || 0) - (a.annualLimit || 0); });
+          else if (s === "provider") plans.sort(function (a, b) { return a.provider.localeCompare(b.provider) || a.priceAnnual - b.priceAnnual; });
+          else if (s === "value") {
+            // Best value = highest (annualLimit / priceAnnual) ratio
+            plans.sort(function (a, b) {
+              var ra = a.annualLimit ? a.annualLimit / a.priceAnnual : 0;
+              var rb = b.annualLimit ? b.annualLimit / b.priceAnnual : 0;
+              return rb - ra;
+            });
+          }
+
+          return plans;
+        }
+
+        // ── "Best match" scoring (from the chooser) ─────────
+        function getBestMatchIds() {
+          if (!state.audience && !state.budget && !state.priority) return new Set();
+
+          var scored = ALL_PLANS.map(function (p) {
+            var score = 0;
+
+            // Budget alignment
+            if (state.budget === "under50k" && p.priceAnnual < 50000) score += 30;
+            else if (state.budget === "50to150k" && p.priceAnnual >= 50000 && p.priceAnnual <= 150000) score += 30;
+            else if (state.budget === "over150k" && p.priceAnnual > 150000) score += 30;
+
+            // Priority alignment
+            if (state.priority === "value" && p.annualLimit) {
+              score += Math.round((p.annualLimit / p.priceAnnual) * 10);
+            }
+            if (state.priority === "coverage" && p.annualLimit) {
+              score += Math.round(p.annualLimit / 100000);
+            }
+            if (state.priority === "surgery" && p.benefits.surgery) score += 40;
+            if (state.priority === "maternity" && p.benefits.maternity) score += 40;
+
+            return { id: p.id, score: score };
+          });
+
+          scored.sort(function (a, b) { return b.score - a.score; });
+          // Top 3 as best matches
+          var top = scored.filter(function (s) { return s.score > 0; }).slice(0, 3);
+          return new Set(top.map(function (s) { return s.id; }));
+        }
+
+        // ── Rendering: cards ─────────────────────────────────
+        function esc(str) {
+          if (str === null || str === undefined) return "";
+          return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+        }
+
+        function renderCards(plans) {
+          var bestIds = getBestMatchIds();
+          if (plans.length === 0) {
+            grid.innerHTML =
+              '<p style="grid-column:1/-1;text-align:center;padding:48px;color:var(--inkl);">No plans match these filters. Try widening your search.</p>';
+            return;
+          }
+
+          grid.innerHTML = plans
+            .map(function (p) {
+              var isBest = bestIds.has(p.id);
+              var limitBadge = p.annualLimit
+                ? '<span class="plan-limit">🛡️ ' + esc(naira(p.annualLimit)) + " annual limit</span>"
+                : '<span class="plan-limit" style="background:var(--cream);color:var(--inkl)">Limit not published</span>';
+
+              var highlights = p.highlights
+                .map(function (h) {
+                  return '<span class="highlight-chip">' + esc(h) + "</span>";
+                })
+                .join("");
+
+              var bestForBadge = p.bestFor
+                ? '<span class="plan-badge best-for">🏆 ' + esc(p.bestFor) + "</span>"
+                : "";
+              var bestMatchClass = isBest ? " best-match" : "";
+              var bestMatchBadge = isBest ? '<span class="plan-badge">✨ Best match for you</span>' : "";
+
+              // Benefit list (for expand)
+              var benefitItems = Object.keys(BENEFIT_LABELS)
+                .map(function (key) {
+                  var covered = p.benefits[key];
+                  return (
+                    '<div class="benefit-item ' + (covered ? "yes" : "no") + '">' +
+                    '<span class="ic">' + (covered ? "✓" : "—") + "</span>" +
+                    esc(BENEFIT_LABELS[key]) +
+                    "</div>"
+                  );
+                })
+                .join("");
+
+              var notesHtml = p.notes ? '<p class="plan-notes">' + esc(p.notes) + "</p>" : "";
+
+              return (
+                '<div class="plan-card' + bestMatchClass + '">' +
+                bestForBadge +
+                bestMatchBadge +
+                '<div class="plan-provider">' + esc(p.provider) + "</div>" +
+                '<div class="plan-tier">' + esc(p.planName) + " · " + esc(p.networkSize) + " hospitals</div>" +
+                '<div class="plan-price">' + esc(p.priceDisplay) + "</div>" +
+                '<div class="plan-price-sub">≈ ' + esc(naira(p.priceMonthly)) + "/month</div>" +
+                limitBadge +
+                '<div class="plan-highlights">' + highlights + "</div>" +
+                '<div class="plan-network">🏥 ' + esc(p.networkSize) + " hospital network</div>" +
+                '<button class="plan-details-btn" data-plan-id="' + esc(p.id) + '">View details</button>' +
+                '<div class="plan-expand" id="expand-' + esc(p.id) + '">' +
+                '<div class="benefit-list">' + benefitItems + "</div>" +
+                '<div class="plan-waiting">⏳ ' + esc(p.waitingPeriod || "Standard") + "</div>" +
+                notesHtml +
+                '<div class="plan-source">Source: <a href="' + esc(p.source) + '" target="_blank" rel="noopener">' + esc(p.provider) + " website</a> · Verified " + esc(p.lastVerified) + "</div>" +
+                "</div>" +
+                "</div>"
+              );
+            })
+            .join("");
+
+          // Wire up expand buttons
+          grid.querySelectorAll(".plan-details-btn").forEach(function (btn) {
+            btn.addEventListener("click", function () {
+              var id = btn.getAttribute("data-plan-id");
+              var expand = document.getElementById("expand-" + id);
+              if (expand) {
+                var showing = expand.classList.toggle("show");
+                btn.textContent = showing ? "Hide details" : "View details";
+              }
+            });
+          });
+        }
+
+        // ── Rendering: table ────────────────────────────────
+        function renderTable(plans) {
+          var bestIds = getBestMatchIds();
+          if (plans.length === 0) {
+            table.innerHTML = '<tr><td style="padding:48px;text-align:center;color:var(--inkl);">No plans match these filters.</td></tr>';
+            return;
+          }
+
+          // Cap at 6 columns for readability
+          var shown = plans.slice(0, 6);
+
+          // Header row
+          var header =
+            "<thead><tr><th class='row-label'>Plan</th>" +
+            shown
+              .map(function (p) {
+                var mark = bestIds.has(p.id) ? " ✨" : "";
+                return "<th>" + esc(p.provider) + "<br><span style='font-weight:400;font-size:12px;opacity:.8'>" + esc(p.planName) + mark + "</span></th>";
+              })
+              .join("") +
+            "</tr></thead>";
+
+          // Data rows: price, limit, network, then each benefit
+          function row(label, getter, yesNo) {
+            var cells = shown
+              .map(function (p) {
+                var val = getter(p);
+                if (yesNo) {
+                  var cls = val ? "yes" : "no";
+                  return "<td class='" + cls + "'>" + (val ? "✓ Yes" : "— No") + "</td>";
+                }
+                return "<td>" + esc(val) + "</td>";
+              })
+              .join("");
+            return "<tr><td class='row-label'>" + label + "</td>" + cells + "</tr>";
+          }
+
+          var body =
+            "<tbody>" +
+            row("Price / yr", function (p) { return naira(p.priceAnnual); }) +
+            row("≈ Monthly", function (p) { return naira(p.priceMonthly); }) +
+            row("Annual limit", function (p) { return p.annualLimit ? naira(p.annualLimit) : "Not stated"; }) +
+            row("Network", function (p) { return p.networkSize; }) +
+            Object.keys(BENEFIT_LABELS)
+              .map(function (key) {
+                return row(BENEFIT_LABELS[key], function (p) { return p.benefits[key]; }, true);
+              })
+              .join("") +
+            row("Waiting period", function (p) { return p.waitingPeriod || "Standard"; }) +
+            "</tbody>";
+
+          table.innerHTML = header + body;
+        }
+
+        // ── Master render ───────────────────────────────────
+        function render() {
+          var plans = getFilteredPlans();
+          countEl.innerHTML = "Showing <strong>" + plans.length + "</strong> of " + ALL_PLANS.length + " plans";
+
+          if (state.view === "cards") {
+            grid.style.display = "grid";
+            tableWrap.style.display = "none";
+            renderCards(plans);
+          } else {
+            grid.style.display = "none";
+            tableWrap.style.display = "block";
+            renderTable(plans);
+          }
+        }
+
+        // ── Wire up filter bar ──────────────────────────────
+        document.getElementById("filterBudget").addEventListener("change", function (e) {
+          state.filterBudget = e.target.value;
+          render();
+        });
+        document.getElementById("filterBenefit").addEventListener("change", function (e) {
+          state.filterBenefit = e.target.value;
+          render();
+        });
+        document.getElementById("sortBy").addEventListener("change", function (e) {
+          state.sortBy = e.target.value;
+          render();
+        });
+
+        // View toggle
+        document.getElementById("viewCards").addEventListener("click", function () {
+          state.view = "cards";
+          this.classList.add("active");
+          document.getElementById("viewTable").classList.remove("active");
+          render();
+        });
+        document.getElementById("viewTable").addEventListener("click", function () {
+          state.view = "table";
+          this.classList.add("active");
+          document.getElementById("viewCards").classList.remove("active");
+          render();
+        });
+
+        // ── Wire up chooser chips ───────────────────────────
+        var resetBtn = document.getElementById("chooserReset");
+        document.querySelectorAll(".chip-row").forEach(function (row) {
+          var question = row.getAttribute("data-question");
+          row.querySelectorAll(".chip").forEach(function (chip) {
+            chip.addEventListener("click", function () {
+              var val = chip.getAttribute("data-value");
+              // Toggle: clicking selected chip deselects it
+              if (state[question] === val) {
+                state[question] = "";
+                chip.classList.remove("selected");
+              } else {
+                state[question] = val;
+                row.querySelectorAll(".chip").forEach(function (c) { c.classList.remove("selected"); });
+                chip.classList.add("selected");
+              }
+              updateResetBtn();
+              render();
+            });
+          });
+        });
+
+        function updateResetBtn() {
+          var anySelected = state.audience || state.budget || state.priority;
+          resetBtn.style.display = anySelected ? "block" : "none";
+        }
+
+        resetBtn.addEventListener("click", function () {
+          state.audience = "";
+          state.budget = "";
+          state.priority = "";
+          document.querySelectorAll(".chip-row .chip.selected").forEach(function (c) {
+            c.classList.remove("selected");
+          });
+          updateResetBtn();
+          render();
+        });
+
+        // ── Initial render ──────────────────────────────────
+        render();
+      })();
+    </script>
+  </body>
+</html>
