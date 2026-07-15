@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Cova — Renew your policy</title>
     <script src="api-client.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.40.0/dist/umd/supabase-full.min.js"></script>
+    <script src="cova-config.js"></script>
+    <script src="cova-auth.js"></script>
     <link
       href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap"
       rel="stylesheet"
@@ -625,6 +628,11 @@
     </div>
 
     <script>
+      // Require a signed-in user to renew a policy.
+      window.addEventListener("DOMContentLoaded", async () => {
+        await window.cova.requireUser();
+      });
+
       // Product configurations
       const PRODUCT_CONFIG = {
         device: {
@@ -946,9 +954,17 @@
           return;
         }
 
-        // Get user email from localStorage
-        const user = JSON.parse(localStorage.getItem("user"));
-        const email = user?.email || "adaeze@brightsupermarkets.com";
+        // Get user email from the authenticated Supabase session.
+        let email = null;
+        try {
+          const { data } = await window.cova.supabaseClient.auth.getUser();
+          email = data && data.user ? data.user.email : null;
+        } catch (_) { /* fall through */ }
+        if (!email) {
+          alert("Your session has expired. Please log in again.");
+          window.location.href = "cova-auth.html#login";
+          return;
+        }
 
         // Initialize payment with Paystack
         const paymentResult = await initializePayment(policyId, amount, email);

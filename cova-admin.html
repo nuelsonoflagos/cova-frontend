@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Cova — Admin Dashboard</title>
     <script src="api-client.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.40.0/dist/umd/supabase-full.min.js"></script>
+    <script src="cova-config.js"></script>
+    <script src="cova-auth.js"></script>
     <link
       href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap"
       rel="stylesheet"
@@ -1832,11 +1835,22 @@
       }
 
       function logout() {
-        window.location.href = "cova-login.html";
+        // Sign out of Supabase (clears the session), then go to staff login.
+        const { supabaseClient } = window.cova || {};
+        if (supabaseClient) {
+          supabaseClient.auth.signOut().finally(() => {
+            window.location.href = "cova-admin-login.html";
+          });
+        } else {
+          window.location.href = "cova-admin-login.html";
+        }
       }
 
-      // Initialize on load
-      document.addEventListener("DOMContentLoaded", function () {
+      // Initialize on load — but ONLY if the caller is an authenticated admin.
+      // requireStaffRole redirects to the staff login page if not authorized.
+      document.addEventListener("DOMContentLoaded", async function () {
+        const session = await window.cova.requireStaffRole("admin");
+        if (!session) return; // redirected to login
         renderPoliciesChart();
         renderResolutionChart();
         renderClaimsTable();

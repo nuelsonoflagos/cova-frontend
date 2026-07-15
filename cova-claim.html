@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Cova — Claim submission</title>
     <script src="api-client.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.40.0/dist/umd/supabase-full.min.js"></script>
+    <script src="cova-config.js"></script>
+    <script src="cova-auth.js"></script>
     <link
       href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap"
       rel="stylesheet"
@@ -844,6 +847,11 @@
     </main>
 
     <script>
+      // Require a signed-in user to file a claim.
+      window.addEventListener("DOMContentLoaded", async () => {
+        await window.cova.requireUser();
+      });
+
       // Product configurations with incident types
       const PRODUCT_CONFIG = {
         device: {
@@ -1181,7 +1189,7 @@
         }
       }
 
-      function submitClaim() {
+      async function submitClaim() {
         // Get policy_id from URL
         const params = new URLSearchParams(window.location.search);
         const policyId = params.get('policy_id');

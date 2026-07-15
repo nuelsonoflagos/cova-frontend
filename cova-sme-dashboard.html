@@ -660,7 +660,7 @@
             <span>📥</span>Invoices
           </a>
           <a
-            href="cova-login.html"
+            href="cova-auth.html#login"
             class="sidebar-link"
             onclick="switchTab('logout', this)"
           >
@@ -1142,11 +1142,12 @@
       </main>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.40.0/dist/umd/supabase-full.min.js"></script>
+    <script src="cova-config.js"></script>
+    <script src="cova-auth.js"></script>
     <script>
-      const supabaseUrl = 'https://sipbkoxamzsurjsojsov.supabase.co';
-      const supabaseAnonKey = 'sb_publishable_K5waOlfDMf1e7nwO7CkTmQ_fMyB5E5x';
-      const supabaseClient = supabase.createClient(supabaseUrl, supabaseAnonKey);
+      // Supabase client + auth helpers provided by cova-config.js / cova-auth.js.
+      const { supabaseClient, escapeHtml } = window.cova;
 
       // Fetch company policies on page load
       window.addEventListener("DOMContentLoaded", async () => {
@@ -1239,22 +1240,26 @@
 
         container.innerHTML = policies
           .map(
-            (policy) => `
+            (policy) => {
+              const safeId = encodeURIComponent(policy.id || "");
+              const status = policy.status === "active" ? "active" : "inactive";
+              return `
     <tr>
-      <td><div class="device-name">${policy.metadata?.device_name || "Unknown Device"}</div></td>
-      <td><div class="imei-masked">${policy.metadata?.imei || "N/A"}</div></td>
-      <td>₦${policy.sum_insured?.toLocaleString() || "0"}</td>
+      <td><div class="device-name">${escapeHtml(policy.metadata?.device_name || "Unknown Device")}</div></td>
+      <td><div class="imei-masked">${escapeHtml(policy.metadata?.imei || "N/A")}</div></td>
+      <td>₦${escapeHtml(policy.sum_insured?.toLocaleString() || "0")}</td>
       <td>
-        <span class="status-chip ${policy.status === "active" ? "active" : "inactive"}">${policy.status || "Unknown"}</span>
+        <span class="status-chip ${status}">${escapeHtml(policy.status || "Unknown")}</span>
       </td>
       <td>
         <div class="actions-cell">
-          <span class="action-link" onclick="viewPolicy('${policy.id}')">View</span>
-          <span class="action-link" onclick="fileClaim('${policy.id}')">Claim</span>
+          <span class="action-link js-action" data-action="viewPolicy" data-id="${safeId}">View</span>
+          <span class="action-link js-action" data-action="fileClaim" data-id="${safeId}">Claim</span>
         </div>
       </td>
     </tr>
-  `,
+  `;
+            },
           )
           .join("");
       }
@@ -1268,22 +1273,26 @@
 
         container.innerHTML = policies
           .map(
-            (policy) => `
+            (policy) => {
+              const safeId = encodeURIComponent(policy.id || "");
+              const status = policy.status === "active" ? "active" : "inactive";
+              return `
     <tr>
-      <td><div class="device-name">${policy.metadata?.vehicle_name || "Unknown Vehicle"}</div></td>
-      <td><div class="imei-masked">${policy.metadata?.registration_number || "N/A"}</div></td>
-      <td>₦${policy.sum_insured?.toLocaleString() || "0"}</td>
+      <td><div class="device-name">${escapeHtml(policy.metadata?.vehicle_name || "Unknown Vehicle")}</div></td>
+      <td><div class="imei-masked">${escapeHtml(policy.metadata?.registration_number || "N/A")}</div></td>
+      <td>₦${escapeHtml(policy.sum_insured?.toLocaleString() || "0")}</td>
       <td>
-        <span class="status-chip ${policy.status === "active" ? "active" : "inactive"}">${policy.status || "Unknown"}</span>
+        <span class="status-chip ${status}">${escapeHtml(policy.status || "Unknown")}</span>
       </td>
       <td>
         <div class="actions-cell">
-          <span class="action-link" onclick="viewPolicy('${policy.id}')">View</span>
-          <span class="action-link" onclick="fileClaim('${policy.id}')">Claim</span>
+          <span class="action-link js-action" data-action="viewPolicy" data-id="${safeId}">View</span>
+          <span class="action-link js-action" data-action="fileClaim" data-id="${safeId}">Claim</span>
         </div>
       </td>
     </tr>
-  `,
+  `;
+            },
           )
           .join("");
       }
@@ -1297,22 +1306,26 @@
 
         container.innerHTML = policies
           .map(
-            (policy) => `
+            (policy) => {
+              const safeId = encodeURIComponent(policy.id || "");
+              const status = policy.status === "active" ? "active" : "inactive";
+              return `
     <tr>
-      <td><div class="device-name">${policy.metadata?.group_name || "Unknown Group"}</div></td>
-      <td><div class="imei-masked">${policy.metadata?.member_count || "0"} members</div></td>
-      <td>₦${policy.sum_insured?.toLocaleString() || "0"}</td>
+      <td><div class="device-name">${escapeHtml(policy.metadata?.group_name || "Unknown Group")}</div></td>
+      <td><div class="imei-masked">${escapeHtml(policy.metadata?.member_count || "0")} members</div></td>
+      <td>₦${escapeHtml(policy.sum_insured?.toLocaleString() || "0")}</td>
       <td>
-        <span class="status-chip ${policy.status === "active" ? "active" : "inactive"}">${policy.status || "Unknown"}</span>
+        <span class="status-chip ${status}">${escapeHtml(policy.status || "Unknown")}</span>
       </td>
       <td>
         <div class="actions-cell">
-          <span class="action-link" onclick="viewPolicy('${policy.id}')">View</span>
-          <span class="action-link" onclick="fileClaim('${policy.id}')">Claim</span>
+          <span class="action-link js-action" data-action="viewPolicy" data-id="${safeId}">View</span>
+          <span class="action-link js-action" data-action="fileClaim" data-id="${safeId}">Claim</span>
         </div>
       </td>
     </tr>
-  `,
+  `;
+            },
           )
           .join("");
       }
@@ -1326,19 +1339,22 @@
 
         container.innerHTML = policies
           .map(
-            (policy) => `
+            (policy) => {
+              const safeId = encodeURIComponent(policy.id || "");
+              return `
     <div class="commercial-card">
-      <div class="commercial-icon">${getCommercialIcon(policy.product_type)}</div>
-      <div class="commercial-badge">${policy.status || "Active"}</div>
-      <div class="commercial-product">${getCommercialProductName(policy.product_type)}</div>
-      <div class="commercial-value">₦${policy.sum_insured?.toLocaleString() || "0"}</div>
-      <div class="commercial-detail">Premium: ₦${policy.premium_amount?.toLocaleString() || "0"}/${policy.premium_frequency || "monthly"}</div>
+      <div class="commercial-icon">${escapeHtml(getCommercialIcon(policy.product_type))}</div>
+      <div class="commercial-badge">${escapeHtml(policy.status || "Active")}</div>
+      <div class="commercial-product">${escapeHtml(getCommercialProductName(policy.product_type))}</div>
+      <div class="commercial-value">₦${escapeHtml(policy.sum_insured?.toLocaleString() || "0")}</div>
+      <div class="commercial-detail">Premium: ₦${escapeHtml(policy.premium_amount?.toLocaleString() || "0")}/${escapeHtml(policy.premium_frequency || "monthly")}</div>
       <div class="commercial-actions">
-        <button class="btn-primary" onclick="viewPolicy('${policy.id}')">View Policy</button>
-        <button class="btn-secondary" onclick="fileClaim('${policy.id}')">File Claim</button>
+        <button class="btn-primary js-action" data-action="viewPolicy" data-id="${safeId}">View Policy</button>
+        <button class="btn-secondary js-action" data-action="fileClaim" data-id="${safeId}">File Claim</button>
       </div>
     </div>
-  `,
+  `;
+            },
           )
           .join("");
       }
@@ -1352,22 +1368,29 @@
 
         container.innerHTML = policies
           .map(
-            (claim) => `
+            (claim) => {
+              const safeId = encodeURIComponent(claim.id || "");
+              const status = claim.status === "approved" ? "active" : "inactive";
+              const incidentDate = claim.incident_date
+                ? escapeHtml(new Date(claim.incident_date).toLocaleDateString())
+                : "N/A";
+              return `
     <tr>
-      <td><div class="device-name">${claim.claim_ref || "N/A"}</div></td>
-      <td><div class="imei-masked">${claim.incident_type || "N/A"}</div></td>
-      <td>${new Date(claim.incident_date).toLocaleDateString()}</td>
-      <td>₦${claim.claim_amount?.toLocaleString() || "0"}</td>
+      <td><div class="device-name">${escapeHtml(claim.claim_ref || "N/A")}</div></td>
+      <td><div class="imei-masked">${escapeHtml(claim.incident_type || "N/A")}</div></td>
+      <td>${incidentDate}</td>
+      <td>₦${escapeHtml(claim.claim_amount?.toLocaleString() || "0")}</td>
       <td>
-        <span class="status-chip ${claim.status === "approved" ? "active" : "inactive"}">${claim.status || "Pending"}</span>
+        <span class="status-chip ${status}">${escapeHtml(claim.status || "Pending")}</span>
       </td>
       <td>
         <div class="actions-cell">
-          <span class="action-link" onclick="viewClaim('${claim.id}')">View</span>
+          <span class="action-link js-action" data-action="viewClaim" data-id="${safeId}">View</span>
         </div>
       </td>
     </tr>
-  `,
+  `;
+            },
           )
           .join("");
       }
@@ -1401,6 +1424,19 @@
       function viewClaim(claimId) {
         window.location.href = `cova-claim-tracker.html?claim_id=${claimId}`;
       }
+
+      // Delegated click handler for all rendered policy/claim action buttons.
+      // Replaces inline onclick handlers (which were an XSS vector) — actions
+      // are keyed off data-action attributes.
+      document.addEventListener("click", (ev) => {
+        const el = ev.target.closest(".js-action");
+        if (!el) return;
+        const action = el.getAttribute("data-action");
+        const id = decodeURIComponent(el.getAttribute("data-id") || "");
+        if (action === "viewPolicy") viewPolicy(id);
+        else if (action === "fileClaim") fileClaim(id);
+        else if (action === "viewClaim") viewClaim(id);
+      });
 
       function toggleSidebar() {
         const sidebar = document.getElementById("sidebar");

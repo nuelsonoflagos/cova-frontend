@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Cova — Policy details</title>
     <script src="api-client.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.40.0/dist/umd/supabase-full.min.js"></script>
+    <script src="cova-config.js"></script>
+    <script src="cova-auth.js"></script>
     <link
       href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap"
       rel="stylesheet"
@@ -1407,9 +1410,19 @@
         const amount = new URLSearchParams(window.location.search).get(
           "amount",
         );
-        const user = JSON.parse(localStorage.getItem("user"));
+        // Get email from the authenticated Supabase session (not localStorage).
+        let email = null;
+        try {
+          const { data } = await window.cova.supabaseClient.auth.getUser();
+          email = data && data.user ? data.user.email : null;
+        } catch (_) { /* fall through */ }
+        if (!email) {
+          alert("Your session has expired. Please log in again.");
+          window.location.href = "cova-auth.html#login";
+          return;
+        }
 
-        const result = await initializePayment(policyId, amount, user.email);
+        const result = await initializePayment(policyId, amount, email);
 
         if (result.ok) {
           // Redirect to Paystack
@@ -1421,6 +1434,9 @@
 
       // Initialize page
       window.addEventListener("DOMContentLoaded", async () => {
+        // Require a signed-in user to view a policy.
+        await window.cova.requireUser();
+
         const policyId = new URLSearchParams(window.location.search).get("id");
 
         if (!policyId) {
@@ -1450,38 +1466,39 @@
         const coverSummary = document.querySelector(".cover-summary");
         if (coverSummary && policy.metadata) {
           const metadata = policy.metadata;
+          const esc = window.cova ? window.cova.escapeHtml : (s) => s;
           coverSummary.innerHTML =
             policy.product_type === "device"
               ? `
       <div class="summary-item">
         <span class="summary-label">Device</span>
-        <span class="summary-value summary-strong">${metadata.device_name || "N/A"}</span>
+        <span class="summary-value summary-strong">${esc(metadata.device_name || "N/A")}</span>
       </div>
       <div class="summary-item">
         <span class="summary-label">IMEI</span>
-        <span class="summary-value">${metadata.imei || "N/A"}</span>
+        <span class="summary-value">${esc(metadata.imei || "N/A")}</span>
       </div>
     `
               : `
       <div class="summary-item">
         <span class="summary-label">Insurer</span>
-        <span class="summary-value">${policy.insurer || "N/A"}</span>
+        <span class="summary-value">${esc(policy.insurer || "N/A")}</span>
       </div>
       <div class="summary-item">
         <span class="summary-label">Cover type</span>
-        <span class="summary-value">${policy.cover_type || "N/A"}</span>
+        <span class="summary-value">${esc(policy.cover_type || "N/A")}</span>
       </div>
       <div class="summary-item">
         <span class="summary-label">Sum insured</span>
-        <span class="summary-value">₦${policy.sum_insured ? policy.sum_insured.toLocaleString() : "0"}</span>
+        <span class="summary-value">₦${esc(policy.sum_insured ? policy.sum_insured.toLocaleString() : "0")}</span>
       </div>
       <div class="summary-item">
         <span class="summary-label">Start date</span>
-        <span class="summary-value">${policy.start_date || "N/A"}</span>
+        <span class="summary-value">${esc(policy.start_date || "N/A")}</span>
       </div>
       <div class="summary-item">
         <span class="summary-label">End date</span>
-        <span class="summary-value">${policy.end_date || "N/A"}</span>
+        <span class="summary-value">${esc(policy.end_date || "N/A")}</span>
       </div>
     `;
         }

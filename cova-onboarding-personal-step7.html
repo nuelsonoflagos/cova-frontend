@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cova — Risk Profile</title>
   <link rel="stylesheet" href="styles.css">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.40.0/dist/umd/supabase-full.min.js"></script>
+  <script src="cova-config.js"></script>
 </head>
 <body>
   <div class="progress-container">
@@ -60,18 +61,8 @@
   </main>
 
   <script>
-    // Initialize Supabase using environment variables or placeholders if not available
-    // Replace these with your actual Supabase URL and Anon Key
-    const supabaseUrl = 'https://sipbkoxamzsurjsojsov.supabase.co'; // Based on previous project context
-    const supabaseAnonKey = 'sb_publishable_K5waOlfDMf1e7nwO7CkTmQ_fMyB5E5x'; // Real key provided by user
-    
-    // We will initialize it gracefully in case the key is invalid
-    let supabaseClient;
-    try {
-      supabaseClient = supabase.createClient(supabaseUrl, supabaseAnonKey);
-    } catch(e) {
-      console.warn("Supabase not fully configured yet.");
-    }
+    // Supabase client is provided by cova-config.js (window.cova.supabaseClient).
+    const { supabaseClient } = window.cova;
 
     const stored = sessionStorage.getItem('cova_risk');
     if (stored) {

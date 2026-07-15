@@ -4,11 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Cova — My Dashboard</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.40.0/dist/umd/supabase-full.min.js"></script>
+    <script src="cova-config.js"></script>
+    <script src="cova-auth.js"></script>
     <script>
-      const supabaseUrl = 'https://sipbkoxamzsurjsojsov.supabase.co';
-      const supabaseAnonKey = 'sb_publishable_K5waOlfDMf1e7nwO7CkTmQ_fMyB5E5x';
-      const supabaseClient = supabase.createClient(supabaseUrl, supabaseAnonKey);
+      // Supabase client + auth helpers provided by cova-config.js / cova-auth.js.
+      const { supabaseClient, escapeHtml } = window.cova;
 
       // Load policies when page loads
       window.addEventListener("DOMContentLoaded", async () => {
@@ -68,15 +69,26 @@
         policies.forEach((policy) => {
           const policyCard = document.createElement("div");
           policyCard.className = "policy-card";
+          // Escape all dynamic DB values to prevent stored XSS.
+          const safeId = encodeURIComponent(policy.id || "");
           policyCard.innerHTML = `
-      <h3>${policy.product_type}</h3>
-      <p><strong>Status:</strong> ${policy.status}</p>
-      <p><strong>Premium:</strong> ₦${policy.premium_amount}</p>
-      <p><strong>Coverage:</strong> ₦${policy.sum_insured}</p>
-      <button onclick="viewPolicy('${policy.id}')">View Details</button>
-      <button onclick="fileClaim('${policy.id}')">File Claim</button>
+      <h3>${escapeHtml(policy.product_type)}</h3>
+      <p><strong>Status:</strong> ${escapeHtml(policy.status)}</p>
+      <p><strong>Premium:</strong> ₦${escapeHtml(policy.premium_amount)}</p>
+      <p><strong>Coverage:</strong> ₦${escapeHtml(policy.sum_insured)}</p>
+      <button data-policy-id="${safeId}" class="js-view-policy">View Details</button>
+      <button data-policy-id="${safeId}" class="js-file-claim">File Claim</button>
     `;
           policiesContainer.appendChild(policyCard);
+        });
+
+        // Wire up buttons via event delegation (avoids inline onclick + XSS).
+        policiesContainer.addEventListener("click", (ev) => {
+          const btn = ev.target.closest("button[data-policy-id]");
+          if (!btn) return;
+          const id = btn.getAttribute("data-policy-id");
+          if (btn.classList.contains("js-view-policy")) viewPolicy(id);
+          else if (btn.classList.contains("js-file-claim")) fileClaim(id);
         });
       }
 

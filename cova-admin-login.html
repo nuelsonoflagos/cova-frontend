@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Cova — Staff Login</title>
     <script src="api-client.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.40.0/dist/umd/supabase-full.min.js"></script>
+    <script src="cova-config.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -537,40 +539,70 @@
         });
       });
 
+      // Supabase client is provided by cova-config.js (window.cova.supabaseClient).
+      const { supabaseClient } = window.cova;
+
+      // Shared staff login: authenticate via Supabase, then confirm the user
+      // has the required role in the `staff` table. Credentials are never
+      // hardcoded in the client — verification happens against the database.
+      async function staffLogin(email, password, requiredRole, redirectPage, errorEls) {
+        // 1. Authenticate with Supabase Auth.
+        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+        if (error || !data || !data.user) {
+          throw new Error("Invalid email or password.");
+        }
+
+        // 2. Verify the caller is staff with the required role.
+        const { data: staffRow, error: staffError } = await supabaseClient
+          .from("staff")
+          .select("role")
+          .eq("user_id", data.user.id)
+          .maybeSingle();
+
+        if (staffError || !staffRow) {
+          // Not a staff account — sign back out and reject.
+          await supabaseClient.auth.signOut();
+          throw new Error("This account is not authorized for staff access.");
+        }
+        if (requiredRole === "admin" && staffRow.role !== "admin") {
+          await supabaseClient.auth.signOut();
+          throw new Error("This account does not have admin privileges.");
+        }
+
+        // 3. Authorized — go to the portal.
+        window.location.href = redirectPage;
+      }
+
+      function showError(errorEls, message) {
+        errorEls.inputs.forEach((i) => i.classList.add("error"));
+        errorEls.box.classList.add("show");
+        if (message) errorEls.box.textContent = message;
+        const removeError = () => errorEls.inputs.forEach((i) => i.classList.remove("error"));
+        errorEls.inputs.forEach((i) => i.addEventListener("input", removeError, { once: true }));
+      }
+
       // Admin login form
       const adminForm = document.getElementById("admin-form");
       const adminError = document.getElementById("admin-error");
       const adminEmail = document.getElementById("admin-email");
       const adminPassword = document.getElementById("admin-password");
 
-      adminForm.addEventListener("submit", (e) => {
+      adminForm.addEventListener("submit", async (e) => {
         e.preventDefault();
-
-        const email = adminEmail.value.trim();
-        const password = adminPassword.value;
-
-        // Hardcoded credentials
-        const validEmail = "admin@getcova.ng";
-        const validPassword = "password123";
-
-        // Validate credentials
-        if (email === validEmail && password === validPassword) {
-          // Success - redirect to admin dashboard
-          window.location.href = "cova-admin.html";
-        } else {
-          // Show error
-          adminEmail.classList.add("error");
-          adminPassword.classList.add("error");
-          adminError.classList.add("show");
-
-          // Remove error state after 3 seconds of interaction
-          const removeError = () => {
-            adminEmail.classList.remove("error");
-            adminPassword.classList.remove("error");
-          };
-
-          adminEmail.addEventListener("input", removeError, { once: true });
-          adminPassword.addEventListener("input", removeError, { once: true });
+        const errorEls = { box: adminError, inputs: [adminEmail, adminPassword] };
+        const submitBtn = adminForm.querySelector("button[type=submit]");
+        if (submitBtn) submitBtn.disabled = true;
+        try {
+          await staffLogin(
+            adminEmail.value.trim(),
+            adminPassword.value,
+            "admin",
+            "cova-admin.html",
+            errorEls,
+          );
+        } catch (err) {
+          showError(errorEls, err.message || "Login failed.");
+          if (submitBtn) submitBtn.disabled = false;
         }
       });
 
@@ -580,55 +612,41 @@
       const handlerEmail = document.getElementById("handler-email");
       const handlerPassword = document.getElementById("handler-password");
 
-      handlerForm.addEventListener("submit", (e) => {
+      handlerForm.addEventListener("submit", async (e) => {
         e.preventDefault();
-
-        const email = handlerEmail.value.trim();
-        const password = handlerPassword.value;
-
-        // Hardcoded credentials
-        const validEmail = "handler@getcova.ng";
-        const validPassword = "password123";
-
-        // Validate credentials
-        if (email === validEmail && password === validPassword) {
-          // Success - redirect to handler portal
-          window.location.href = "cova-handler.html";
-        } else {
-          // Show error
-          handlerEmail.classList.add("error");
-          handlerPassword.classList.add("error");
-          handlerError.classList.add("show");
-
-          // Remove error state after 3 seconds of interaction
-          const removeError = () => {
-            handlerEmail.classList.remove("error");
-            handlerPassword.classList.remove("error");
-          };
-
-          handlerEmail.addEventListener("input", removeError, { once: true });
-          handlerPassword.addEventListener("input", removeError, {
-            once: true,
-          });
+        const errorEls = { box: handlerError, inputs: [handlerEmail, handlerPassword] };
+        const submitBtn = handlerForm.querySelector("button[type=submit]");
+        if (submitBtn) submitBtn.disabled = true;
+        try {
+          await staffLogin(
+            handlerEmail.value.trim(),
+            handlerPassword.value,
+            "handler",
+            "cova-handler.html",
+            errorEls,
+          );
+        } catch (err) {
+          showError(errorEls, err.message || "Login failed.");
+          if (submitBtn) submitBtn.disabled = false;
         }
       });
 
-      // Log access attempts (placeholder for future implementation)
-      window.addEventListener("load", () => {
-        console.log("[Security] Access attempt logged:", {
-          timestamp: new Date().toISOString(),
-          userAgent: navigator.userAgent,
-          referrer: document.referrer,
-        });
-
-        // TODO: Replace with actual logging to backend when Supabase is integrated
-      });
-
-      // Handle unauthorized access attempts (future implementation)
-      document.addEventListener("keydown", (e) => {
-        // Track suspicious activity patterns
-        // TODO: Implement rate limiting and security monitoring
-      });
+      // If already signed in as staff, bounce straight to the right portal.
+      (async () => {
+        try {
+          const { data } = await supabaseClient.auth.getSession();
+          if (data && data.session) {
+            const { data: staffRow } = await supabaseClient
+              .from("staff")
+              .select("role")
+              .eq("user_id", data.session.user.id)
+              .maybeSingle();
+            if (staffRow) {
+              window.location.href = staffRow.role === "admin" ? "cova-admin.html" : "cova-handler.html";
+            }
+          }
+        } catch (_) { /* ignore — stay on login page */ }
+      })();
     </script>
     <script>
       function toggleMobileMenu() {

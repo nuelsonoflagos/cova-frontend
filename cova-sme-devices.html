@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Cova — Device management</title>
     <script src="api-client.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.40.0/dist/umd/supabase-full.min.js"></script>
+    <script src="cova-config.js"></script>
+    <script src="cova-auth.js"></script>
     <link
       href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap"
       rel="stylesheet"
@@ -1155,28 +1158,46 @@
         const tbody = document.querySelector("#devicesTable tbody");
         if (!tbody) return;
 
+        const esc = window.cova ? window.cova.escapeHtml : (s) => s;
         tbody.innerHTML = "";
 
         devices.forEach((device) => {
+          // Validate/guard fields that may be malformed when imported from CSV.
+          const imei = String(device.imei || "");
+          const status = String(device.status || "").toLowerCase() || "unknown";
+          const safeId = encodeURIComponent(device.id);
           const row = document.createElement("tr");
           row.innerHTML = `
-      <td>${device.name}</td>
-      <td><span class="device-col">${device.device}</span></td>
-      <td><span class="imei-masked">****${device.imei.slice(-4)}</span></td>
-      <td>${device.cover}</td>
-      <td>${device.insurer}</td>
-      <td>${formatCurrency(device.cost)}</td>
-      <td><span class="status-chip ${device.status.toLowerCase()}">${device.status}</span></td>
-      <td>${device.date}</td>
+      <td>${esc(device.name)}</td>
+      <td><span class="device-col">${esc(device.device)}</span></td>
+      <td><span class="imei-masked">****${esc(imei.slice(-4))}</span></td>
+      <td>${esc(device.cover)}</td>
+      <td>${esc(device.insurer)}</td>
+      <td>${esc(formatCurrency(device.cost))}</td>
+      <td><span class="status-chip ${esc(status)}">${esc(device.status)}</span></td>
+      <td>${esc(device.date)}</td>
       <td><div class="actions-cell">
-        <button class="action-btn" onclick="openSwapModal(${device.id})">Swap</button>
-        <button class="action-btn" onclick="fileClaim()">Claim</button>
-        <button class="action-btn danger" onclick="openRemoveModal(${device.id})">Remove</button>
+        <button class="action-btn js-device-action" data-action="swap" data-id="${safeId}">Swap</button>
+        <button class="action-btn js-device-action" data-action="claim" data-id="${safeId}">Claim</button>
+        <button class="action-btn danger js-device-action" data-action="remove" data-id="${safeId}">Remove</button>
       </div></td>
     `;
           tbody.appendChild(row);
         });
       }
+
+      // Delegated handler for device-row action buttons (replaces inline onclick).
+      document.addEventListener("click", (ev) => {
+        const btn = ev.target.closest(".js-device-action");
+        if (!btn) return;
+        // Restore original id type (devices use numeric ids).
+        const raw = decodeURIComponent(btn.getAttribute("data-id") || "");
+        const id = /^\d+$/.test(raw) ? Number(raw) : raw;
+        const action = btn.getAttribute("data-action");
+        if (action === "swap") openSwapModal(id);
+        else if (action === "remove") openRemoveModal(id);
+        else if (action === "claim") fileClaim();
+      });
 
       function formatCurrency(amount) {
         return "₦" + amount.toLocaleString("en-NG");

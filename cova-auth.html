@@ -4,7 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Cova — Login</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.40.0/dist/umd/supabase-full.min.js"></script>
+    <script src="cova-config.js"></script>
     <link
       href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap"
       rel="stylesheet"
@@ -507,7 +508,7 @@
               </div>
               <div class="form-group">
                 <label for="signup_password">Password</label>
-                <input id="signup_password" type="password" placeholder="Create a strong password" required />
+                <input id="signup_password" type="password" placeholder="Create a strong password" required minlength="12" />
               </div>
               <button type="submit" class="btn-primary">Create Account</button>
             </form>
@@ -563,9 +564,8 @@
       </section>
     </main>
     <script>
-      const supabaseUrl = 'https://sipbkoxamzsurjsojsov.supabase.co';
-      const supabaseAnonKey = 'sb_publishable_K5waOlfDMf1e7nwO7CkTmQ_fMyB5E5x';
-      const supabaseClient = supabase.createClient(supabaseUrl, supabaseAnonKey);
+      // Supabase client is provided by cova-config.js (window.cova.supabaseClient).
+      const { supabaseClient } = window.cova;
 
       function switchAuthMode(mode) {
         const tabs = document.querySelectorAll(".login-tab");
