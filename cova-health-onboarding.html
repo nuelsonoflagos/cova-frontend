@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Cova Health Insurance Onboarding</title>
     <script src="api-client.js"></script>
+    <script src="cova-health-plans.js"></script>
     <link
       href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap"
       rel="stylesheet"
@@ -734,59 +735,14 @@
 
       <div class="step-panel" id="step-3">
         <div class="step-title">Choose a plan</div>
-        <div class="step-sub">Select a tier and preferred insurer.</div>
-        <div class="card-grid">
-          <div
-            class="plan-card selected"
-            id="plan-bronze"
-            onclick="selectPlan('Bronze')"
-          >
-            <div class="plan-radio"></div>
-            <h3>Bronze</h3>
-            <p>Outpatient + emergency cover for ₦45k/yr.</p>
-          </div>
-          <div
-            class="plan-card"
-            id="plan-silver"
-            onclick="selectPlan('Silver')"
-          >
-            <div class="plan-radio"></div>
-            <h3>Silver</h3>
-            <p>Bronze plus specialist care and dental for ₦95k/yr.</p>
-          </div>
-          <div class="plan-card" id="plan-gold" onclick="selectPlan('Gold')">
-            <div class="plan-radio"></div>
-            <h3>Gold</h3>
-            <p>Silver plus maternity and optical for ₦180k/yr.</p>
-          </div>
-        </div>
-        <div class="insurer-options">
-          <div
-            class="insurer-card selected"
-            id="ins-AIICO"
-            onclick="selectInsurer('AIICO')"
-          >
-            <strong>AIICO</strong>
-          </div>
-          <div
-            class="insurer-card"
-            id="ins-Hygeia"
-            onclick="selectInsurer('Hygeia')"
-          >
-            <strong>Hygeia</strong>
-          </div>
-          <div
-            class="insurer-card"
-            id="ins-Reliance"
-            onclick="selectInsurer('Reliance HMO')"
-          >
-            <strong>Reliance HMO</strong>
-          </div>
+        <div class="step-sub">Real plans from Nigeria's top HMOs. Pick one that fits you.</div>
+        <div class="card-grid" id="plan-grid">
+          <!-- Plan cards are populated dynamically from cova-health-plans.js -->
         </div>
         <a
           href="cova-compare-health.html"
-          style="display:block;text-align:center;font-family:var(--fd);font-size:14px;font-weight:600;color:var(--g);margin-bottom:16px;text-decoration:underline"
-        >Compare all health plans from 10 HMOs →</a>
+          style="display:block;text-align:center;font-family:var(--fd);font-size:14px;font-weight:600;color:var(--g);margin:16px 0;text-decoration:underline"
+        >Compare all 24 health plans from 10 HMOs →</a>
         <button class="btn-primary" onclick="nextStep(3)">Continue →</button
         ><button class="btn-secondary" onclick="prevStep(3)">← Go back</button>
       </div>
@@ -932,8 +888,11 @@
     <script>
       let currentStep = 1;
       let coverType = "Individual";
-      let selectedPlan = "Bronze";
-      let selectedInsurer = "AIICO";
+      // selectedPlan now holds a real plan object (from cova-health-plans.js)
+      // instead of a hardcoded tier name. Populated by renderPlans().
+      let step3Plans = [];
+      let selectedPlan = null;
+      let selectedInsurer = "";
       let selectedHospital = "Lagos University Teaching Hospital";
       function goBack() {
         if (currentStep === 'otp') { prevStep('otp'); return; }
@@ -956,24 +915,56 @@
         document.getElementById("corp-fields").style.display =
           type === "Corporate/Group" ? "block" : "none";
       }
-      function selectPlan(plan) {
-        selectedPlan = plan;
-        ["plan-bronze", "plan-silver", "plan-gold"].forEach((id) =>
-          document.getElementById(id).classList.remove("selected"),
-        );
-        document
-          .getElementById("plan-" + plan.toLowerCase())
-          .classList.add("selected");
-        updatePrice();
+      // Render 3 representative real plans (budget / mid / premium) into Step 3.
+      function renderPlans() {
+        var allPlans = (typeof window !== "undefined" && window.CovaHealthPlans) ? window.CovaHealthPlans : [];
+        var grid = document.getElementById("plan-grid");
+        if (!grid) return;
+
+        if (allPlans.length === 0) {
+          grid.innerHTML = '<p style="grid-column:1/-1;color:var(--inkl)">Plans are loading. Please try again.</p>';
+          return;
+        }
+
+        // Pick 3 across price tiers: cheapest, a solid mid-range, and a premium option.
+        var sorted = allPlans.slice().sort(function (a, b) { return a.priceAnnual - b.priceAnnual; });
+        step3Plans = [
+          sorted[0],                                                        // budget
+          sorted[Math.floor(sorted.length * 0.4)] || sorted[0],             // mid-range
+          sorted[Math.floor(sorted.length * 0.7)] || sorted[sorted.length - 1], // premium
+        ];
+
+        grid.innerHTML = step3Plans.map(function (plan, i) {
+          var limitText = plan.annualLimit
+            ? "₦" + (plan.annualLimit >= 1000000 ? (plan.annualLimit / 1000000) + "M" : (plan.annualLimit / 1000) + "K") + " annual limit"
+            : plan.networkSize + " hospitals";
+          var highlights = plan.highlights.slice(0, 2).join(" · ");
+          var badge = plan.bestFor ? '<div style="font-size:11px;font-weight:700;color:var(--am);margin-bottom:6px">🏆 ' + plan.bestFor + '</div>' : '';
+          return (
+            '<div class="plan-card' + (i === 0 ? " selected" : "") + '" id="plan-' + i + '" onclick="selectPlan(' + i + ')">' +
+            '<div class="plan-radio"></div>' +
+            badge +
+            '<h3 style="font-size:15px">' + plan.provider + '</h3>' +
+            '<p style="font-size:13px;color:var(--inkl);margin-bottom:8px">' + plan.planName + '</p>' +
+            '<p style="font-size:15px;font-weight:700;color:var(--g)">' + plan.priceDisplay.split("(")[0].trim() + '</p>' +
+            '<p style="font-size:12px;color:var(--inkl)">' + limitText + '</p>' +
+            (highlights ? '<p style="font-size:12px;color:var(--inkm);margin-top:6px">' + highlights + '</p>' : '') +
+            '</div>'
+          );
+        }).join("");
+
+        // Default-select the first (budget) plan.
+        selectPlan(0);
       }
-      function selectInsurer(name) {
-        selectedInsurer = name;
-        ["ins-AIICO", "ins-Hygeia", "ins-Reliance"].forEach((id) =>
-          document.getElementById(id).classList.remove("selected"),
-        );
-        document
-          .getElementById("ins-" + name.replace(/\s/g, ""))
-          .classList.add("selected");
+
+      function selectPlan(index) {
+        selectedPlan = step3Plans[index];
+        selectedInsurer = selectedPlan ? selectedPlan.provider : "";
+        step3Plans.forEach(function (_, i) {
+          var el = document.getElementById("plan-" + i);
+          if (el) el.classList.toggle("selected", i === index);
+        });
+        updatePrice();
       }
       function selectHospital(name) {
         selectedHospital = name;
@@ -986,9 +977,9 @@
         });
       }
       function updatePrice() {
-        const prices = { Bronze: 45000, Silver: 95000, Gold: 180000 };
+        if (!selectedPlan) return;
         document.getElementById("summary-price").textContent =
-          "₦" + prices[selectedPlan].toLocaleString("en-NG");
+          "₦" + selectedPlan.priceAnnual.toLocaleString("en-NG") + "/yr";
       }
       function validateStep(step) {
         if (step === 2) {
@@ -1017,9 +1008,11 @@
           document.getElementById("summary-cover").textContent = coverType;
           document.getElementById("summary-name").textContent =
             document.getElementById("health-name").value;
-          document.getElementById("summary-plan").textContent = selectedPlan;
+          document.getElementById("summary-plan").textContent = selectedPlan
+            ? selectedPlan.provider + " — " + selectedPlan.planName
+            : "Not selected";
           document.getElementById("summary-insurer").textContent =
-            selectedInsurer;
+            selectedInsurer || "—";
           document.getElementById("summary-hospital").textContent =
             selectedHospital;
           updatePrice();
@@ -1368,6 +1361,9 @@
 
     <script>
       document.addEventListener("DOMContentLoaded", () => {
+        // Populate the plan cards with real provider data.
+        renderPlans();
+
         const labels = Array.from(document.querySelectorAll("label"));
         const methodLabel = labels.find((l) =>
           l.textContent.includes("Where should we send your verification code"),
