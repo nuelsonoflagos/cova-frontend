@@ -422,10 +422,6 @@
         font-size: 11px;
         color: var(--inkf);
       }
-      .plan-source a {
-        color: var(--gl);
-        text-decoration: none;
-      }
       .plan-notes {
         font-size: 12px;
         color: var(--inkl);
@@ -906,7 +902,7 @@
                 '<div class="benefit-list">' + benefitItems + "</div>" +
                 '<div class="plan-waiting">⏳ ' + esc(p.waitingPeriod || "Standard") + "</div>" +
                 notesHtml +
-                '<div class="plan-source">Source: <a href="' + esc(p.source) + '" target="_blank" rel="noopener">' + esc(p.provider) + " website</a> · Verified " + esc(p.lastVerified) + "</div>" +
+                '<div class="plan-source">Provider: ' + esc(p.provider) + " · Verified " + esc(p.lastVerified) + "</div>" +
                 "</div>" +
                 "</div>"
               );
