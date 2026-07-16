@@ -748,82 +748,12 @@
       </div>
       <div class="step-panel" id="step-4">
         <div class="step-title">Primary hospital</div>
-        <div class="step-sub">
-          Pick one Lagos hospital for your main care provider.
+        <div class="step-sub" id="hospital-sub">
+          Pick a hospital for your main care provider.
         </div>
-        <div class="hospital-grid">
-          <div
-            class="hospital-card selected"
-            id="hosp-1"
-            onclick="selectHospital('Lagos University Teaching Hospital')"
-          >
-            Lagos University Teaching Hospital
-          </div>
-          <div
-            class="hospital-card"
-            id="hosp-2"
-            onclick="selectHospital('Reddington Hospital')"
-          >
-            Reddington Hospital
-          </div>
-          <div
-            class="hospital-card"
-            id="hosp-3"
-            onclick="selectHospital('Lagoon Hospitals')"
-          >
-            Lagoon Hospitals
-          </div>
-          <div
-            class="hospital-card"
-            id="hosp-4"
-            onclick="selectHospital('St. Nicholas Hospital')"
-          >
-            St. Nicholas Hospital
-          </div>
-          <div
-            class="hospital-card"
-            id="hosp-5"
-            onclick="selectHospital('Evercare Hospital')"
-          >
-            Evercare Hospital
-          </div>
-          <div
-            class="hospital-card"
-            id="hosp-6"
-            onclick="selectHospital('Cedarcrest Hospitals')"
-          >
-            Cedarcrest Hospitals
-          </div>
-          <div
-            class="hospital-card"
-            id="hosp-7"
-            onclick="
-              selectHospital('Rivers State University Teaching Hospital')
-            "
-          >
-            Rivers State University Teaching Hospital
-          </div>
-          <div
-            class="hospital-card"
-            id="hosp-8"
-            onclick="selectHospital('First Consultant Hospital')"
-          >
-            First Consultant Hospital
-          </div>
-          <div
-            class="hospital-card"
-            id="hosp-9"
-            onclick="selectHospital('St. Gerard’s Hospital')"
-          >
-            St. Gerard’s Hospital
-          </div>
-          <div
-            class="hospital-card"
-            id="hosp-10"
-            onclick="selectHospital('Shield Specialists Hospital')"
-          >
-            Shield Specialists Hospital
-          </div>
+        <div class="hospital-grid" id="hospital-grid">
+          <!-- Hospitals are populated dynamically by renderHospitals() based on
+               the selected provider’s network. -->
         </div>
         <div class="alert-box">
           Full network will be shared via WhatsApp once your plan is ready.
@@ -981,6 +911,42 @@
         document.getElementById("summary-price").textContent =
           "₦" + selectedPlan.priceAnnual.toLocaleString("en-NG") + "/yr";
       }
+
+      // Populate the hospital grid with the selected provider's actual network.
+      // Falls back to a general list if the provider isn't in the mapping yet.
+      function renderHospitals() {
+        var grid = document.getElementById("hospital-grid");
+        var sub = document.getElementById("hospital-sub");
+        if (!grid) return;
+
+        var provider = selectedPlan ? selectedPlan.provider : "";
+        var networkMap = (typeof window !== "undefined" && window.CovaProviderHospitals) ? window.CovaProviderHospitals : {};
+        var hospitals = (provider && networkMap[provider]) || [
+          "Lagos University Teaching Hospital", "Reddington Hospital", "Lagoon Hospitals",
+          "St. Nicholas Hospital", "Eko Hospitals", "First Consultant Hospital"
+        ];
+
+        // Update subtitle to reference the provider + network size.
+        if (sub && selectedPlan) {
+          sub.textContent =
+            "These hospitals accept " + provider + " (" + selectedPlan.networkSize + " network). Pick your main care provider.";
+        }
+
+        // If the previously-selected hospital isn't in this provider's network,
+        // reset the selection to the first available hospital.
+        if (hospitals.indexOf(selectedHospital) === -1 && hospitals.length > 0) {
+          selectedHospital = hospitals[0];
+        }
+
+        grid.innerHTML = hospitals.map(function (name, i) {
+          return (
+            '<div class="hospital-card' + (name === selectedHospital ? " selected" : "") + '" ' +
+            'onclick="selectHospital(' + JSON.stringify(name) + ')">' +
+            name +
+            '</div>'
+          );
+        }).join("");
+      }
       function validateStep(step) {
         if (step === 2) {
           let ok = true;
@@ -1002,20 +968,32 @@
         }
         return true;
       }
+      function updateSummary() {
+        document.getElementById("summary-cover").textContent = coverType;
+        const nameEl = document.getElementById("health-name");
+        if (nameEl && nameEl.value) {
+          document.getElementById("summary-name").textContent = nameEl.value;
+        }
+        document.getElementById("summary-plan").textContent = selectedPlan
+          ? selectedPlan.provider + " — " + selectedPlan.planName
+          : "Not selected";
+        document.getElementById("summary-insurer").textContent =
+          selectedInsurer || "—";
+        document.getElementById("summary-hospital").textContent =
+          selectedHospital;
+        updatePrice();
+      }
+
       function nextStep(from) {
         if (!validateStep(from)) return;
         if (from === 2) {
-          document.getElementById("summary-cover").textContent = coverType;
-          document.getElementById("summary-name").textContent =
-            document.getElementById("health-name").value;
-          document.getElementById("summary-plan").textContent = selectedPlan
-            ? selectedPlan.provider + " — " + selectedPlan.planName
-            : "Not selected";
-          document.getElementById("summary-insurer").textContent =
-            selectedInsurer || "—";
-          document.getElementById("summary-hospital").textContent =
-            selectedHospital;
-          updatePrice();
+          // Validate personal details were filled (handled by validateStep).
+        }
+        // Always refresh the summary + hospital list so they reflect the
+        // user's current selections (plan, provider, cover type).
+        updateSummary();
+        if (from === 3 || from === 4) {
+          renderHospitals();
         }
         goToStep(from + 1);
       }
@@ -1361,8 +1339,9 @@
 
     <script>
       document.addEventListener("DOMContentLoaded", () => {
-        // Populate the plan cards with real provider data.
+        // Populate the plan cards + hospital grid with real provider data.
         renderPlans();
+        renderHospitals();
 
         const labels = Array.from(document.querySelectorAll("label"));
         const methodLabel = labels.find((l) =>

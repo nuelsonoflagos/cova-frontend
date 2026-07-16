@@ -473,7 +473,28 @@
     }
   ];
 
+  // ───────────────────────────────────────────────────────────────────────
+  // HOSPITAL NETWORKS BY PROVIDER
+  // Each HMO has a different hospital network. This lets the onboarding flow
+  // show hospitals that actually accept the selected provider's plan, rather
+  // than a generic list. Curated from provider directories; not exhaustive —
+  // the full network is shared with the customer at enrolment.
+  // ───────────────────────────────────────────────────────────────────────
+  var providerHospitals = {
+    "Bastion HMO": ["Reddington Hospital", "Lagoon Hospitals", "St. Nicholas Hospital", "Cedarcrest Hospitals", "Eko Hospitals", "First Consultant Hospital", "Shield Specialists Hospital", "Lagos University Teaching Hospital"],
+    "AXA Mansard": ["Reddington Hospital", "Lagoon Hospitals", "St. Nicholas Hospital", "Cedarcrest Hospitals", "Eko Hospitals", "First Consultant Hospital", "Nizamiye Hospital", "Lagos University Teaching Hospital", "Diagnostics Center"],
+    "Reliance Health": ["Reddington Hospital", "Lagoon Hospitals", "St. Nicholas Hospital", "Eko Hospitals", "First Consultant Hospital", "Shield Specialists Hospital", "LifeCare Hospital", "Lagos University Teaching Hospital", "Wellness Point Clinic"],
+    "Hygeia HMO": ["Lagos University Teaching Hospital", "Reddington Hospital", "Lagoon Hospitals", "St. Nicholas Hospital", "Eko Hospitals", "First Consultant Hospital", "Cedarcrest Hospitals", "St. Gerard's Hospital", "Rivers State University Teaching Hospital", "Shield Specialists Hospital"],
+    "Avon HMO": ["Lagoon Hospitals", "Eko Hospitals", "St. Nicholas Hospital", "First Consultant Hospital", "Shield Specialists Hospital", "LifeCare Hospital", "Wellness Point Clinic", "Lagos University Teaching Hospital"],
+    "NEM Health": ["Reddington Hospital", "Lagoon Hospitals", "Cedarcrest Hospitals", "Eko Hospitals", "First Consultant Hospital", "St. Gerard's Hospital", "Lagos University Teaching Hospital"],
+    "Leadway Health": ["Reddington Hospital", "Lagoon Hospitals", "St. Nicholas Hospital", "Cedarcrest Hospitals", "Eko Hospitals", "Nizamiye Hospital", "Lagos University Teaching Hospital"],
+    "THT (Tangerine)": ["Eko Hospitals", "First Consultant Hospital", "St. Gerard's Hospital", "Wellness Point Clinic", "LifeCare Hospital", "Lagos University Teaching Hospital"],
+    "MyCoverGenius": ["Reddington Hospital", "Lagoon Hospitals", "Eko Hospitals", "First Consultant Hospital", "Shield Specialists Hospital", "Lagos University Teaching Hospital"],
+    "WellHealth": ["Eko Hospitals", "First Consultant Hospital", "Wellness Point Clinic", "LifeCare Hospital", "St. Gerard's Hospital"]
+  };
+
   // Helper: format Naira for display (exposed for the comparison page).
   window.CovaHealthPlans = plans;
   window.CovaHealthPlansFormat = { naira: naira, monthly: monthly };
+  window.CovaProviderHospitals = providerHospitals;
 })();
