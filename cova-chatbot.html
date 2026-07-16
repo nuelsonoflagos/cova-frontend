@@ -424,6 +424,11 @@
     </div>
 
     <script src="cova-health-plans.js"></script>
+    <script src="cova-device-plans.js"></script>
+    <script src="cova-motor-plans.js"></script>
+    <script src="cova-life-plans.js"></script>
+    <script src="cova-travel-plans.js"></script>
+    <script src="cova-property-plans.js"></script>
     <script src="recommendation-engine.js"></script>
     <script>
       const chatMessages = document.getElementById("chat-messages");
@@ -867,9 +872,18 @@
         };
         btnGroup.appendChild(btn);
 
-        // For health, add a secondary "compare all plans" link.
+        // Add a secondary "compare all plans" link for any vertical that has a
+        // comparison engine. Maps need → ?type= param on cova-compare.html.
         const need = item.forNeeds && item.forNeeds[0];
-        if (need === 'health') {
+        const compareMap = {
+          health: { type: 'health', label: 'Compare all health plans' },
+          car: { type: 'motor', label: 'Compare all motor plans' },
+          devices: { type: 'device', label: 'Compare all device plans' },
+          life: { type: 'life', label: 'Compare all life plans' },
+          travel: { type: 'travel', label: 'Compare all travel plans' },
+          property: { type: 'property', label: 'Compare all property plans' },
+        };
+        if (need && compareMap[need]) {
           const compareBtn = document.createElement("button");
           compareBtn.className = "send-btn";
           compareBtn.style.width = "100%";
@@ -879,9 +893,9 @@
           compareBtn.style.color = "#0a5c45";
           compareBtn.style.border = "1.5px solid rgba(10,92,69,0.2)";
           compareBtn.style.marginTop = "8px";
-          compareBtn.textContent = "⚖️ Compare all 24 health plans →";
+          compareBtn.textContent = "⚖️ " + compareMap[need].label + " →";
           compareBtn.onclick = () => {
-            const page = 'cova-compare-health.html';
+            const page = 'cova-compare.html?type=' + compareMap[need].type;
             if (window.parent && window.parent !== window) {
               window.parent.location.href = page;
             } else {

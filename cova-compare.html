@@ -1,0 +1,503 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title id="pageTitle">Cova — Compare Insurance</title>
+    <meta name="description" id="pageDesc" content="Compare insurance plans from Nigeria's top providers." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      :root {
+        --g:#0a5c45; --gm:#137a5c; --gl:#1d9e75; --gp:#e6f5f0; --gpp:#d0ede4;
+        --cream:#f7f4ee; --crd:#e8e4db; --ink:#0f1a14; --inkm:#2d3e35;
+        --inkl:#5a6e63; --inkf:#9aada3; --w:#fff;
+        --r:#c0392b; --rp:#fdecea; --am:#d4860a; --amp:#fef3e2;
+        --fd:"Syne",sans-serif; --fb:"DM Sans",sans-serif;
+        --rad:16px; --rads:10px; --radsm:8px;
+        --shadow:0 2px 12px rgba(10,92,69,0.08);
+      }
+      html { scroll-behavior:smooth; }
+      body { font-family:var(--fb); background:var(--cream); color:var(--ink); line-height:1.6; }
+
+      nav {
+        padding:0 24px; height:72px; display:flex; align-items:center; justify-content:space-between;
+        background:var(--w); border-bottom:1px solid var(--crd); position:sticky; top:0; z-index:100;
+      }
+      .nav-logo { font-family:var(--fd); font-weight:800; font-size:22px; color:var(--g); text-decoration:none; }
+      .nav-right { display:flex; gap:16px; align-items:center; }
+      .nav-link { font-family:var(--fd); font-size:13px; font-weight:600; color:var(--g); text-decoration:none; padding:8px 14px; border-radius:var(--radsm); }
+      .nav-link:hover { background:var(--gp); }
+
+      .hero { background:linear-gradient(135deg,var(--g) 0%,var(--gm) 100%); color:var(--w); padding:48px 5vw 56px; text-align:center; }
+      .hero-eyebrow { font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.16em; color:var(--gpp); margin-bottom:12px; }
+      .hero h1 { font-family:var(--fd); font-size:clamp(26px,4vw,40px); font-weight:800; letter-spacing:-0.5px; margin-bottom:12px; }
+      .hero p { font-size:16px; color:rgba(255,255,255,0.85); max-width:600px; margin:0 auto; }
+
+      /* Vertical switcher tabs */
+      .tabs { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-top:24px; }
+      .tab { background:rgba(255,255,255,0.12); color:var(--w); border:1.5px solid rgba(255,255,255,0.25); border-radius:999px; padding:8px 18px; font-family:var(--fb); font-size:13px; font-weight:600; cursor:pointer; text-decoration:none; transition:all 0.15s; }
+      .tab:hover, .tab.active { background:var(--w); color:var(--g); border-color:var(--w); }
+
+      .container { max-width:1180px; margin:0 auto; padding:0 5vw; }
+
+      .filter-section { padding:36px 0 0; }
+      .filter-bar { display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin-bottom:16px; }
+      .filter-select {
+        font-family:var(--fb); font-size:14px; color:var(--ink); background:var(--w);
+        border:1.5px solid var(--crd); border-radius:12px; padding:10px 14px; cursor:pointer; min-width:150px;
+      }
+      .filter-select:focus { outline:none; border-color:var(--gl); box-shadow:0 0 0 3px rgba(29,158,117,0.1); }
+      .view-toggle { display:inline-flex; background:var(--w); border:1.5px solid var(--crd); border-radius:12px; overflow:hidden; margin-left:auto; }
+      .view-toggle button { font-family:var(--fd); font-size:13px; font-weight:600; padding:10px 16px; background:none; border:none; cursor:pointer; color:var(--inkl); }
+      .view-toggle button.active { background:var(--g); color:var(--w); }
+      .results-count { font-size:14px; color:var(--inkl); margin-bottom:20px; }
+      .results-count strong { color:var(--ink); }
+
+      .plans-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:18px; }
+      .plan-card {
+        background:var(--w); border:1px solid var(--crd); border-radius:24px; padding:24px;
+        transition:transform 0.2s,box-shadow 0.2s,border-color 0.2s; display:flex; flex-direction:column;
+      }
+      .plan-card:hover { transform:translateY(-3px); box-shadow:0 12px 36px rgba(10,92,69,0.1); border-color:var(--gl); }
+      .plan-badge {
+        font-family:var(--fd); font-size:11px; font-weight:700; padding:4px 12px; border-radius:999px;
+        background:var(--am); color:var(--w); display:inline-block; margin-bottom:10px; align-self:flex-start;
+      }
+      .plan-provider { font-family:var(--fd); font-size:17px; font-weight:800; margin-bottom:2px; }
+      .plan-tier { font-size:14px; color:var(--inkl); margin-bottom:14px; }
+      .plan-price { font-family:var(--fd); font-size:22px; font-weight:800; color:var(--g); margin-bottom:2px; }
+      .plan-price-sub { font-size:13px; color:var(--inkl); margin-bottom:14px; }
+      .cover-chips { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px; }
+      .cover-chip { font-size:11px; font-weight:600; padding:3px 9px; border-radius:8px; background:var(--cream); border:1px solid var(--crd); color:var(--inkm); }
+      .plan-highlights { font-size:12px; color:var(--inkl); margin-bottom:14px; line-height:1.7; }
+      .plan-highlights strong { color:var(--inkm); }
+      .plan-details-btn {
+        font-family:var(--fd); font-size:14px; font-weight:600; color:var(--g); background:none;
+        border:1.5px solid rgba(10,92,69,0.2); border-radius:var(--radsm); padding:11px; cursor:pointer;
+        transition:all 0.15s; margin-top:auto; width:100%;
+      }
+      .plan-details-btn:hover { background:var(--gp); border-color:var(--g); }
+      .plan-expand { display:none; margin-top:16px; padding-top:16px; border-top:1px solid var(--crd); }
+      .plan-expand.show { display:block; }
+      .plan-expand p { font-size:13px; color:var(--inkm); margin-bottom:8px; }
+      .plan-expand .src { font-size:11px; color:var(--inkf); }
+      .plan-expand .src a { color:var(--gl); }
+      .plan-notes { font-size:12px; color:var(--inkl); font-style:italic; margin-top:8px; }
+
+      /* Table view */
+      .table-wrap { display:none; overflow-x:auto; border:1px solid var(--crd); border-radius:var(--rad); background:var(--w); }
+      .compare-table { width:100%; border-collapse:collapse; font-size:13px; min-width:700px; }
+      .compare-table th, .compare-table td { padding:14px 16px; text-align:left; border-bottom:1px solid var(--crd); vertical-align:top; }
+      .compare-table th { background:var(--gp); font-family:var(--fd); font-weight:700; color:var(--g); }
+      .compare-table .row-label { font-weight:600; color:var(--inkm); background:var(--cream); white-space:nowrap; }
+
+      /* Education */
+      .edu-section { padding:64px 0 72px; }
+      .edu-eyebrow { font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.16em; color:var(--gl); margin-bottom:12px; text-align:center; }
+      .edu-title { font-family:var(--fd); font-size:clamp(24px,3vw,32px); font-weight:800; text-align:center; margin-bottom:36px; }
+      .edu-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:18px; }
+      .edu-card { background:var(--w); border:1px solid var(--crd); border-radius:24px; padding:28px; transition:transform 0.2s; }
+      .edu-card:hover { transform:translateY(-3px); }
+      .edu-icon { font-size:28px; margin-bottom:14px; }
+      .edu-card h3 { font-family:var(--fd); font-size:17px; font-weight:700; margin-bottom:10px; }
+      .edu-card p { font-size:14px; color:var(--inkl); }
+
+      .disclaimer { text-align:center; font-size:13px; color:var(--inkl); padding:24px; background:var(--gp); border-radius:var(--rad); margin-bottom:36px; }
+
+      @media (max-width:900px) { .plans-grid,.edu-grid { grid-template-columns:repeat(2,1fr); } }
+      @media (max-width:600px) { .plans-grid,.edu-grid { grid-template-columns:1fr; } .filter-bar { flex-direction:column; align-items:stretch; } .view-toggle { margin-left:0; } }
+    </style>
+  </head>
+  <body>
+    <nav>
+      <a href="index.html" class="nav-logo">Cova</a>
+      <div class="nav-right">
+        <a href="index.html" class="nav-link">← Home</a>
+      </div>
+    </nav>
+
+    <section class="hero">
+      <div class="hero-eyebrow" id="heroEyebrow">Compare Insurance</div>
+      <h1 id="heroTitle">Compare plans from Nigeria's top providers</h1>
+      <p id="heroSub">Real prices, real benefits, side by side.</p>
+      <div class="tabs" id="verticalTabs">
+        <a class="tab" data-type="health" href="?type=health">🏥 Health</a>
+        <a class="tab" data-type="motor" href="?type=motor">🚗 Motor</a>
+        <a class="tab" data-type="device" href="?type=device">📱 Device</a>
+        <a class="tab" data-type="life" href="?type=life">❤️ Life</a>
+        <a class="tab" data-type="travel" href="?type=travel">✈️ Travel</a>
+        <a class="tab" data-type="property" href="?type=property">🏠 Property</a>
+      </div>
+    </section>
+
+    <section class="container filter-section" id="results">
+      <div class="filter-bar" id="filterBar">
+        <select class="filter-select" id="sortSelect"><option value="default">Sort: Recommended</option></select>
+        <select class="filter-select" id="filterSelect1"><option value="">All</option></select>
+        <div class="view-toggle">
+          <button id="viewCards" class="active">Cards</button>
+          <button id="viewTable">Table</button>
+        </div>
+      </div>
+      <div class="results-count" id="resultsCount"></div>
+      <div class="plans-grid" id="plansGrid"></div>
+      <div class="table-wrap" id="tableWrap"><table class="compare-table" id="compareTable"></table></div>
+    </section>
+
+    <section class="container edu-section" id="learn">
+      <div class="edu-eyebrow">Learn the basics</div>
+      <h2 class="edu-title" id="eduTitle">Insurance, explained simply</h2>
+      <div class="edu-grid" id="eduGrid"></div>
+    </section>
+
+    <div class="container"><div class="disclaimer" id="disclaimer">Prices verified July 2026. Confirm with provider before purchasing.</div></div>
+
+    <!-- Data modules -->
+    <script src="cova-health-plans.js"></script>
+    <script src="cova-device-plans.js"></script>
+    <script src="cova-motor-plans.js"></script>
+    <script src="cova-life-plans.js"></script>
+    <script src="cova-travel-plans.js"></script>
+    <script src="cova-property-plans.js"></script>
+    <script>
+      (function () {
+        // ── Vertical configuration ─────────────────────────────────────────
+        var VERTICALS = {
+          health: {
+            label: "Health Insurance", icon: "🏥",
+            data: window.CovaHealthPlans || [],
+            title: "Compare health plans from Nigeria's top HMOs",
+            sub: "Real prices, real benefits, side by side. Filter by budget, coverage, and benefits.",
+            eyebrow: "Health Insurance",
+            priceField: "priceAnnual",
+            priceLabel: "priceDisplay",
+            sortOptions: [
+              { value: "value", label: "Sort: Best value (limit per ₦)" },
+              { value: "priceAsc", label: "Sort: Lowest price" },
+              { value: "limitDesc", label: "Sort: Highest coverage" },
+              { value: "provider", label: "Sort: Provider A–Z" },
+            ],
+            filterLabel: "Must have",
+            filterOptions: [
+              { value: "", label: "All benefits", field: "benefits" },
+              { value: "surgery", label: "Surgery", field: "benefits" },
+              { value: "maternity", label: "Maternity", field: "benefits" },
+              { value: "dental", label: "Dental", field: "benefits" },
+              { value: "chronic", label: "Chronic care", field: "benefits" },
+            ],
+            edu: [
+              { icon:"🏥", title:"What is an HMO?", text:"A Health Maintenance Organisation provides health cover for a regular fee. You visit a network hospital and pay little or nothing at the point of care." },
+              { icon:"💰", title:"What is an annual limit?", text:"The maximum an HMO pays out per year. Higher limits cost more but protect against big bills." },
+              { icon:"⏳", title:"Waiting periods", text:"Most plans don't cover everything from day one. Surgery/dental wait 6–12 months; maternity 9–12 months." },
+              { icon:"🚫", title:"What's not covered", text:"Cosmetic surgery, fertility treatments, self-inflicted injuries. If already pregnant at enrolment, maternity isn't covered." },
+              { icon:"👨‍👩‍👧", title:"Individual vs family", text:"Family plans cover you, spouse, and children for one price — usually 40–60% cheaper than separate individual plans." },
+              { icon:"📞", title:"Network size matters", text:"Bigger network = more choice. Hygeia has 2,000+ facilities; Reliance and AXA have 1,000–1,500." },
+            ],
+          },
+          motor: {
+            label: "Motor Insurance", icon: "🚗",
+            data: window.CovaMotorPlans || [],
+            title: "Compare motor insurance in Nigeria",
+            sub: "Third-party is mandatory by law. Compare comprehensive and hybrid tiers where providers actually compete.",
+            eyebrow: "Motor Insurance",
+            priceField: "priceAnnual",
+            priceLabel: "priceModel",
+            sortOptions: [
+              { value: "priceAsc", label: "Sort: Lowest price" },
+              { value: "tier", label: "Sort: Cover level (TP→Hybrid→Comp)" },
+              { value: "provider", label: "Sort: Provider A–Z" },
+            ],
+            filterLabel: "Cover level",
+            filterOptions: [
+              { value: "", label: "All levels", field: "tier" },
+              { value: "third-party", label: "Third-party (mandatory)", field: "tier" },
+              { value: "hybrid", label: "Hybrid / mini-comprehensive", field: "tier" },
+              { value: "comprehensive", label: "Comprehensive", field: "tier" },
+            ],
+            edu: [
+              { icon:"⚖️", title:"Third-party is mandatory", text:"By law, every vehicle must have at least third-party insurance (₦15,000/yr for private cars). Police enforce this since Feb 2025." },
+              { icon:"🚗", title:"Comprehensive = ~5% of value", text:"Full comprehensive cover costs about 5% of your vehicle's value per year. A ₦5M car ≈ ₦250k/yr." },
+              { icon:"🔀", title:"The hybrid sweet spot", text:"Mini-comprehensive plans (Leadway AutoBase ₦30k, AIICO Gold ₦45k) give you some own-damage cover at a fraction of comprehensive cost." },
+              { icon:"📋", title:"NAICOM rates by vehicle type", text:"Private ₦15k, Commercial ₦20k, Trucks ₦100k, Tricycles ₦5k, Motorcycles ₦3k — these are legal minimums identical at every insurer." },
+              { icon:"⚡", title:"Claims speed differs", text:"AIICO pays in 48 hours — the fastest in the market. Others take 5–7 business days." },
+              { icon:"💳", title:"Flexible payments", text:"AXA Mansard offers monthly installments up to 10 months. Most others require annual payment." },
+            ],
+          },
+          device: {
+            label: "Device Insurance", icon: "📱",
+            data: window.CovaDevicePlans || [],
+            title: "Compare device & gadget insurance in Nigeria",
+            sub: "Phone cracked? Laptop stolen? Compare real protection plans. Watch out: many 'phone insurance' products are screen-only.",
+            eyebrow: "Device Insurance",
+            priceField: "priceFrom",
+            priceLabel: "priceFromLabel",
+            sortOptions: [
+              { value: "coverType", label: "Sort: Full cover first" },
+              { value: "priceAsc", label: "Sort: Lowest price" },
+              { value: "provider", label: "Sort: Provider A–Z" },
+            ],
+            filterLabel: "Cover type",
+            filterOptions: [
+              { value: "", label: "All types", field: "coverType" },
+              { value: "full", label: "Full cover (theft + damage)", field: "coverType" },
+              { value: "screen-only", label: "Screen-only (cheaper, narrower)", field: "coverType" },
+              { value: "manufacturer", label: "Manufacturer (Samsung)", field: "coverType" },
+            ],
+            edu: [
+              { icon:"⚠️", title:"Full vs screen-only", text:"Many 'phone insurance' products only cover screen cracks. True full cover (theft + accidental + liquid) costs 5–7% of device value/yr." },
+              { icon:"📱", title:"Typical pricing", text:"Genuine comprehensive device cover = ~5% of your phone's value per year. A ₦200k phone ≈ ₦10k/yr." },
+              { icon:"🔧", title:"No AppleCare equivalent", text:"Nigeria has no true AppleCare for iPhones. Samsung Care+ is the closest (Samsung devices only)." },
+              { icon:"🏪", title:"Where to buy", text:"Some plans only sell through partners: AXA/SLOT (SLOT stores), Jumia Protect (with device purchase), AIICO (Access Bank)." },
+              { icon:"🚫", title:"Common exclusions", text:"Wear and tear, deliberate damage, unattended theft, pre-existing damage, devices not purchased in Nigeria." },
+              { icon:"💎", title:"Broadest cover", text:"CHI All Risks covers phones, laptops, AND jewellery/watches in one policy — broadest item coverage available." },
+            ],
+          },
+          life: {
+            label: "Life Insurance", icon: "❤️",
+            data: window.CovaLifePlans || [],
+            title: "Compare life insurance in Nigeria",
+            sub: "Protect your family's future. Compare term, whole life, and savings plans from Nigeria's top life insurers.",
+            eyebrow: "Life Insurance",
+            priceField: "priceAnnual",
+            priceLabel: "priceFromLabel",
+            sortOptions: [
+              { value: "priceAsc", label: "Sort: Lowest premium" },
+              { value: "type", label: "Sort: Plan type" },
+              { value: "provider", label: "Sort: Provider A–Z" },
+            ],
+            filterLabel: "Plan type",
+            filterOptions: [
+              { value: "", label: "All types", field: "type" },
+              { value: "term", label: "Term life (pure protection)", field: "type" },
+              { value: "savings", label: "Savings + life cover", field: "type" },
+              { value: "endowment", label: "Endowment (protection + investment)", field: "type" },
+            ],
+            edu: [
+              { icon:"💚", title:"Term life is cheapest", text:"Term life gives maximum cover for minimum cost — ₦7,500/yr buys ₦500k cover, ₦10k/yr buys ₦1M. No cash value if you survive." },
+              { icon:"👨‍👩‍👧", title:"Why you need it", text:"If something happens to you, life insurance pays your family a lump sum to replace your income, pay the mortgage, or fund the kids' education." },
+              { icon:"📊", title:"How pricing works", text:"Premiums depend on age, sum assured, and health. A 30-yr-old pays far less than a 50-yr-old for the same cover." },
+              { icon:"🏦", title:"Savings + protection", text:"Endowment plans (AXA Life Savings, AIICO FEP) combine life cover with savings/investment — you get money back at maturity." },
+              { icon:"⚡", title:"Claims speed matters", text:"AIICO pays life claims in 48 hours — fastest in Nigeria. Others take 5–7 business days." },
+              { icon:"📋", title:"Group life is mandatory", text:"Employers must provide group life cover of at least 3× annual salary (Pension Reform Act 2014)." },
+            ],
+          },
+          travel: {
+            label: "Travel Insurance", icon: "✈️",
+            data: window.CovaTravelPlans || [],
+            title: "Compare travel insurance in Nigeria",
+            sub: "Schengen visa? Hajj? Business trip? Compare real travel insurance from providers accepted at every embassy.",
+            eyebrow: "Travel Insurance",
+            priceField: "priceFlat",
+            priceLabel: "priceFromLabel",
+            sortOptions: [
+              { value: "priceAsc", label: "Sort: Lowest price" },
+              { value: "tripType", label: "Sort: Trip type" },
+              { value: "provider", label: "Sort: Provider A–Z" },
+            ],
+            filterLabel: "Trip type",
+            filterOptions: [
+              { value: "", label: "All trips", field: "tripType" },
+              { value: "schengen", label: "Schengen visa", field: "tripType" },
+              { value: "worldwide", label: "Worldwide", field: "tripType" },
+              { value: "pilgrimage", label: "Hajj & Umrah", field: "tripType" },
+            ],
+            edu: [
+              { icon:"🇪🇺", title:"Schengen visa requirement", text:"Schengen visa insurance requires minimum €30,000 medical cover. All providers here meet this on their Schengen variant." },
+              { icon:"✈️", title:"What's covered", text:"Medical emergencies abroad, evacuation/repatriation, lost luggage, flight delays, trip cancellation, and legal costs." },
+              { icon:"💰", title:"Pricing benchmark", text:"Schengen insurance costs ₦1,500–₦2,300/day. Leadway Travel Lite is ₦10,000 flat for 30 days worldwide." },
+              { icon:"🕌", title:"Hajj & Umrah", text:"SanlamAllianz offers a dedicated pilgrimage plan with €10,000 medical cover — designed for shorter pilgrimage trips." },
+              { icon:"📜", title:"Instant certificates", text:"AXA Mansard issues certificates within minutes online — essential if your visa appointment is soon." },
+              { icon:"🎒", title:"Student plans", text:"CHI and AXA offer student-specific travel insurance with extended duration for study abroad." },
+            ],
+          },
+          property: {
+            label: "Property Insurance", icon: "🏠",
+            data: window.CovaPropertyPlans || [],
+            title: "Compare home & property insurance in Nigeria",
+            sub: "Fire, burglary, flood — protect your home and contents. Compare flat-rate and comprehensive plans.",
+            eyebrow: "Property Insurance",
+            priceField: "priceFlat",
+            priceLabel: "priceFromLabel",
+            sortOptions: [
+              { value: "priceAsc", label: "Sort: Lowest price" },
+              { value: "provider", label: "Sort: Provider A–Z" },
+            ],
+            filterLabel: "Provider",
+            filterOptions: [
+              { value: "", label: "All providers", field: "provider" },
+              { value: "AIICO Insurance", label: "AIICO", field: "provider" },
+              { value: "Leadway Assurance", label: "Leadway", field: "provider" },
+              { value: "AXA Mansard", label: "AXA Mansard", field: "provider" },
+            ],
+            edu: [
+              { icon:"🏠", title:"Building vs contents", text:"Building cover protects the structure. Contents cover protects what's inside (furniture, electronics, clothes). Some plans cover both." },
+              { icon:"💰", title:"Flat-rate options", text:"AIICO offers ₦10,000 flat home insurance (₦2M fire, ₦1M burglary). Leadway Householder covers building + contents from ₦10k–₦20k." },
+              { icon:"🔥", title:"Fire is most common", text:"Fire & special perils is the most-claimed property risk in Nigeria. Most policies cover fire, lightning, explosion, flood, and storm." },
+              { icon:"🔒", title:"Burglary cover", text:"Burglary insurance covers theft involving forcible/violent entry. It's available standalone or bundled with fire cover." },
+              { icon:"⚖️", title:"Renters vs owners", text:"Renters need contents cover only (cheaper). Homeowners need building + contents. Landlords need liability cover for tenant injuries." },
+              { icon:"🏘️", title:"Quote-based pricing", text:"Most property insurance is priced as a % of property value. Only AIICO and Leadway offer flat-rate products that don't need a valuation." },
+            ],
+          },
+        };
+
+        // ── Determine current vertical from URL ────────────────────────────
+        var params = new URLSearchParams(window.location.search);
+        var type = params.get("type") || "health";
+        if (!VERTICALS[type]) type = "health";
+        var V = VERTICALS[type];
+
+        // ── Populate page meta ─────────────────────────────────────────────
+        document.getElementById("pageTitle").textContent = "Cova — " + V.title;
+        document.getElementById("heroTitle").textContent = V.title;
+        document.getElementById("heroSub").textContent = V.sub;
+        document.getElementById("heroEyebrow").textContent = V.eyebrow;
+        document.getElementById("eduTitle").textContent = V.label + ", explained simply";
+        document.querySelector(".tab.active") && document.querySelector(".tab.active").classList.remove("active");
+        var activeTab = document.querySelector('.tab[data-type="' + type + '"]');
+        if (activeTab) activeTab.classList.add("active");
+
+        // Sort dropdown
+        var sortSel = document.getElementById("sortSelect");
+        sortSel.innerHTML = V.sortOptions.map(function(o){return '<option value="'+o.value+'">'+o.label+'</option>';}).join("");
+
+        // Filter dropdown
+        var filterSel = document.getElementById("filterSelect1");
+        filterSel.previousSibling && filterSel.previousSibling.nodeType !== 3;
+        // Update the first <option> label
+        filterSel.innerHTML = V.filterOptions.map(function(o){return '<option value="'+o.value+'">'+o.label+'</option>';}).join("");
+
+        // Education cards
+        document.getElementById("eduGrid").innerHTML = V.edu.map(function(e){
+          return '<div class="edu-card"><div class="edu-icon">'+e.icon+'</div><h3>'+esc(e.title)+'</h3><p>'+esc(e.text)+'</p></div>';
+        }).join("");
+
+        document.getElementById("disclaimer").textContent =
+          "Prices verified July 2026 from provider websites and public sources. " + V.label +
+          " prices in Nigeria change frequently — always confirm with the provider before purchasing.";
+
+        // ── State ──────────────────────────────────────────────────────────
+        var state = { filterVal: "", sortVal: V.sortOptions[0].value, view: "cards" };
+        var grid = document.getElementById("plansGrid");
+        var tableWrap = document.getElementById("tableWrap");
+        var table = document.getElementById("compareTable");
+        var countEl = document.getElementById("resultsCount");
+
+        function esc(s) {
+          if (s===null||s===undefined) return "";
+          return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+        }
+
+        // ── Filter + sort ──────────────────────────────────────────────────
+        function getFiltered() {
+          var plans = V.data.slice();
+          // Filter
+          var fo = V.filterOptions.find(function(o){return o.value===state.filterVal;});
+          if (fo && fo.value) {
+            plans = plans.filter(function(p){
+              if (fo.field === "benefits") return p.benefits && p.benefits[fo.value] === true;
+              return p[fo.field] === fo.value;
+            });
+          }
+          // Sort
+          var s = state.sortVal;
+          if (s === "priceAsc") {
+            plans.sort(function(a,b){ return (a[V.priceField]||Infinity) - (b[V.priceField]||Infinity); });
+          } else if (s === "provider") {
+            plans.sort(function(a,b){ return a.provider.localeCompare(b.provider); });
+          } else if (s === "value") {
+            plans.sort(function(a,b){ var ra=a.annualLimit?(a.annualLimit/(a.priceAnnual||1)):0; var rb=b.annualLimit?(b.annualLimit/(b.priceAnnual||1)):0; return rb-ra; });
+          } else if (s === "limitDesc") {
+            plans.sort(function(a,b){ return (b.annualLimit||0)-(a.annualLimit||0); });
+          } else if (s === "tier" || s === "type" || s === "tripType" || s === "coverType") {
+            plans.sort(function(a,b){ return String(a[s]||"").localeCompare(String(b[s]||"")); });
+          }
+          return plans;
+        }
+
+        // ── Render: cards ──────────────────────────────────────────────────
+        function renderCards(plans) {
+          if (!plans.length) { grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;padding:48px;color:var(--inkl)">No plans match these filters. Try widening your search.</p>'; return; }
+          grid.innerHTML = plans.map(function(p){
+            var price = p[V.priceLabel] || "Quote-based";
+            var badge = p.bestFor ? '<span class="plan-badge">🏆 '+esc(p.bestFor)+'</span>' : '';
+            var chips = (p.covers||p.highlights||[]).slice(0,4).map(function(c){return '<span class="cover-chip">'+esc(c)+'</span>';}).join("");
+            var highlights = "";
+            if (type === "health") highlights = '<div class="plan-highlights"><strong>Network:</strong> '+esc(p.networkSize)+' hospitals<br><strong>Limit:</strong> '+(p.annualLimit?"₦"+(p.annualLimit/1000000)+"M":"Not stated")+'</div>';
+            else if (type === "motor") highlights = '<div class="plan-highlights"><strong>TPPD limit:</strong> '+esc(p.tppdLimit||"—")+(p.ownDamageLimit?'<br><strong>Own damage:</strong> '+esc(p.ownDamageLimit):"")+'</div>';
+            else if (type === "life") highlights = '<div class="plan-highlights"><strong>Sum assured:</strong> '+esc(p.sumAssured||"—")+'<br><strong>Term:</strong> '+esc(p.term||"—")+'</div>';
+            else if (type === "travel") highlights = '<div class="plan-highlights"><strong>Medical:</strong> '+esc(p.medicalLimit||"—")+'<br><strong>Duration:</strong> '+esc(p.duration||"—")+'</div>';
+            else if (type === "device") highlights = '<div class="plan-highlights"><strong>Devices:</strong> '+esc(p.devices||"—")+'<br><strong>Claim limit:</strong> '+esc(p.claimLimit||"—")+'</div>';
+            else if (type === "property") highlights = '<div class="plan-highlights"><strong>Target:</strong> '+esc(p.target||"—")+'</div>';
+
+            return '<div class="plan-card">'+badge+
+              '<div class="plan-provider">'+esc(p.provider)+'</div>'+
+              '<div class="plan-tier">'+esc(p.planName)+'</div>'+
+              '<div class="plan-price">'+esc(price)+'</div>'+
+              (p.coverType ? '<div class="plan-price-sub" style="text-transform:capitalize">'+esc(p.coverType.replace("-"," "))+' cover</div>' : '<div class="plan-price-sub">&nbsp;</div>')+
+              '<div class="cover-chips">'+chips+'</div>'+
+              highlights+
+              '<button class="plan-details-btn" data-pid="'+esc(p.id)+'">View details</button>'+
+              '<div class="plan-expand" id="ex-'+esc(p.id)+'">'+
+                (p.covers ? '<p><strong>What\'s covered:</strong> '+p.covers.map(esc).join(", ")+'</p>' : '')+
+                (p.features && p.features.length ? '<p><strong>Features:</strong> '+p.features.map(esc).join(", ")+'</p>' : '')+
+                (p.waitingPeriod ? '<p><strong>Waiting period:</strong> '+esc(p.waitingPeriod)+'</p>' : '')+
+                (p.deductible ? '<p><strong>Deductible:</strong> '+esc(p.deductible)+'</p>' : '')+
+                (p.notes ? '<p class="plan-notes">'+esc(p.notes)+'</p>' : '')+
+                '<p class="src">Source: <a href="'+esc(p.source)+'" target="_blank" rel="noopener">'+esc(p.provider)+'</a> · Verified '+esc(p.lastVerified)+'</p>'+
+              '</div></div>';
+          }).join("");
+
+          grid.querySelectorAll(".plan-details-btn").forEach(function(btn){
+            btn.addEventListener("click", function(){
+              var ex = document.getElementById("ex-"+btn.getAttribute("data-pid"));
+              if (ex) { var show = ex.classList.toggle("show"); btn.textContent = show ? "Hide details" : "View details"; }
+            });
+          });
+        }
+
+        // ── Render: table ──────────────────────────────────────────────────
+        function renderTable(plans) {
+          if (!plans.length) { table.innerHTML = '<tr><td style="padding:48px;text-align:center;color:var(--inkl)">No plans match.</td></tr>'; return; }
+          var shown = plans.slice(0,6);
+          var header = "<thead><tr><th class='row-label'>Plan</th>"+shown.map(function(p){return "<th>"+esc(p.provider)+"<br><span style='font-weight:400;font-size:12px;opacity:.8'>"+esc(p.planName)+"</span></th>";}).join("")+"</tr></thead>";
+          function row(label, getter) {
+            return "<tr><td class='row-label'>"+label+"</td>"+shown.map(function(p){return "<td>"+esc(getter(p))+"</td>";}).join("")+"</tr>";
+          }
+          var body = "<tbody>"+
+            row("Price", function(p){return p[V.priceLabel]||"Quote-based";})+
+            row("Covers", function(p){return (p.covers||p.highlights||[]).join(", ");});
+          if (type==="health") body += row("Annual limit", function(p){return p.annualLimit?"₦"+(p.annualLimit/1000000)+"M":"Not stated";})+row("Network",function(p){return p.networkSize;});
+          if (type==="motor") body += row("TPPD",function(p){return p.tppdLimit||"—";})+row("Own damage",function(p){return p.ownDamageLimit||"—";});
+          if (type==="life") body += row("Sum assured",function(p){return p.sumAssured||"—";});
+          if (type==="travel") body += row("Medical",function(p){return p.medicalLimit||"—";});
+          if (type==="device") body += row("Devices",function(p){return p.devices||"—";})+row("Claim limit",function(p){return p.claimLimit||"—";});
+          if (type==="property") body += row("Target",function(p){return p.target||"—";});
+          body += "</tbody>";
+          table.innerHTML = header+body;
+        }
+
+        // ── Master render ──────────────────────────────────────────────────
+        function render() {
+          var plans = getFiltered();
+          countEl.innerHTML = "Showing <strong>"+plans.length+"</strong> of "+V.data.length+" plans";
+          if (state.view==="cards") { grid.style.display="grid"; tableWrap.style.display="none"; renderCards(plans); }
+          else { grid.style.display="none"; tableWrap.style.display="block"; renderTable(plans); }
+        }
+
+        // ── Wire up ────────────────────────────────────────────────────────
+        sortSel.addEventListener("change", function(e){state.sortVal=e.target.value;render();});
+        filterSel.addEventListener("change", function(e){state.filterVal=e.target.value;render();});
+        document.getElementById("viewCards").addEventListener("click",function(){state.view="cards";this.classList.add("active");document.getElementById("viewTable").classList.remove("active");render();});
+        document.getElementById("viewTable").addEventListener("click",function(){state.view="table";this.classList.add("active");document.getElementById("viewCards").classList.remove("active");render();});
+
+        render();
+      })();
+    </script>
+  </body>
+</html>
