@@ -52,6 +52,39 @@
         min-height: 100vh;
         overflow-x: hidden;
       }
+
+      /* ── Scroll-reveal animation system (zero libraries) ──────────────────
+         Elements with [data-reveal] start hidden + offset; when the
+         IntersectionObserver sees them, it adds .reveal-in which transitions
+         them to visible. [data-reveal-delay="N"] staggers grids. */
+      [data-reveal] {
+        opacity: 0;
+        transform: translateY(24px);
+        transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+                    transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+      [data-reveal].reveal-in {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      /* ── Hero entrance cascade ──────────────────────────────────────────── */
+      @keyframes heroFadeUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+      @keyframes heroFadeRight {
+        from { opacity: 0; transform: translateX(40px); }
+        to   { opacity: 1; transform: translateX(0); }
+      }
+      .hero-enter-up {
+        opacity: 0;
+        animation: heroFadeUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      }
+      .hero-enter-right {
+        opacity: 0;
+        animation: heroFadeRight 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.3s forwards;
+      }
       a {
         text-decoration: none;
         color: inherit;
@@ -654,28 +687,36 @@
         border: 1px solid var(--border);
         border-radius: 24px;
         padding: 24px;
-        transition: transform 0.2s;
+        transition: transform 0.2s, box-shadow 0.2s;
       }
       .insurer-card:hover {
         transform: translateY(-3px);
+        box-shadow: 0 12px 36px rgba(10, 92, 69, 0.08);
       }
-      .insurer-header {
-        display: flex;
+      /* Typographic monogram tile (replaces fuzzy favicon logos) */
+      .insurer-tile {
+        display: inline-flex;
         align-items: center;
-        gap: 12px;
-        margin-bottom: 8px;
+        justify-content: center;
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        background: var(--green-soft);
+        margin-bottom: 14px;
       }
-      .insurer-logo {
-        width: 28px;
-        height: 28px;
-        border-radius: 4px;
-        object-fit: contain;
+      .insurer-tile span {
+        font-family: var(--font-heading);
+        font-size: 15px;
+        font-weight: 800;
+        color: var(--green);
+        letter-spacing: 0.5px;
       }
       .insurer-name {
         font-family: var(--font-heading);
         font-size: 17px;
         font-weight: 800;
         color: var(--ink);
+        margin-bottom: 4px;
       }
       .insurer-rating {
         font-size: 13px;
@@ -751,6 +792,25 @@
         color: rgba(255, 255, 255, 0.85);
         line-height: 1.8;
         max-width: 420px;
+      }
+      /* Fix: .btn-white was used but never defined. White pill on dark panels. */
+      .btn-white {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: fit-content;
+        padding: 14px 28px;
+        border-radius: 999px;
+        background: var(--white);
+        color: var(--green);
+        font-family: var(--font-heading);
+        font-size: 15px;
+        font-weight: 700;
+        transition: transform 0.2s, box-shadow 0.2s;
+      }
+      .btn-white:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
       }
       footer {
         background: var(--dark);
@@ -1212,7 +1272,7 @@
         background: var(--dark);
       }
 
-      /* Right Side Floating Images */
+      /* Right Side — real hero photo (replaces floating shapes) */
       .hero-right {
         position: relative;
         height: 100%;
@@ -1222,55 +1282,74 @@
         align-items: center;
         justify-content: center;
       }
-      .shape-img {
-        will-change: transform;
-        position: absolute;
-        background-size: cover;
-        background-position: center;
-        box-shadow: 0 20px 40px rgba(10, 92, 69, 0.15);
-        animation: float 6s ease-in-out infinite;
+      .hero-photo-frame {
+        position: relative;
+        width: 100%;
+        max-width: 440px;
+        aspect-ratio: 4 / 5;
       }
-      .img-1 {
-        width: 220px;
-        height: 320px;
-        border-radius: 110px;
-        background-image: url("img-1.jpg");
-        top: 20px;
-        left: 0px;
-        animation-delay: 0s;
+      .hero-photo {
+        position: relative;
         z-index: 2;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 28px;
+        box-shadow: 0 30px 60px rgba(10, 92, 69, 0.18);
+        background-color: var(--green-soft);
       }
-      .img-2 {
-        width: 180px;
-        height: 180px;
-        border-radius: 50%;
-        background-image: url("img-2.jpg");
-        bottom: 20px;
-        left: 60px;
-        animation-delay: 1.5s;
-        z-index: 3;
-        border: 6px solid var(--bg);
-      }
-      .img-3 {
-        width: 240px;
-        height: 260px;
-        border-radius: 40px 120px 40px 40px;
-        background-image: url("img-3.jpg");
-        top: 80px;
-        right: 0px;
-        animation-delay: 3s;
+      /* Decorative accent shape behind the photo */
+      .hero-photo-accent {
+        position: absolute;
         z-index: 1;
+        top: 24px;
+        left: 24px;
+        width: 100%;
+        height: 100%;
+        border-radius: 28px;
+        background: linear-gradient(135deg, var(--green-strong) 0%, var(--green) 100%);
+        opacity: 0.15;
       }
-      @keyframes float {
-        0% {
-          transform: translateY(0);
-        }
-        50% {
-          transform: translateY(-15px);
-        }
-        100% {
-          transform: translateY(0);
-        }
+
+      /* ── Stats bar ───────────────────────────────────────────────────── */
+      .stats-bar {
+        background: var(--white);
+        border-top: 1px solid var(--border);
+        border-bottom: 1px solid var(--border);
+        padding: 32px 5vw;
+      }
+      .stats-inner {
+        max-width: 1100px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 24px;
+        text-align: center;
+      }
+      .stat {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+      }
+      .stat-num {
+        font-family: var(--font-heading);
+        font-size: clamp(28px, 4vw, 42px);
+        font-weight: 800;
+        color: var(--green);
+        line-height: 1;
+      }
+      .stat-suffix {
+        font-family: var(--font-heading);
+        font-size: 24px;
+        font-weight: 800;
+        color: var(--green);
+      }
+      .stat-label {
+        font-size: 13px;
+        color: var(--muted);
+        font-weight: 500;
+        margin-top: 2px;
       }
       @media (max-width: 1024px) {
         .hero-split {
@@ -1284,11 +1363,30 @@
           margin: 0 auto 32px;
         }
         .hero-right {
-          display: none;
+          display: flex;
+          min-height: 360px;
+          order: -1; /* Show photo above the text on tablet */
+          margin-bottom: 8px;
+        }
+        .hero-photo-frame {
+          max-width: 320px;
+        }
+        .stats-inner {
+          grid-template-columns: repeat(2, 1fr);
+          gap: 20px 16px;
         }
       }
       @media (max-width: 600px) {
         .side-by-side-cards-compact {
+          grid-template-columns: 1fr;
+        }
+        .stats-inner {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .stat-num {
+          font-size: 30px;
+        }
+        .split-cta {
           grid-template-columns: 1fr;
         }
       }
@@ -1665,17 +1763,17 @@
 
     <section class="hero-split">
       <div class="hero-left">
-        <div class="hero-tag">INSURANCE SIMPLIFIED</div>
-        <h1 class="hero-title-split">
+        <div class="hero-tag hero-enter-up" style="animation-delay:0.05s">INSURANCE SIMPLIFIED</div>
+        <h1 class="hero-title-split hero-enter-up" style="animation-delay:0.15s">
           Every insurance policy your life and business will ever need.
         </h1>
-        <p class="hero-copy-split">
+        <p class="hero-copy-split hero-enter-up" style="animation-delay:0.3s">
           Cova is Nigeria's independent broker — we compare 6 insurers, deliver
           the best policies, and manage claims on WhatsApp so you never have to
           fight an insurer alone.
         </p>
 
-        <div class="side-by-side-cards-compact">
+        <div class="side-by-side-cards-compact hero-enter-up" style="animation-delay:0.45s">
           <!-- Personal Cover Card -->
           <div class="sbs-card-compact personal-card">
             <div class="sbs-header">
@@ -1710,10 +1808,34 @@
         </div>
       </div>
 
-      <div class="hero-right">
-        <div class="shape-img img-1"></div>
-        <div class="shape-img img-2"></div>
-        <div class="shape-img img-3"></div>
+      <div class="hero-right hero-enter-right">
+        <div class="hero-photo-frame">
+          <img
+            class="hero-photo"
+            src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=900&q=80&auto=format&fit=crop"
+            alt="A confident Nigerian woman professional"
+            loading="eager"
+          />
+          <div class="hero-photo-accent"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Stats bar ──────────────────────────────────────────────────── -->
+    <section class="stats-bar" id="stats-bar">
+      <div class="stats-inner">
+        <div class="stat" data-reveal>
+          <span class="stat-num" data-count-to="6">0</span><span class="stat-label">Insurers compared</span>
+        </div>
+        <div class="stat" data-reveal data-reveal-delay="100">
+          <span class="stat-num" data-count-to="22">0</span><span class="stat-suffix">+</span><span class="stat-label">Products covered</span>
+        </div>
+        <div class="stat" data-reveal data-reveal-delay="200">
+          <span class="stat-num" data-count-to="72">0</span><span class="stat-suffix">hr</span><span class="stat-label">Claims SLA</span>
+        </div>
+        <div class="stat" data-reveal data-reveal-delay="300">
+          <span class="stat-num">NAICOM</span><span class="stat-label">Licensed broker</span>
+        </div>
       </div>
     </section>
 
@@ -2037,7 +2159,7 @@
           claim on WhatsApp with a dedicated handler.
         </p>
         <div class="how-grid">
-          <div class="how-card">
+          <div class="how-card" data-reveal>
             <div class="how-step">Step 1</div>
             <div class="how-title">Tell us what you need</div>
             <div class="how-desc">
@@ -2045,21 +2167,21 @@
               policies.
             </div>
           </div>
-          <div class="how-card">
+          <div class="how-card" data-reveal data-reveal-delay="100">
             <div class="how-step">Step 2</div>
             <div class="how-title">Compare 6 insurers</div>
             <div class="how-desc">
               We review multiple quotes and recommend the strongest cover.
             </div>
           </div>
-          <div class="how-card">
+          <div class="how-card" data-reveal data-reveal-delay="200">
             <div class="how-step">Step 3</div>
             <div class="how-title">Buy in minutes</div>
             <div class="how-desc">
               Choose payment terms and get your policy issued instantly online.
             </div>
           </div>
-          <div class="how-card">
+          <div class="how-card" data-reveal data-reveal-delay="300">
             <div class="how-step">Step 4</div>
             <div class="how-title">Claim on WhatsApp</div>
             <div class="how-desc">
@@ -2079,80 +2201,41 @@
           device and corporate insurance.
         </p>
         <div class="insurer-grid">
-          <div class="insurer-card">
-            <div class="insurer-header">
-              <img
-                src="https://upload.wikimedia.org/wikipedia/commons/9/94/AXA_Logo.svg"
-                alt="AXA Mansard Logo"
-                class="insurer-logo"
-              />
-              <div class="insurer-name">AXA Mansard</div>
-            </div>
+          <div class="insurer-card" data-reveal data-reveal-delay="0">
+            <div class="insurer-tile"><span>AXA</span></div>
+            <div class="insurer-name">AXA Mansard</div>
             <div class="insurer-rating">A+ rated</div>
-            <div class="insurer-rec">Recommended for motor and devices</div>
+            <div class="insurer-rec">Motor & devices</div>
           </div>
-          <div class="insurer-card">
-            <div class="insurer-header">
-              <img
-                src="https://www.google.com/s2/favicons?domain=leadway.com&sz=128"
-                alt="Leadway Assurance Logo"
-                class="insurer-logo"
-              />
-              <div class="insurer-name">Leadway Assurance</div>
-            </div>
+          <div class="insurer-card" data-reveal data-reveal-delay="80">
+            <div class="insurer-tile"><span>LW</span></div>
+            <div class="insurer-name">Leadway Assurance</div>
             <div class="insurer-rating">A rated</div>
-            <div class="insurer-rec">Recommended for fire and property</div>
+            <div class="insurer-rec">Fire & property</div>
           </div>
-          <div class="insurer-card">
-            <div class="insurer-header">
-              <img
-                src="https://www.google.com/s2/favicons?domain=zenithbank.com&sz=128"
-                alt="Zenith Insurance Logo"
-                class="insurer-logo"
-              />
-              <div class="insurer-name">Zenith Insurance</div>
-            </div>
+          <div class="insurer-card" data-reveal data-reveal-delay="160">
+            <div class="insurer-tile"><span>Z</span></div>
+            <div class="insurer-name">Zenith Insurance</div>
             <div class="insurer-rating">A+ rated</div>
-            <div class="insurer-rec">Recommended for corporate risks</div>
+            <div class="insurer-rec">Corporate risks</div>
           </div>
-          <div class="insurer-card">
-            <div class="insurer-header">
-              <img
-                src="https://www.aiicoplc.com/images/AIICO_Insurance_PLC_.png"
-                alt="AIICO Insurance Logo"
-                class="insurer-logo"
-                style="object-fit: contain; width: 40px; height: 28px"
-              />
-              <div class="insurer-name">AIICO Insurance</div>
-            </div>
+          <div class="insurer-card" data-reveal data-reveal-delay="240">
+            <div class="insurer-tile"><span>AI</span></div>
+            <div class="insurer-name">AIICO Insurance</div>
             <div class="insurer-rating">A rated</div>
-            <div class="insurer-rec">Recommended for group health</div>
+            <div class="insurer-rec">Group health</div>
           </div>
-          <div class="insurer-card">
-            <div class="insurer-header">
-              <img
-                src="https://www.google.com/s2/favicons?domain=cornerstone.com.ng&sz=128"
-                alt="Cornerstone Insurance Logo"
-                class="insurer-logo"
-              />
-              <div class="insurer-name">Cornerstone Insurance</div>
-            </div>
+          <div class="insurer-card" data-reveal data-reveal-delay="320">
+            <div class="insurer-tile"><span>CO</span></div>
+            <div class="insurer-name">Cornerstone Insurance</div>
             <div class="insurer-rating">BBB rated</div>
-            <div class="insurer-rec">Recommended for SME bundles</div>
+            <div class="insurer-rec">SME bundles</div>
           </div>
-          <div class="insurer-card">
-            <div class="insurer-header">
-              <img
-                src="https://www.google.com/s2/favicons?domain=nem-insurance.com&sz=128"
-                alt="NEM Insurance Logo"
-                class="insurer-logo"
-              />
-              <div class="insurer-name">NEM Insurance</div>
-            </div>
+          <div class="insurer-card" data-reveal data-reveal-delay="400">
+            <div class="insurer-tile"><span>NE</span></div>
+            <div class="insurer-name">NEM Insurance</div>
             <div class="insurer-rating">A rated</div>
-            <div class="insurer-rec">
-              Recommended for workmen's compensation
-            </div>
+            <div class="insurer-rec">Workmen's comp</div>
           </div>
         </div>
       </div>
@@ -2169,48 +2252,53 @@
           buying easy and claims fast.
         </p>
         <div class="why-grid">
-          <div class="why-card">
+          <div class="why-card" data-reveal>
             <div class="why-icon">💬</div>
             <div class="why-title">WhatsApp-first claims</div>
             <div class="why-desc">
               Submit claims instantly with a message, photo or voice note on
-              WhatsApp.
+              WhatsApp — no forms, no office visits.
             </div>
           </div>
-          <div class="why-card">
+          <div class="why-card" data-reveal data-reveal-delay="100">
             <div class="why-icon">👤</div>
             <div class="why-title">Named handler</div>
             <div class="why-desc">
-              A single claims handler manages your case from first report to
-              settlement.
+              A single dedicated handler manages your case from first report to
+              settlement — you always know who to reach.
             </div>
           </div>
-          <div class="why-card">
+          <div class="why-card" data-reveal data-reveal-delay="200">
             <div class="why-icon">⏱️</div>
             <div class="why-title">72hr SLA</div>
             <div class="why-desc">
-              Claims are resolved quickly or your next month is free.
+              Claims are acknowledged within 72 hours — or your next month's
+              premium is on us. We hold ourselves accountable.
             </div>
           </div>
-          <div class="why-card">
+          <div class="why-card" data-reveal data-reveal-delay="300">
             <div class="why-icon">🔒</div>
             <div class="why-title">Zero out-of-pocket</div>
             <div class="why-desc">
-              Approved claims are settled directly with service providers.
+              Approved claims are settled directly with service providers —
+              hospitals, garages, and repair shops — so you never pay upfront.
             </div>
           </div>
-          <div class="why-card">
+          <div class="why-card" data-reveal data-reveal-delay="400">
             <div class="why-icon">⚖️</div>
             <div class="why-title">Independent broker</div>
             <div class="why-desc">
-              We compare insurers and recommend what is best for you.
+              We're not tied to one insurer. We compare 6 NAICOM-licensed
+              providers and recommend what's genuinely best for you.
             </div>
           </div>
-          <div class="why-card">
+          <div class="why-card" data-reveal data-reveal-delay="500">
             <div class="why-icon">📊</div>
             <div class="why-title">Live tracking</div>
             <div class="why-desc">
-              Track claims progress in real time with clear status updates.
+              Track every claim in real time with clear status updates — from
+              submission to approval to payout. No black boxes.
+            </div>
             </div>
           </div>
         </div>
@@ -2220,14 +2308,14 @@
     <section class="section">
       <div class="container-inner">
         <div class="split-cta">
-          <div class="cta-panel left">
+          <div class="cta-panel left" data-reveal>
             <h3>Individual and family cover</h3>
             <p>Life, health, motor, travel, property and device protection.</p>
             <a class="btn-white" href="cova-personal.html"
               >Get personal cover</a
             >
           </div>
-          <div class="cta-panel right">
+          <div class="cta-panel right" data-reveal data-reveal-delay="120">
             <h3>Business and SME cover</h3>
             <p>
               Fleet, group health, fire, liability and workplace protection.
@@ -2320,6 +2408,57 @@
     </div>
     <script>
       document.addEventListener("DOMContentLoaded", () => {
+        // ── Scroll-reveal: fade-up any [data-reveal] element when it enters ─
+        const reveals = document.querySelectorAll("[data-reveal]");
+        if ("IntersectionObserver" in window) {
+          const io = new IntersectionObserver(
+            (entries) => {
+              entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                  const delay = entry.target.getAttribute("data-reveal-delay");
+                  if (delay) entry.target.style.transitionDelay = delay + "ms";
+                  entry.target.classList.add("reveal-in");
+                  io.unobserve(entry.target);
+                }
+              });
+            },
+            { threshold: 0.15, rootMargin: "0px 0px -40px 0px" }
+          );
+          reveals.forEach((el) => io.observe(el));
+        } else {
+          // Fallback: just show everything.
+          reveals.forEach((el) => el.classList.add("reveal-in"));
+        }
+
+        // ── Count-up stats: animate numbers from 0 when scrolled into view ─
+        const counters = document.querySelectorAll("[data-count-to]");
+        function animateCount(el) {
+          const target = parseInt(el.getAttribute("data-count-to"), 10);
+          const duration = 1400;
+          const start = performance.now();
+          function tick(now) {
+            const progress = Math.min((now - start) / duration, 1);
+            const eased = 1 - Math.pow(1 - progress, 3); // easeOutCubic
+            el.textContent = Math.round(eased * target);
+            if (progress < 1) requestAnimationFrame(tick);
+          }
+          requestAnimationFrame(tick);
+        }
+        if ("IntersectionObserver" in window && counters.length) {
+          const countIO = new IntersectionObserver(
+            (entries) => {
+              entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                  animateCount(entry.target);
+                  countIO.unobserve(entry.target);
+                }
+              });
+            },
+            { threshold: 0.5 }
+          );
+          counters.forEach((el) => countIO.observe(el));
+        }
+
         const wrappers = document.querySelectorAll(".product-row-wrapper");
 
         wrappers.forEach((wrapper) => {
