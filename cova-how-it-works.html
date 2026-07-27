@@ -1416,6 +1416,18 @@
       .product-row-track {
         padding: 0 5vw 24px;
       }
+
+      /* ── Scroll-reveal animation ───────────────────────────────────── */
+      [data-reveal] {
+        opacity: 0;
+        transform: translateY(24px);
+        transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+                    transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+      [data-reveal].reveal-in {
+        opacity: 1;
+        transform: translateY(0);
+      }
     </style>
   </head>
   <body>
@@ -1676,7 +1688,15 @@
 
     <section class="section section-green" id="how">
       <div class="container-inner" style="max-width: 1080px">
-        <div class="how-grid">
+        <div class="section-label" data-reveal>How it works</div>
+        <h2 class="section-title light" data-reveal>
+          From quote to claim — the Cova way.
+        </h2>
+        <p class="section-sub light" data-reveal>
+          Four simple steps. No paperwork mountains, no office visits, no
+          fighting with insurers on your own.
+        </p>
+        <div class="how-grid" data-reveal>
           <div class="how-card">
             <div class="how-step">Step 1</div>
             <div class="how-title">Tell us what you need</div>
@@ -1711,66 +1731,54 @@
       </div>
     </section>
 
+    <!-- ── Claims process — what actually happens when you claim ──────── -->
     <section class="section">
-      <div class="container-inner" style="max-width: 800px; margin: 0 auto">
-        <div class="section-label">Send a message</div>
-        <h2 class="section-title">Get in touch</h2>
-        <div
-          style="
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            margin-top: 32px;
-          "
-        >
-          <div class="modal-group">
-            <label>Name</label>
-            <input
-              type="text"
-              placeholder="Your name"
-              style="
-                padding: 16px;
-                border-radius: 18px;
-                border: 1px solid var(--border);
-                width: 100%;
-              "
-            />
+      <div class="container-inner" style="max-width: 1080px">
+        <div class="section-label" data-reveal>When you need to claim</div>
+        <h2 class="section-title" data-reveal>
+          A claims process that actually works for you.
+        </h2>
+        <p class="section-sub" data-reveal>
+          The moment that matters most is when something goes wrong. Here's
+          exactly what happens — no fine print, no runaround.
+        </p>
+        <div class="how-grid" data-reveal style="margin-top: 32px">
+          <div class="how-card">
+            <div class="how-step">Step 1</div>
+            <div class="how-title">Message your handler on WhatsApp</div>
+            <div class="how-desc">
+              Send a text, photo, or voice note describing what happened. Your
+              named handler responds personally — no call centres, no ticket
+              numbers.
+            </div>
           </div>
-          <div class="modal-group">
-            <label>Email Address</label>
-            <input
-              type="email"
-              placeholder="you@example.com"
-              style="
-                padding: 16px;
-                border-radius: 18px;
-                border: 1px solid var(--border);
-                width: 100%;
-              "
-            />
+          <div class="how-card">
+            <div class="how-step">Step 2</div>
+            <div class="how-title">We file the claim for you</div>
+            <div class="how-desc">
+              Your handler prepares and submits the claim to the insurer on your
+              behalf. We handle the paperwork, the forms, and the back-and-forth.
+            </div>
           </div>
-          <div class="modal-group">
-            <label>Message</label>
-            <textarea
-              placeholder="How can we help you?"
-              rows="5"
-              style="
-                padding: 16px;
-                border-radius: 18px;
-                border: 1px solid var(--border);
-                width: 100%;
-                font-family: inherit;
-                resize: vertical;
-              "
-            ></textarea>
+          <div class="how-card">
+            <div class="how-step">Step 3</div>
+            <div class="how-title">72-hour SLA</div>
+            <div class="how-desc">
+              We acknowledge every claim within 72 hours. If we don't, your next
+              month's premium is on us — we hold ourselves to it.
+            </div>
           </div>
-          <button
-            class="btn-primary"
-            style="width: max-content; margin-top: 10px"
-            onclick="alert('Message sent!')"
-          >
-            Send Message
-          </button>
+          <div class="how-card">
+            <div class="how-step">Step 4</div>
+            <div class="how-title">Settlement, not excuses</div>
+            <div class="how-desc">
+              Approved claims are paid directly to hospitals, garages, or your
+              account. We push the insurer until it's settled — that's our job.
+            </div>
+          </div>
+        </div>
+        <div style="text-align: center; margin-top: 40px" data-reveal>
+          <a class="btn-primary" href="cova-contact.html">Talk to a handler →</a>
         </div>
       </div>
     </section>
@@ -2002,6 +2010,26 @@
       function toggleFaq(element) {
         if (element) element.classList.toggle("open");
       }
+
+      // ── Scroll-reveal ────────────────────────────────────────────────
+      (function () {
+        var reveals = document.querySelectorAll("[data-reveal]");
+        if ("IntersectionObserver" in window) {
+          var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+              if (entry.isIntersecting) {
+                var d = entry.target.getAttribute("data-reveal-delay");
+                if (d) entry.target.style.transitionDelay = d + "ms";
+                entry.target.classList.add("reveal-in");
+                io.unobserve(entry.target);
+              }
+            });
+          }, { threshold: 0.12, rootMargin: "0px 0px -40px 0px" });
+          reveals.forEach(function (el) { io.observe(el); });
+        } else {
+          reveals.forEach(function (el) { el.classList.add("reveal-in"); });
+        }
+      })();
     </script>
   <script src="chatbot-widget.js"></script>
   </body>

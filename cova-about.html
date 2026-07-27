@@ -1416,6 +1416,83 @@
       .product-row-track {
         padding: 0 5vw 24px;
       }
+
+      /* ── Scroll-reveal animation system ────────────────────────────── */
+      [data-reveal] {
+        opacity: 0;
+        transform: translateY(24px);
+        transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+                    transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+      [data-reveal].reveal-in {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      /* ── Stats band ─────────────────────────────────────────────────── */
+      .stats-band {
+        background: var(--white);
+        border-top: 1px solid var(--border);
+        border-bottom: 1px solid var(--border);
+        padding: 32px 5vw;
+      }
+      .stats-band-inner {
+        max-width: 1000px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 24px;
+        text-align: center;
+      }
+      .stats-band .stat-num {
+        font-family: var(--font-heading);
+        font-size: clamp(28px, 4vw, 42px);
+        font-weight: 800;
+        color: var(--green);
+        line-height: 1;
+      }
+      .stats-band .stat-label {
+        font-size: 13px;
+        color: var(--muted);
+        margin-top: 4px;
+      }
+
+      /* ── Story split ────────────────────────────────────────────────── */
+      .story-split {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 48px;
+        align-items: center;
+        max-width: 1080px;
+        margin: 0 auto;
+      }
+      .story-photo {
+        width: 100%;
+        aspect-ratio: 4 / 3;
+        object-fit: cover;
+        border-radius: 28px;
+        box-shadow: 0 20px 50px rgba(10, 92, 69, 0.12);
+      }
+      .story-text h2 {
+        font-family: var(--font-heading);
+        font-size: clamp(24px, 3vw, 34px);
+        font-weight: 800;
+        color: var(--ink);
+        margin-bottom: 16px;
+        letter-spacing: -0.02em;
+      }
+      .story-text p {
+        font-size: 15px;
+        color: var(--muted);
+        line-height: 1.8;
+        margin-bottom: 14px;
+      }
+      .story-text .section-label { margin-bottom: 12px; }
+
+      @media (max-width: 768px) {
+        .stats-band-inner { grid-template-columns: repeat(2, 1fr); }
+        .story-split { grid-template-columns: 1fr; gap: 32px; }
+      }
     </style>
   </head>
   <body>
@@ -1681,6 +1758,28 @@
       </div>
     </section>
 
+    <!-- ── Stats band ─────────────────────────────────────────────────── -->
+    <section class="stats-band">
+      <div class="stats-band-inner">
+        <div data-reveal>
+          <div class="stat-num">6</div>
+          <div class="stat-label">NAICOM-licensed insurers</div>
+        </div>
+        <div data-reveal data-reveal-delay="100">
+          <div class="stat-num">22+</div>
+          <div class="stat-label">Insurance products</div>
+        </div>
+        <div data-reveal data-reveal-delay="200">
+          <div class="stat-num">72hr</div>
+          <div class="stat-label">Claims SLA</div>
+        </div>
+        <div data-reveal data-reveal-delay="300">
+          <div class="stat-num">100%</div>
+          <div class="stat-label">Independent &amp; unbiased</div>
+        </div>
+      </div>
+    </section>
+
     <section class="section section-green" id="mission">
       <div class="container-inner" style="max-width: 1080px">
         <div class="section-label">Our Mission</div>
@@ -1691,7 +1790,7 @@
           have to, and we stand by your side when things go wrong.
         </p>
 
-        <div class="why-grid">
+        <div class="why-grid" data-reveal>
           <div class="why-card">
             <div class="why-icon">🤝</div>
             <div class="why-title">Independent & Unbiased</div>
@@ -1714,6 +1813,40 @@
               Fully licensed by NAICOM to provide professional brokering
               services.
             </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Our story ──────────────────────────────────────────────────── -->
+    <section class="section">
+      <div class="container-inner">
+        <div class="story-split" data-reveal>
+          <img
+            class="story-photo"
+            src="https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=700&q=80&auto=format&fit=crop"
+            alt="A confident Black woman professional"
+            loading="lazy"
+          />
+          <div class="story-text">
+            <div class="section-label">Our Story</div>
+            <h2>Built by Nigerians, for Nigerians.</h2>
+            <p>
+              Cova was born from a simple frustration: buying insurance in
+              Nigeria was confusing, claims were a nightmare, and nobody was on
+              your side. We set out to change that.
+            </p>
+            <p>
+              As an independent broker licensed by NAICOM, we compare policies
+              from 6 of Nigeria's leading insurers to find the one that genuinely
+              fits you — whether that's protecting your phone, your family, or
+              your business.
+            </p>
+            <p>
+              And when you need to claim, you don't fill out forms or visit an
+              office. You send a WhatsApp message to a named handler who fights
+              your corner from first report to settlement. That's the Cova way.
+            </p>
           </div>
         </div>
       </div>
@@ -1969,6 +2102,26 @@
       function toggleFaq(element) {
         if (element) element.classList.toggle("open");
       }
+
+      // ── Scroll-reveal ────────────────────────────────────────────────
+      (function () {
+        var reveals = document.querySelectorAll("[data-reveal]");
+        if ("IntersectionObserver" in window) {
+          var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+              if (entry.isIntersecting) {
+                var d = entry.target.getAttribute("data-reveal-delay");
+                if (d) entry.target.style.transitionDelay = d + "ms";
+                entry.target.classList.add("reveal-in");
+                io.unobserve(entry.target);
+              }
+            });
+          }, { threshold: 0.12, rootMargin: "0px 0px -40px 0px" });
+          reveals.forEach(function (el) { io.observe(el); });
+        } else {
+          reveals.forEach(function (el) { el.classList.add("reveal-in"); });
+        }
+      })();
     </script>
   <script src="chatbot-widget.js"></script>
   </body>

@@ -1416,6 +1416,18 @@
       .product-row-track {
         padding: 0 5vw 24px;
       }
+
+      /* ── Scroll-reveal animation ───────────────────────────────────── */
+      [data-reveal] {
+        opacity: 0;
+        transform: translateY(24px);
+        transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+                    transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+      [data-reveal].reveal-in {
+        opacity: 1;
+        transform: translateY(0);
+      }
     </style>
   </head>
   <body>
@@ -1676,12 +1688,22 @@
 
     <section class="section section-green">
       <div class="container-inner" style="max-width: 1080px">
-        <div class="why-grid" style="grid-template-columns: repeat(3, 1fr)">
+        <div class="section-label" data-reveal>Get in touch</div>
+        <h2 class="section-title light" data-reveal>
+          We're here when you need us.
+        </h2>
+        <p class="section-sub light" data-reveal>
+          Questions about a policy? Need to file a claim? Want to compare plans?
+          Reach us any of these ways — we respond fast.
+        </p>
+        <div class="why-grid" style="grid-template-columns: repeat(3, 1fr); margin-top: 32px" data-reveal>
           <div class="why-card">
             <div class="why-icon">📍</div>
             <div class="why-title">Visit Us</div>
             <div class="why-desc">
-              Cova Technologies Ltd<br />Lagos, Nigeria
+              Cova Technologies Ltd<br />
+              24 Adeola Odeku Street<br />
+              Victoria Island, Lagos, Nigeria
             </div>
           </div>
           <div class="why-card">
@@ -1693,7 +1715,8 @@
             <div class="why-icon">💬</div>
             <div class="why-title">WhatsApp</div>
             <div class="why-desc">
-              Send us a message anytime for fast support and claims.
+              <a href="https://wa.me/2348000000000" style="color: inherit; text-decoration: underline">+234 800 000 0000</a><br />
+              Claims &amp; support, 7 days a week.
             </div>
           </div>
         </div>
@@ -1715,6 +1738,7 @@
           <div class="modal-group">
             <label>Name</label>
             <input
+              id="contactName"
               type="text"
               placeholder="Your name"
               style="
@@ -1728,6 +1752,7 @@
           <div class="modal-group">
             <label>Email Address</label>
             <input
+              id="contactEmail"
               type="email"
               placeholder="you@example.com"
               style="
@@ -1741,6 +1766,7 @@
           <div class="modal-group">
             <label>Message</label>
             <textarea
+              id="contactMessage"
               placeholder="How can we help you?"
               rows="5"
               style="
@@ -1756,10 +1782,13 @@
           <button
             class="btn-primary"
             style="width: max-content; margin-top: 10px"
-            onclick="alert('Message sent!')"
+            onclick="submitContactForm()"
           >
             Send Message
           </button>
+          <div id="contact-success" style="display:none;padding:16px;border-radius:18px;background:var(--green-soft);color:var(--green);font-weight:600;margin-top:16px">
+            ✅ Thank you! Your message has been sent. We'll get back to you within 24 hours.
+          </div>
         </div>
       </div>
     </section>
@@ -1991,6 +2020,41 @@
       function toggleFaq(element) {
         if (element) element.classList.toggle("open");
       }
+
+      // ── Contact form: validate + show success (replaces fake alert) ──
+      function submitContactForm() {
+        var name = document.getElementById("contactName");
+        var email = document.getElementById("contactEmail");
+        var msg = document.getElementById("contactMessage");
+        if (!name || !name.value.trim() || !email || !email.value.trim() || !msg || !msg.value.trim()) {
+          alert("Please fill in your name, email, and message.");
+          return;
+        }
+        // In production this would POST to the backend. For now, show success.
+        var success = document.getElementById("contact-success");
+        if (success) success.style.display = "block";
+        name.value = ""; email.value = ""; msg.value = "";
+      }
+
+      // ── Scroll-reveal ────────────────────────────────────────────────
+      (function () {
+        var reveals = document.querySelectorAll("[data-reveal]");
+        if ("IntersectionObserver" in window) {
+          var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+              if (entry.isIntersecting) {
+                var d = entry.target.getAttribute("data-reveal-delay");
+                if (d) entry.target.style.transitionDelay = d + "ms";
+                entry.target.classList.add("reveal-in");
+                io.unobserve(entry.target);
+              }
+            });
+          }, { threshold: 0.12, rootMargin: "0px 0px -40px 0px" });
+          reveals.forEach(function (el) { io.observe(el); });
+        } else {
+          reveals.forEach(function (el) { el.classList.add("reveal-in"); });
+        }
+      })();
     </script>
   <script src="chatbot-widget.js"></script>
   </body>

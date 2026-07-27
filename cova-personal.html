@@ -710,6 +710,53 @@
           flex-direction: column;
         }
       }
+
+      /* ── Scroll-reveal animation system ────────────────────────────── */
+      [data-reveal] {
+        opacity: 0;
+        transform: translateY(24px);
+        transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+                    transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+      [data-reveal].reveal-in {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      @keyframes heroFadeUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+      .hero-enter-up {
+        opacity: 0;
+        animation: heroFadeUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      }
+      /* ── Hero image ─────────────────────────────────────────────────── */
+      .hero-photo-frame {
+        position: relative;
+        width: 100%;
+        max-width: 440px;
+        aspect-ratio: 4 / 5;
+      }
+      .hero-photo {
+        position: relative;
+        z-index: 2;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 28px;
+        box-shadow: 0 30px 60px rgba(10, 92, 69, 0.18);
+      }
+      .hero-photo-accent {
+        position: absolute;
+        z-index: 1;
+        top: 24px;
+        left: 24px;
+        width: 100%;
+        height: 100%;
+        border-radius: 28px;
+        background: linear-gradient(135deg, var(--green-strong) 0%, var(--green) 100%);
+        opacity: 0.15;
+      }
     </style>
   </head>
   <body>
@@ -818,15 +865,15 @@
     </div>
     <section class="hero">
       <div class="hero-content">
-        <div class="hero-tag">Personal insurance</div>
-        <h1 class="hero-title">
+        <div class="hero-tag hero-enter-up" style="animation-delay:0.05s">Personal insurance</div>
+        <h1 class="hero-title hero-enter-up" style="animation-delay:0.15s">
           Everything you and your family need covered. One broker.
         </h1>
-        <p class="hero-copy">
+        <p class="hero-copy hero-enter-up" style="animation-delay:0.3s">
           From your phone to your life insurance — Cova finds the best policy
           across 6 insurers and handles every claim on WhatsApp.
         </p>
-        <div class="hero-actions">
+        <div class="hero-actions hero-enter-up" style="animation-delay:0.45s">
           <a class="btn-primary" href="cova-onboarding.html"
             >Protect my devices</a
           >
@@ -834,7 +881,7 @@
             >Get motor cover</a
           >
         </div>
-        <div class="hero-stats">
+        <div class="hero-stats hero-enter-up" style="animation-delay:0.6s">
           <div class="stat">
             <div class="stat-number">11</div>
             <div class="stat-label">personal products</div>
@@ -849,9 +896,20 @@
           </div>
         </div>
       </div>
+      <div class="hero-content hero-enter-up" style="animation-delay:0.4s">
+        <div class="hero-photo-frame">
+          <img
+            class="hero-photo"
+            src="https://images.unsplash.com/photo-1511895426328-dc8714191300?w=700&q=80&auto=format&fit=crop"
+            alt="A happy Nigerian family"
+            loading="eager"
+          />
+          <div class="hero-photo-accent"></div>
+        </div>
+      </div>
     </section>
     <section class="section">
-      <div class="section-title">Personal cover products</div>
+      <div class="section-title" data-reveal>Personal cover products</div>
       <p class="section-sub">
         Choose the right cover for your family, devices, car or travel. Every
         policy is backed by Cova claims support.
@@ -1047,7 +1105,7 @@
     </section>
     <section class="section" id="why">
       <div class="section-title">Why Cova for personal cover</div>
-      <div class="why-grid">
+      <div class="why-grid" data-reveal>
         <div class="why-card">
           <div class="why-icon">💬</div>
           <div class="why-title">WhatsApp-first claims</div>
@@ -1088,7 +1146,7 @@
         Answers to the most common personal insurance questions for phones,
         cars, health and travel.
       </p>
-      <div class="faq-grid">
+      <div class="faq-grid" data-reveal>
         <div class="faq-item" onclick="toggleFaq(this)">
           <div class="faq-question">Can I claim for a stolen phone?</div>
           <div class="faq-answer">
@@ -1262,6 +1320,26 @@
       function toggleFaq(element) {
         element.classList.toggle("open");
       }
+
+      // ── Scroll-reveal: fade-up elements when they enter the viewport ──
+      (function () {
+        var reveals = document.querySelectorAll("[data-reveal]");
+        if ("IntersectionObserver" in window) {
+          var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+              if (entry.isIntersecting) {
+                var d = entry.target.getAttribute("data-reveal-delay");
+                if (d) entry.target.style.transitionDelay = d + "ms";
+                entry.target.classList.add("reveal-in");
+                io.unobserve(entry.target);
+              }
+            });
+          }, { threshold: 0.12, rootMargin: "0px 0px -40px 0px" });
+          reveals.forEach(function (el) { io.observe(el); });
+        } else {
+          reveals.forEach(function (el) { el.classList.add("reveal-in"); });
+        }
+      })();
     </script>
   <script src="chatbot-widget.js"></script>
   </body>
