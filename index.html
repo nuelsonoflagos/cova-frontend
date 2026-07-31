@@ -693,23 +693,21 @@
         transform: translateY(-3px);
         box-shadow: 0 12px 36px rgba(10, 92, 69, 0.08);
       }
-      /* Typographic monogram tile (replaces fuzzy favicon logos) */
-      .insurer-tile {
-        display: inline-flex;
+      /* Official insurer logo container */
+      .insurer-logo-box {
+        display: flex;
         align-items: center;
-        justify-content: center;
-        width: 44px;
-        height: 44px;
-        border-radius: 12px;
-        background: var(--green-soft);
-        margin-bottom: 14px;
+        justify-content: flex-start;
+        height: 56px;
+        width: 100%;
+        margin-bottom: 18px;
       }
-      .insurer-tile span {
-        font-family: var(--font-heading);
-        font-size: 15px;
-        font-weight: 800;
-        color: var(--green);
-        letter-spacing: 0.5px;
+      .insurer-logo-box img {
+        max-height: 48px;
+        max-width: 150px;
+        width: auto;
+        height: auto;
+        object-fit: contain;
       }
       .insurer-name {
         font-family: var(--font-heading);
@@ -2399,37 +2397,49 @@
         </p>
         <div class="insurer-grid">
           <div class="insurer-card" data-reveal data-reveal-delay="0">
-            <div class="insurer-tile"><span>AXA</span></div>
+            <div class="insurer-logo-box">
+              <img src="assets/logos/axa-mansard.svg" alt="AXA Mansard logo" loading="lazy" />
+            </div>
             <div class="insurer-name">AXA Mansard</div>
             <div class="insurer-rating">A+ rated</div>
             <div class="insurer-rec">Motor & devices</div>
           </div>
           <div class="insurer-card" data-reveal data-reveal-delay="80">
-            <div class="insurer-tile"><span>LW</span></div>
+            <div class="insurer-logo-box">
+              <img src="assets/logos/leadway.webp" alt="Leadway Assurance logo" loading="lazy" />
+            </div>
             <div class="insurer-name">Leadway Assurance</div>
             <div class="insurer-rating">A rated</div>
             <div class="insurer-rec">Fire & property</div>
           </div>
           <div class="insurer-card" data-reveal data-reveal-delay="160">
-            <div class="insurer-tile"><span>Z</span></div>
+            <div class="insurer-logo-box">
+              <img src="assets/logos/zenith-insurance.webp" alt="Zenith Insurance logo" loading="lazy" />
+            </div>
             <div class="insurer-name">Zenith Insurance</div>
             <div class="insurer-rating">A+ rated</div>
             <div class="insurer-rec">Corporate risks</div>
           </div>
           <div class="insurer-card" data-reveal data-reveal-delay="240">
-            <div class="insurer-tile"><span>AI</span></div>
+            <div class="insurer-logo-box">
+              <img src="assets/logos/aiico.png" alt="AIICO Insurance logo" loading="lazy" />
+            </div>
             <div class="insurer-name">AIICO Insurance</div>
             <div class="insurer-rating">A rated</div>
             <div class="insurer-rec">Group health</div>
           </div>
           <div class="insurer-card" data-reveal data-reveal-delay="320">
-            <div class="insurer-tile"><span>CO</span></div>
+            <div class="insurer-logo-box">
+              <img src="assets/logos/cornerstone.png" alt="Cornerstone Insurance logo" loading="lazy" />
+            </div>
             <div class="insurer-name">Cornerstone Insurance</div>
             <div class="insurer-rating">BBB rated</div>
             <div class="insurer-rec">SME bundles</div>
           </div>
           <div class="insurer-card" data-reveal data-reveal-delay="400">
-            <div class="insurer-tile"><span>NE</span></div>
+            <div class="insurer-logo-box">
+              <img src="assets/logos/nem-insurance.jpg" alt="NEM Insurance logo" loading="lazy" />
+            </div>
             <div class="insurer-name">NEM Insurance</div>
             <div class="insurer-rating">A rated</div>
             <div class="insurer-rec">Workmen's comp</div>
