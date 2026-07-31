@@ -288,6 +288,13 @@
         text-transform: uppercase;
         letter-spacing: 0.12em;
       }
+      .hero-trust-line {
+        margin-top: 18px;
+        font-size: 13px;
+        color: var(--green);
+        font-weight: 700;
+        letter-spacing: 0.02em;
+      }
       .section {
         padding: 92px 5vw;
       }
@@ -730,32 +737,177 @@
         opacity: 0;
         animation: heroFadeUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
       }
-      /* ── Hero image ─────────────────────────────────────────────────── */
-      .hero-photo-frame {
+      /* Stage wraps slider + decorative shapes; sized to the slider */
+      .hero-stage {
         position: relative;
         width: 100%;
         max-width: 440px;
-        aspect-ratio: 4 / 5;
       }
-      .hero-photo {
+      /* ── Hero image slider ──────────────────────────────────────────── */
+      .hero-slider {
         position: relative;
+        z-index: 3;
+        width: 100%;
+        max-width: 440px;
+        aspect-ratio: 4 / 5;
+        border-radius: 24px;
+        overflow: hidden;
+        background: var(--green-soft);
+        box-shadow: 0 30px 60px rgba(10, 92, 69, 0.22);
+      }
+      /* ── Decorative shapes around the slider ────────────────────────── */
+      .hero-deco-blob {
+        position: absolute;
+        z-index: 1;
+        top: -6%;
+        left: -12%;
+        width: 92%;
+        height: 102%;
+        border-radius: 46% 54% 56% 44% / 52% 48% 52% 48%;
+        background: radial-gradient(
+          circle at 50% 50%,
+          rgba(29, 158, 117, 0.28) 0%,
+          rgba(29, 158, 117, 0.10) 55%,
+          transparent 75%
+        );
+        filter: blur(8px);
+        animation: heroBlob 14s ease-in-out infinite;
+      }
+      @keyframes heroBlob {
+        0%, 100% { border-radius: 46% 54% 56% 44% / 52% 48% 52% 48%; transform: translate(0, 0) rotate(0deg); }
+        50%      { border-radius: 54% 46% 44% 56% / 48% 52% 48% 52%; transform: translate(6px, -4px) rotate(8deg); }
+      }
+      .hero-deco-ring {
+        position: absolute;
         z-index: 2;
+        bottom: -34px;
+        right: -34px;
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        border: 2px solid var(--green-strong);
+        opacity: 0.55;
+        animation: heroFloat 7s ease-in-out infinite;
+      }
+      .hero-deco-pill {
+        position: absolute;
+        z-index: 4;
+        top: 8%;
+        right: -18px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 16px;
+        border-radius: 100px;
+        background: #fff;
+        box-shadow: 0 14px 30px rgba(10, 92, 69, 0.18);
+        font-family: var(--font-heading);
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--green);
+        animation: heroFloat 5.5s ease-in-out infinite;
+      }
+      .hero-deco-pill .pulse-dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: var(--green-strong);
+        box-shadow: 0 0 0 0 rgba(29, 158, 117, 0.5);
+        animation: pulse 2s infinite;
+      }
+      @keyframes pulse {
+        0%   { box-shadow: 0 0 0 0 rgba(29, 158, 117, 0.5); }
+        70%  { box-shadow: 0 0 0 9px rgba(29, 158, 117, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(29, 158, 117, 0); }
+      }
+      @keyframes heroFloat {
+        0%, 100% { transform: translateY(0); }
+        50%      { transform: translateY(-10px); }
+      }
+      .hero-deco-dots {
+        position: absolute;
+        z-index: 2;
+        bottom: 10%;
+        left: -26px;
+        width: 60px;
+        height: 60px;
+        background-image: radial-gradient(var(--green) 1.6px, transparent 1.6px);
+        background-size: 14px 14px;
+        opacity: 0.4;
+        animation: heroFloat 8s ease-in-out infinite;
+      }
+      .hero-slide {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        transform: scale(1.06);
+        transition: opacity 0.9s ease, transform 1.4s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+      .hero-slide.is-active {
+        opacity: 1;
+        transform: scale(1);
+      }
+      .hero-slide img {
         width: 100%;
         height: 100%;
         object-fit: cover;
-        border-radius: 28px;
-        box-shadow: 0 30px 60px rgba(10, 92, 69, 0.18);
+        display: block;
       }
-      .hero-photo-accent {
+      .hero-slide-caption {
         position: absolute;
-        z-index: 1;
-        top: 24px;
-        left: 24px;
-        width: 100%;
-        height: 100%;
-        border-radius: 28px;
-        background: linear-gradient(135deg, var(--green-strong) 0%, var(--green) 100%);
-        opacity: 0.15;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        padding: 18px 20px 22px;
+        background: linear-gradient(
+          to top,
+          rgba(8, 30, 22, 0.88) 0%,
+          rgba(8, 30, 22, 0.35) 60%,
+          transparent 100%
+        );
+        color: #fff;
+        font-family: var(--font-heading);
+        font-size: 14px;
+        font-weight: 700;
+        letter-spacing: 0.01em;
+        opacity: 0;
+        transform: translateY(8px);
+        transition: opacity 0.5s ease 0.3s, transform 0.5s ease 0.3s;
+      }
+      .hero-slide.is-active .hero-slide-caption {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      .hero-slider-dots {
+        position: absolute;
+        z-index: 5;
+        bottom: 14px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 7px;
+      }
+      .hero-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.45);
+        border: none;
+        padding: 0;
+        cursor: pointer;
+        transition: width 0.35s ease, background 0.35s ease;
+      }
+      .hero-dot.is-active {
+        width: 22px;
+        border-radius: 4px;
+        background: #fff;
+      }
+      @media (max-width: 600px) {
+        .hero-stage { max-width: 300px; }
+        .hero-slider { max-width: 300px; }
+        .hero-deco-ring { width: 90px; height: 90px; bottom: -16px; right: -10px; }
+        .hero-deco-pill { font-size: 12px; padding: 8px 13px; right: 0; }
+        .hero-deco-dots { display: none; }
       }
     </style>
   </head>
@@ -895,26 +1047,56 @@
             <div class="stat-label">claims SLA</div>
           </div>
         </div>
+        <div class="hero-trust-line hero-enter-up" style="animation-delay:0.75s">
+          Independent broker &middot; NAICOM-licensed &middot; We work for you, not the insurer
+        </div>
       </div>
       <div class="hero-content hero-enter-up" style="animation-delay:0.4s">
-        <div class="hero-photo-frame">
-          <img
-            class="hero-photo"
-            src="https://images.unsplash.com/photo-1511895426328-dc8714191300?w=700&q=80&auto=format&fit=crop"
-            alt="A happy Nigerian family"
-            loading="eager"
-          />
-          <div class="hero-photo-accent"></div>
+        <div class="hero-stage">
+          <div class="hero-deco-blob" aria-hidden="true"></div>
+          <div class="hero-deco-dots" aria-hidden="true"></div>
+          <div class="hero-deco-ring" aria-hidden="true"></div>
+          <div class="hero-deco-pill" aria-hidden="true">
+            <span class="pulse-dot"></span>
+            <span>NAICOM licensed</span>
+          </div>
+          <div class="hero-slider" id="heroSlider" aria-roledescription="carousel" aria-label="What Cova protects for you">
+            <div class="hero-slide is-active">
+              <img
+                src="https://images.unsplash.com/photo-1511895426328-dc8714191300?w=720&q=80&auto=format&fit=crop"
+                alt="A happy Nigerian family"
+                loading="eager"
+              />
+              <div class="hero-slide-caption">Health &amp; life cover for your family</div>
+            </div>
+            <div class="hero-slide">
+              <img
+                src="https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=720&q=80&auto=format&fit=crop"
+                alt="A confident Black woman professional"
+                loading="lazy"
+              />
+              <div class="hero-slide-caption">Cover for you &amp; your career</div>
+            </div>
+            <div class="hero-slide">
+              <img
+                src="https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?w=720&q=80&auto=format&fit=crop"
+                alt="A person using a smartphone"
+                loading="lazy"
+              />
+              <div class="hero-slide-caption">Phone, car &amp; home &mdash; all covered</div>
+            </div>
+            <div class="hero-slider-dots" role="tablist" aria-label="Choose image"></div>
+          </div>
         </div>
       </div>
     </section>
     <section class="section">
       <div class="section-title" data-reveal>Personal cover products</div>
-      <p class="section-sub">
+      <p class="section-sub" data-reveal>
         Choose the right cover for your family, devices, car or travel. Every
         policy is backed by Cova claims support.
       </p>
-      <div class="products-grid">
+      <div class="products-grid" data-reveal>
         <div
           class="product-card"
           onclick="window.location = 'cova-onboarding.html'"
@@ -1104,7 +1286,7 @@
       </div>
     </section>
     <section class="section" id="why">
-      <div class="section-title">Why Cova for personal cover</div>
+      <div class="section-title" data-reveal>Why Cova for personal cover</div>
       <div class="why-grid" data-reveal>
         <div class="why-card">
           <div class="why-icon">💬</div>
@@ -1141,7 +1323,7 @@
       </div>
     </section>
     <section class="section" id="faq">
-      <div class="section-title">Frequently asked questions</div>
+      <div class="section-title" data-reveal>Frequently asked questions</div>
       <p class="section-sub">
         Answers to the most common personal insurance questions for phones,
         cars, health and travel.
@@ -1194,7 +1376,7 @@
       </div>
     </section>
     <section class="section">
-      <div class="split-cta">
+      <div class="split-cta" data-reveal>
         <div class="cta-panel left">
           <h3>Need business cover too?</h3>
           <p>
@@ -1213,6 +1395,17 @@
             >Protect my devices</a
           >
         </div>
+      </div>
+    </section>
+    <section style="background:var(--dark);padding:28px 5vw">
+      <div style="max-width:1200px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:14px 28px;text-align:center">
+        <span style="color:#fff;font-family:var(--font-heading);font-size:13px;font-weight:700;letter-spacing:0.03em">&#9989; Authorized &amp; regulated</span>
+        <span style="color:rgba(255,255,255,0.3)">|</span>
+        <span style="color:#fff;font-family:var(--font-heading);font-size:13px;font-weight:700;letter-spacing:0.03em">NAICOM-licensed broker</span>
+        <span style="color:rgba(255,255,255,0.3)">|</span>
+        <span style="color:#fff;font-family:var(--font-heading);font-size:13px;font-weight:700;letter-spacing:0.03em">Independent &mdash; we work for you</span>
+        <span style="color:rgba(255,255,255,0.3)">|</span>
+        <span style="color:rgba(255,255,255,0.5);font-size:13px">License no: <em style="font-style:normal;opacity:0.7">coming soon</em></span>
       </div>
     </section>
     <footer>
@@ -1320,6 +1513,57 @@
       function toggleFaq(element) {
         element.classList.toggle("open");
       }
+
+      // ── Hero image slider: auto-rotate + dot navigation ─────────────
+      (function () {
+        var heroSlider = document.getElementById("heroSlider");
+        if (!heroSlider) return;
+        var slides = Array.prototype.slice.call(heroSlider.querySelectorAll(".hero-slide"));
+        var dotsContainer = heroSlider.querySelector(".hero-slider-dots");
+        var current = 0;
+        var timer = null;
+
+        slides.forEach(function (_, i) {
+          var dot = document.createElement("button");
+          dot.className = "hero-dot" + (i === 0 ? " is-active" : "");
+          dot.setAttribute("role", "tab");
+          dot.setAttribute("aria-label", "Go to image " + (i + 1));
+          dot.addEventListener("click", function () {
+            goTo(i);
+            restart();
+          });
+          dotsContainer.appendChild(dot);
+        });
+        var dots = Array.prototype.slice.call(dotsContainer.children);
+
+        function goTo(idx) {
+          slides[current].classList.remove("is-active");
+          dots[current].classList.remove("is-active");
+          current = (idx + slides.length) % slides.length;
+          slides[current].classList.add("is-active");
+          dots[current].classList.add("is-active");
+        }
+        function next() { goTo(current + 1); }
+        function start() { timer = setInterval(next, 4500); }
+        function restart() { clearInterval(timer); start(); }
+
+        heroSlider.addEventListener("mouseenter", function () { clearInterval(timer); });
+        heroSlider.addEventListener("mouseleave", start);
+        heroSlider.addEventListener("focusin", function () { clearInterval(timer); });
+        heroSlider.addEventListener("focusout", start);
+
+        if ("IntersectionObserver" in window) {
+          var visIO = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+              if (entry.isIntersecting) start();
+              else clearInterval(timer);
+            });
+          }, { threshold: 0.4 });
+          visIO.observe(heroSlider);
+        } else {
+          start();
+        }
+      })();
 
       // ── Scroll-reveal: fade-up elements when they enter the viewport ──
       (function () {
