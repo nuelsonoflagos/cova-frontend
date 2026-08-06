@@ -186,6 +186,11 @@
         position: relative;
         z-index: 1;
       }
+      .hero-content.hero-visual {
+        max-width: none;
+        z-index: 0;
+        margin-left: -50px; /* overlap: image slides under the headline */
+      }
       .hero-tag {
         font-size: 13px;
         font-weight: 700;
@@ -667,6 +672,9 @@
         .hero {
           grid-template-columns: 1fr;
         }
+        .hero-content.hero-visual {
+          margin-left: 0; /* no overlap when stacked */
+        }
         .hero-stats {
           grid-template-columns: 1fr;
         }
@@ -1051,7 +1059,7 @@
           Independent broker &middot; NAICOM-licensed &middot; We work for you, not the insurer
         </div>
       </div>
-      <div class="hero-content hero-enter-up" style="animation-delay:0.4s">
+      <div class="hero-content hero-enter-up hero-visual" style="animation-delay:0.4s">
         <div class="hero-stage">
           <div class="hero-deco-blob" aria-hidden="true"></div>
           <div class="hero-deco-dots" aria-hidden="true"></div>
