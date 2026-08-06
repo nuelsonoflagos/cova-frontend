@@ -1293,7 +1293,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        margin-left: -60px; /* slide image under the headline area */
+        margin-left: -30px; /* subtle overlap: image nudges toward the headline */
       }
       /* Stage wraps slider + decorative shapes; sized to the slider */
       .hero-stage {
@@ -1398,14 +1398,19 @@
       .hero-proof-badge {
         position: absolute;
         z-index: 6;
-        bottom: 18px;
+        top: 50%;
         left: -22px;
+        transform: translateY(-50%);
         min-width: 168px;
         padding: 12px 16px;
         border-radius: 16px;
         background: #fff;
         box-shadow: 0 16px 36px rgba(10, 92, 69, 0.20);
-        animation: heroFloat 6s ease-in-out infinite;
+        animation: proofFloat 6s ease-in-out infinite;
+      }
+      @keyframes proofFloat {
+        0%, 100% { transform: translateY(-50%); }
+        50%      { transform: translateY(calc(-50% - 8px)); }
       }
       .hero-proof-item {
         display: none;
@@ -1616,7 +1621,10 @@
         }
         .hero-proof-badge {
           left: 0;
+          top: auto;
           bottom: -18px;
+          transform: none;
+          animation: none;
           min-width: 150px;
           padding: 10px 13px;
         }
